@@ -1,34 +1,38 @@
 // frontend/src/App.js
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Register from './components/Register';
 import Login from './components/Login';
-import './App.css';
+import Dashboard from './components/Dashboard';
+import LandingPage from './components/LandingPage'; // <--- Import Here
+import { useAuth } from './context/AuthContext';
 
 function App() {
+  const { currentUser } = useAuth();
+
   return (
     <Router>
       <div className="App">
-        <header className="App-header">
-          <h1>Personalized CA</h1>
-          <nav>
-            <Link to="/register" style={{ margin: '10px', color: 'white' }}>
-              Register
-            </Link>
-            <Link to="/login" style={{ margin: '10px', color: 'white' }}>
-              Login
-            </Link>
-          </nav>
-        </header>
-
-        {/* Define the routes */}
         <Routes>
-          <Route path="/register" element={<Register />} />
-          <Route path="/login" element={<Login />} />
-          {/* Optional: A default home page */}
-          <Route path="/" element={<h2>Welcome! Please register or log in.</h2>} />
-        </Routes>
+          {/* The Home Route is now the Landing Page */}
+          <Route path="/" element={<LandingPage />} />
 
+          {/* Public Routes */}
+          <Route 
+            path="/register" 
+            element={currentUser ? <Navigate to="/dashboard" /> : <Register />} 
+          />
+          <Route 
+            path="/login" 
+            element={currentUser ? <Navigate to="/dashboard" /> : <Login />} 
+          />
+
+          {/* Protected Route */}
+          <Route 
+            path="/dashboard" 
+            element={currentUser ? <Dashboard /> : <Navigate to="/login" />} 
+          />
+        </Routes>
       </div>
     </Router>
   );
