@@ -4,7 +4,8 @@ import { collection, query, orderBy, onSnapshot, doc, updateDoc, increment } fro
 import AddGoalModal from './AddGoalModal';
 import './Goals.css';
 
-function GoalsList() {
+// Accept the new prop 'smartSavings'
+function GoalsList({ smartSavings = 0 }) {
   const [goals, setGoals] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -24,21 +25,36 @@ function GoalsList() {
     return () => unsubscribe();
   }, []);
 
-  // --- NEW FUNCTION: Add money to a goal ---
   const handleAddFunds = async (goalId) => {
-    const amountStr = prompt("How much do you want to save towards this goal?");
-    const amount = parseFloat(amountStr);
+    let amountToAdd = 0;
 
-    if (amount && amount > 0) {
+    // --- SMART SAVINGS LOGIC ---
+    // If they have "Smart Savings" (money unspent today), offer it!
+    if (smartSavings > 0) {
+      const useSmart = window.confirm(
+        `🎉 You are ₹${smartSavings} under your daily limit!\n\nClick OK to add this savings to your goal.\nClick Cancel to enter a custom amount.`
+      );
+      
+      if (useSmart) {
+        amountToAdd = smartSavings;
+      } else {
+        const input = prompt("Enter custom amount to save:");
+        amountToAdd = parseFloat(input);
+      }
+    } else {
+      // Standard logic if no smart savings
+      const input = prompt("How much do you want to save towards this goal?");
+      amountToAdd = parseFloat(input);
+    }
+
+    // Proceed if valid amount
+    if (amountToAdd && amountToAdd > 0) {
       const userId = auth.currentUser?.uid;
       const goalRef = doc(db, "users", userId, "goals", goalId);
       
-      // Update Firebase
       await updateDoc(goalRef, {
-        savedAmount: increment(amount)
+        savedAmount: increment(amountToAdd)
       });
-      
-      // Optional: You could also deduct this from your 'Remaining Allowance' here if you wanted!
     }
   };
 
@@ -66,11 +82,13 @@ function GoalsList() {
                 <div className="progress-bg" style={{flex: 1}}>
                   <div className="progress-fill" style={{ width: `${percent}%` }}></div>
                 </div>
-                {/* The Button to Add Money */}
+                
+                {/* Smart Button: Glows if savings available */}
                 <button 
-                  className="mini-add-btn" 
+                  className={`mini-add-btn ${smartSavings > 0 ? 'glow' : ''}`}
                   onClick={() => handleAddFunds(goal.id)}
-                  title="Add savings"
+                  title={smartSavings > 0 ? `Quick add ₹${smartSavings}` : "Add savings"}
+                  style={smartSavings > 0 ? { boxShadow: '0 0 10px #10b981', border: '1px solid #10b981' } : {}}
                 >
                   +
                 </button>

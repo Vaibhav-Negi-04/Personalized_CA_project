@@ -1,112 +1,114 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
-import './Register.css'; // Import the new styles
+import GalaxyBackground from './GalaxyBackground'; // Import component
+import './Register.css';
 
 function Register() {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     password: '',
-    userType: 'Student' // Default
+    userType: 'Student'
   });
   
+  // New State for Camera Interaction
+  const [activeField, setActiveField] = useState('default');
+
   const [message, setMessage] = useState('');
-  const [status, setStatus] = useState(''); // 'loading', 'error', 'success'
-  
+  const [status, setStatus] = useState('');
   const navigate = useNavigate();
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
+
+  // Helper to calculate password strength
+  const getStrength = (pass) => {
+    if (!pass) return { class: '', label: '' };
+    if (pass.length < 6) return { class: 'weak', label: 'Weak' };
+    if (pass.length < 10) return { class: 'medium', label: 'Medium' };
+    return { class: 'strong', label: 'Strong 💪' };
+  };
+  const strength = getStrength(formData.password);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setStatus('loading');
     setMessage('Creating your account...');
-    
     try {
-      // Send data to your backend
-      const response = await axios.post('http://localhost:5000/api/auth/register', formData);
-      
-      console.log(response.data);
+      await axios.post('http://localhost:5000/api/auth/register', formData);
       setStatus('success');
-      setMessage('Registration successful! Redirecting to Login...');
-
-      // Redirect to login page after 2 seconds
-      setTimeout(() => {
-        navigate('/login');
-      }, 2000);
-
+      setMessage('Registration successful! Redirecting...');
+      setTimeout(() => navigate('/login'), 2000);
     } catch (error) {
-      console.error('Registration error:', error.response ? error.response.data : error.message);
       setStatus('error');
-      setMessage(error.response ? error.response.data.message : 'Registration failed. Please try again.');
+      setMessage(error.response ? error.response.data.message : 'Registration failed.');
     }
   };
 
   return (
     <div className="register-page">
+      {/* Pass the active field to the background to trigger camera moves */}
+      <GalaxyBackground activeField={activeField} />
+
       <div className="register-card">
+        <Link to="/" className="back-home-link">← Back</Link>
         
         <h2>Create Account</h2>
         <p className="register-subtitle">Join Personalized CA today</p>
         
         <form onSubmit={handleSubmit}>
           
-          {/* Name Field */}
           <div className="form-group">
             <label>Full Name</label>
             <input 
-              type="text" 
-              name="name" 
-              className="form-input" 
-              placeholder="John Doe"
-              value={formData.name} 
-              onChange={handleChange} 
-              required 
+              type="text" name="name" className="form-input" 
+              placeholder="John Doe" value={formData.name} 
+              onChange={handleChange} required 
+              onFocus={() => setActiveField('name')} // Trigger Camera Move
+              onBlur={() => setActiveField('default')} // Reset on leave
             />
           </div>
 
-          {/* Email Field */}
           <div className="form-group">
             <label>Email Address</label>
             <input 
-              type="email" 
-              name="email" 
-              className="form-input" 
-              placeholder="john@example.com"
-              value={formData.email} 
-              onChange={handleChange} 
-              required 
+              type="email" name="email" className="form-input" 
+              placeholder="john@example.com" value={formData.email} 
+              onChange={handleChange} required 
+              onFocus={() => setActiveField('email')}
+              onBlur={() => setActiveField('default')}
             />
           </div>
 
-          {/* Password Field */}
           <div className="form-group">
             <label>Password</label>
             <input 
-              type="password" 
-              name="password" 
-              className="form-input" 
-              placeholder="Create a strong password"
-              value={formData.password} 
-              onChange={handleChange} 
-              required 
+              type="password" name="password" className="form-input" 
+              placeholder="Create a strong password" value={formData.password} 
+              onChange={handleChange} required
+              onFocus={() => setActiveField('password')}
+              onBlur={() => setActiveField('default')}
             />
+            {/* Strength Meter */}
+            {formData.password && (
+              <div className="password-strength-group">
+                <div className="strength-bar-container">
+                  <div className={`strength-bar ${strength.class}`}></div>
+                </div>
+                <div className={`strength-text ${strength.class}`}>{strength.label}</div>
+              </div>
+            )}
           </div>
 
-          {/* User Type Dropdown */}
           <div className="form-group">
             <label>I am a:</label>
             <select 
-              name="userType" 
-              className="form-select"
-              value={formData.userType} 
-              onChange={handleChange}
+              name="userType" className="form-select"
+              value={formData.userType} onChange={handleChange}
+              onFocus={() => setActiveField('userType')}
+              onBlur={() => setActiveField('default')}
             >
               <option value="Student">Student 🎓</option>
               <option value="Individual">Individual 💼</option>
@@ -115,17 +117,12 @@ function Register() {
           </div>
 
           <button type="submit" className="btn-register">
-            {status === 'loading' ? 'Creating Account...' : 'Get Started'}
+            {status === 'loading' ? 'Creating...' : 'Get Started'}
           </button>
 
         </form>
 
-        {/* Dynamic Status Message */}
-        {message && (
-          <div className={`status-msg ${status}`}>
-            {message}
-          </div>
-        )}
+        {message && <div className={`status-msg ${status}`}>{message}</div>}
 
         <div className="auth-footer">
           Already have an account? <Link to="/login">Login here</Link>

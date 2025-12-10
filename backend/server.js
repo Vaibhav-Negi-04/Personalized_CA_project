@@ -20,7 +20,6 @@ const app = express();
 app.use(cors()); // Enable Cross-Origin Resource Sharing
 app.use(express.json()); // Enable parsing of JSON request bodies
 
-// --- API ROUTES ---
 
 // Test route to ensure the server is running
 app.get('/', (req, res) => {
@@ -68,9 +67,6 @@ app.post('/api/auth/register', async (req, res) => {
 /**
  * API Endpoint for Handling Google Sign-In
  * This is a "sign-up or sign-in" endpoint.
- * Expects: { token, userType } in the request body
- * The 'token' is the ID token from the frontend Google Sign-In.
- * The 'userType' is needed ONLY on the first sign-up.
  */
 app.post('/api/auth/google', async (req, res) => {
     try {
@@ -78,27 +74,23 @@ app.post('/api/auth/google', async (req, res) => {
 
         // 1. Verify the ID token sent from the frontend
         const decodedToken = await admin.auth().verifyIdToken(token);
-        const { uid, name, email } = decodedToken;
-
+        const { uid, name, email, picture } = decodedToken;
         // 2. Check if the user already exists in Firestore
         const userRef = admin.firestore().collection('users').doc(uid);
         const userDoc = await userRef.get();
-
-        if (userDoc.exists) {
-            // User exists, just log them in
-            console.log(`User already exists, logging in: ${name} (${uid})`);
-            res.status(200).send({ uid, message: 'User logged in successfully.' });
-        } else {
-            // User does not exist, this is their first time signing up with Google
-            // Create their profile in Firestore
+        if (!userDoc.exists) {
             await userRef.set({
-                name: name,
+                name: name || 'Google User',
                 email: email,
-                userType: userType, // Critical for new users
+                userType: userType || 'Student', 
+                photoURL: picture || '', //
                 createdAt: admin.firestore.FieldValue.serverTimestamp(),
             });
-            console.log(`New user from Google Sign-In, profile created: ${name} (${uid})`);
+            console.log(`New Google User Created: ${name} (${uid})`);
             res.status(201).send({ uid, message: 'User profile created successfully.' });
+        } else {
+            console.log(`User already exists, logging in: ${name} (${uid})`);
+            res.status(200).send({ uid, message: 'User logged in successfully.' });
         }
 
     } catch (error) {
@@ -107,8 +99,6 @@ app.post('/api/auth/google', async (req, res) => {
     }
 });
 
-
-// --- SERVER START ---
 const PORT = 5000;
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);

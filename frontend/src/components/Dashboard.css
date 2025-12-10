@@ -1,21 +1,17 @@
 /* frontend/src/components/Dashboard.css */
 
-:root {
-  --bg-dark: #0f172a;
-  --card-bg: rgba(30, 41, 59, 0.7); /* Glassy */
-  --text-main: #ffffff;
-  --text-muted: #94a3b8;
-  --primary: #10b981; /* Emerald */
-  --secondary: #3b82f6; /* Blue */
-  --danger: #ef4444;
+/* Use the Global Layout Class */
+.dashboard-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+  padding-bottom: 50px;
+  width: 100%;
 }
 
 .dashboard-container {
-  min-height: 100vh;
-  background-color: var(--bg-dark);
-  color: var(--text-main);
-  font-family: 'Segoe UI', sans-serif;
   padding: 2rem;
+  /* Background is handled by body */
 }
 
 /* Header */
@@ -24,81 +20,76 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 2rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .dash-header h1 {
-  font-size: 2rem;
+  font-size: 2.2rem;
+  /* Gradient Text */
+  background: linear-gradient(to right, white, var(--primary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin: 0;
 }
 
 .logout-btn {
-  background: rgba(239, 68, 68, 0.2);
+  background: rgba(244, 63, 94, 0.15);
   color: var(--danger);
   border: 1px solid var(--danger);
-  padding: 8px 16px;
-  border-radius: 8px;
+  padding: 8px 20px;
+  border-radius: 12px;
   cursor: pointer;
-  transition: all 0.2s;
+  font-weight: bold;
+  transition: 0.2s;
 }
+.logout-btn:hover { background: var(--danger); color: white; }
 
-.logout-btn:hover {
-  background: var(--danger);
-  color: white;
-}
-
-/* Grid Layout */
+/* Stats Grid */
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 1.5rem;
-  margin-bottom: 2rem;
 }
 
-/* Stat Cards */
+/* Glass Cards */
 .stat-card {
-  background: var(--card-bg);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 16px;
+  background: var(--bg-card);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
   padding: 1.5rem;
   transition: transform 0.2s;
+  box-shadow: var(--glow-card);
 }
 
 .stat-card:hover {
   transform: translateY(-5px);
-  border-color: var(--secondary);
+  border-color: var(--primary);
 }
 
 .stat-card h3 {
   color: var(--text-muted);
   font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
   margin-bottom: 0.5rem;
 }
 
-.stat-card .value {
-  font-size: 1.8rem;
-  font-weight: bold;
+.stat-card .value { font-size: 2rem; font-weight: 800; }
+
+.value.green { color: var(--accent); text-shadow: 0 0 10px rgba(16, 185, 129, 0.4); }
+.value.blue { color: var(--primary); text-shadow: var(--glow-primary); }
+.value.red { color: var(--danger); text-shadow: 0 0 10px rgba(244, 63, 94, 0.4); }
+
+/* Main Grid Layout */
+.main-dashboard-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 25px;
+  margin-top: 20px;
 }
 
-.value.green { color: var(--primary); }
-.value.blue { color: var(--secondary); }
-.value.red { color: var(--danger); }
-
-/* Content Area */
-.recent-activity {
-  background: var(--card-bg);
-  border-radius: 16px;
-  padding: 2rem;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.loading-screen {
-  height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background-color: var(--bg-dark);
-  color: var(--text-muted);
-  font-size: 1.2rem;
+@media (max-width: 1000px) {
+  .main-dashboard-grid { grid-template-columns: 1fr; }
 }

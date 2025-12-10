@@ -1,60 +1,46 @@
 /* frontend/src/components/Register.css */
 
-:root {
-  --bg-dark: #0f172a;
-  --primary: #10b981; /* Emerald */
-  --secondary: #3b82f6; /* Blue */
-  --text-main: #ffffff;
-  --text-muted: #94a3b8;
-  --input-bg: #0f172a;
-}
-
-/* Main Container */
+/* Remove default backgrounds to let Galaxy shine through */
 .register-page {
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: var(--bg-dark);
-  background-image: radial-gradient(at 100% 0%, rgba(59, 130, 246, 0.15) 0px, transparent 50%),
-                    radial-gradient(at 0% 100%, rgba(16, 185, 129, 0.15) 0px, transparent 50%);
-  font-family: 'Segoe UI', sans-serif;
-  padding: 20px; /* Prevent edges touching on mobile */
+  padding: 20px;
+  position: relative;
+  /* No background-color here, handled by canvas */
 }
 
-/* Glass Card */
+/* Glass Card - Updated for better transparency */
 .register-card {
-  background: rgba(30, 41, 59, 0.7);
-  backdrop-filter: blur(12px);
+  /* Using a very transparent dark violet to match your screenshot */
+  background: rgba(20, 10, 40, 0.5); 
+  backdrop-filter: blur(12px); /* Blur the galaxy slightly for readability */
   -webkit-backdrop-filter: blur(12px);
   padding: 2.5rem;
   border-radius: 24px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15); /* Slightly brighter border */
   width: 100%;
-  max-width: 450px; /* Slightly wider than login */
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  max-width: 450px;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
   
-  /* Animation */
   opacity: 0;
   transform: translateY(20px);
-  animation: fadeInUp 0.6s ease-out forwards;
-}
-
-@keyframes fadeInUp {
-  to { opacity: 1; transform: translateY(0); }
+  animation: fadeInUp 0.8s ease-out forwards;
 }
 
 /* Typography */
 .register-card h2 {
-  color: var(--text-main);
-  font-size: 2rem;
+  font-size: 2.2rem;
   margin-bottom: 0.5rem;
-  font-weight: 700;
+  font-weight: 800;
+  color: white; /* Clean white looks best on galaxy */
+  text-shadow: 0 0 10px rgba(139, 92, 246, 0.5);
   text-align: center;
 }
 
 .register-subtitle {
-  color: var(--text-muted);
+  color: rgba(255, 255, 255, 0.7);
   margin-bottom: 2rem;
   font-size: 0.95rem;
   text-align: center;
@@ -63,22 +49,21 @@
 /* Form Elements */
 .form-group {
   margin-bottom: 1.2rem;
-  text-align: left;
 }
 
 .form-group label {
-  display: block;
-  color: var(--text-muted);
+  color: rgba(255, 255, 255, 0.8);
   margin-bottom: 0.5rem;
   font-size: 0.9rem;
   font-weight: 500;
 }
 
+/* Inputs - Make them semi-transparent too */
 .form-input, .form-select {
   width: 100%;
   padding: 12px 16px;
-  background: var(--input-bg);
-  border: 1px solid #334155;
+  background: rgba(0, 0, 0, 0.4); /* Dark see-through */
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 12px;
   color: white;
   font-size: 1rem;
@@ -86,24 +71,18 @@
   box-sizing: border-box;
 }
 
-/* Fix for dropdown options in dark mode */
-.form-select option {
-  background-color: var(--bg-dark);
-  color: white;
-  padding: 10px;
-}
-
 .form-input:focus, .form-select:focus {
   outline: none;
-  border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+  border-color: #8b5cf6; /* Purple focus */
+  background: rgba(0, 0, 0, 0.6);
+  box-shadow: 0 0 15px rgba(139, 92, 246, 0.3);
 }
 
-/* Button */
+/* Button - Neon Gradient */
 .btn-register {
   width: 100%;
   padding: 14px;
-  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  background: linear-gradient(90deg, #06b6d4, #8b5cf6);
   border: none;
   border-radius: 12px;
   color: white;
@@ -112,14 +91,15 @@
   cursor: pointer;
   transition: transform 0.2s, box-shadow 0.2s;
   margin-top: 1rem;
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.4); /* Glow */
 }
 
 .btn-register:hover {
   transform: translateY(-2px);
-  box-shadow: 0 10px 20px rgba(59, 130, 246, 0.3);
+  box-shadow: 0 0 30px rgba(6, 182, 212, 0.6);
 }
 
-/* Messages */
+/* Status Messages & Footer */
 .status-msg {
   padding: 12px;
   border-radius: 8px;
@@ -127,23 +107,23 @@
   font-size: 0.9rem;
   text-align: center;
 }
-.status-msg.error { background: rgba(239, 68, 68, 0.15); color: #f87171; }
-.status-msg.success { background: rgba(16, 185, 129, 0.15); color: #34d399; }
-.status-msg.loading { background: rgba(59, 130, 246, 0.15); color: #60a5fa; }
-
-/* Footer Link */
 .auth-footer {
   margin-top: 1.5rem;
-  color: var(--text-muted);
+  color: rgba(255, 255, 255, 0.6);
   font-size: 0.9rem;
   text-align: center;
 }
-
 .auth-footer a {
-  color: var(--primary);
+  color: #8b5cf6;
   text-decoration: none;
   font-weight: 600;
-  margin-left: 5px;
 }
+.auth-footer a:hover { color: #06b6d4; }
 
-.auth-footer a:hover { text-decoration: underline; }
+/* Keep your password strength styles, just ensure text is readable */
+.strength-text { color: rgba(255,255,255,0.8); }
+
+/* Animation Keyframes */
+@keyframes fadeInUp {
+  to { opacity: 1; transform: translateY(0); }
+}

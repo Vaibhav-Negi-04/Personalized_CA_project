@@ -1,19 +1,45 @@
-import React from 'react';
-import { useTransactions } from '../hooks/useTransactions'; // Import our hook
+import React, { useState, useMemo } from 'react';
+import { useTransactions } from '../hooks/useTransactions'; 
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import './History.css';
 
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#AF19FF', '#FF4560'];
+const COLORS = ['#06b6d4', '#8b5cf6', '#10b981', '#f43f5e', '#f59e0b', '#6366f1'];
 
 function TransactionHistory() {
   const { transactions, loading } = useTransactions();
+  
+  // State for filters
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth()); 
+  const [selectedDay, setSelectedDay] = useState('all'); // New: 'all' or specific day number
 
-  if (loading) return <p style={{color: 'white'}}>Loading history...</p>;
+  // --- HELPER: Get days in selected month ---
+  const getDaysInMonth = (month) => {
+    const year = new Date().getFullYear();
+    // Day 0 of the next month gives us the last day of the current month
+    return new Date(year, month + 1, 0).getDate();
+  };
 
-  // --- Prepare Data for Chart ---
-  // Group expenses by category and sum them up
-  const chartData = transactions
-    .filter(t => t.type === 'expense') // Only chart expenses
+  // Generate array of days [1, 2, ..., 30, 31]
+  const daysArray = Array.from({ length: getDaysInMonth(selectedMonth) }, (_, i) => i + 1);
+
+  // --- 1. FILTER LOGIC ---
+  const filteredTransactions = useMemo(() => {
+    return transactions.filter(t => {
+      if (!t.date) return false;
+      
+      const matchMonth = t.date.getMonth() === selectedMonth;
+      
+      // If 'all' is selected, show everything for that month.
+      // Otherwise, check if the date matches the selected day.
+      const matchDay = selectedDay === 'all' || t.date.getDate() === parseInt(selectedDay);
+
+      return matchMonth && matchDay;
+    });
+  }, [transactions, selectedMonth, selectedDay]);
+
+  // --- 2. CHART DATA LOGIC ---
+  const chartData = filteredTransactions
+    .filter(t => t.type === 'expense')
     .reduce((acc, curr) => {
       const found = acc.find(item => item.name === curr.category);
       if (found) found.value += curr.amount;
@@ -21,17 +47,89 @@ function TransactionHistory() {
       return acc;
     }, []);
 
+  // Handle month change (Reset day to 'all' when month changes)
+  const handleMonthChange = (e) => {
+    setSelectedMonth(parseInt(e.target.value));
+    setSelectedDay('all');
+  };
+
+  if (loading) return <p style={{color: '#94a3b8'}}>Loading history...</p>;
+
   return (
     <div className="dashboard-content">
       
-      {/* --- Left: Recent Transactions List --- */}
+      {/* --- Left Side: Transaction List --- */}
       <div className="section-card">
-        <h3 className="section-title">Recent Activity</h3>
+        <div style={{
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center', 
+          marginBottom: '15px', 
+          borderBottom: '1px solid rgba(255,255,255,0.1)', 
+          paddingBottom: '10px',
+          flexWrap: 'wrap',
+          gap: '10px'
+        }}>
+          <h3 style={{margin:0, color: '#94a3b8', fontSize: '1.1rem'}}>Activity Log</h3>
+          
+          <div style={{ display: 'flex', gap: '10px' }}>
+            {/* DAY SELECTOR */}
+            <select 
+              value={selectedDay}
+              onChange={(e) => setSelectedDay(e.target.value)}
+              style={{
+                background: '#0f172a', 
+                border: '1px solid #334155', 
+                color: 'white', 
+                padding: '5px 10px', 
+                borderRadius: '8px', 
+                cursor: 'pointer',
+                outline: 'none'
+              }}
+            >
+              <option value="all">All Days</option>
+              {daysArray.map(day => (
+                <option key={day} value={day}>{day}</option>
+              ))}
+            </select>
+
+            {/* MONTH SELECTOR */}
+            <select 
+              value={selectedMonth}
+              onChange={handleMonthChange}
+              style={{
+                background: '#0f172a', 
+                border: '1px solid #334155', 
+                color: 'white', 
+                padding: '5px 10px', 
+                borderRadius: '8px', 
+                cursor: 'pointer',
+                outline: 'none'
+              }}
+            >
+              <option value={0}>January</option>
+              <option value={1}>February</option>
+              <option value={2}>March</option>
+              <option value={3}>April</option>
+              <option value={4}>May</option>
+              <option value={5}>June</option>
+              <option value={6}>July</option>
+              <option value={7}>August</option>
+              <option value={8}>September</option>
+              <option value={9}>October</option>
+              <option value={10}>November</option>
+              <option value={11}>December</option>
+            </select>
+          </div>
+        </div>
+
         <div className="history-list">
-          {transactions.length === 0 ? (
-            <p style={{color: '#64748b', textAlign: 'center', marginTop: '20px'}}>No transactions yet.</p>
+          {filteredTransactions.length === 0 ? (
+            <p style={{color: '#64748b', textAlign: 'center', marginTop: '20px', fontStyle: 'italic'}}>
+              No transactions found for this specific date.
+            </p>
           ) : (
-            transactions.map((t) => (
+            filteredTransactions.map((t) => (
               <div key={t.id} className={`transaction-item ${t.type}`}>
                 <div className="t-info">
                   <h4>{t.category}</h4>
@@ -46,9 +144,11 @@ function TransactionHistory() {
         </div>
       </div>
 
-      {/* --- Right: Expense Chart --- */}
+      {/* --- Right Side: Pie Chart --- */}
       <div className="section-card">
-        <h3 className="section-title">Expense Breakdown</h3>
+        <h3 className="section-title">
+          {selectedDay === 'all' ? 'Monthly Breakdown' : 'Daily Breakdown'}
+        </h3>
         <div style={{ width: '100%', height: 300 }}>
           {chartData.length > 0 ? (
             <ResponsiveContainer>
@@ -74,7 +174,9 @@ function TransactionHistory() {
               </PieChart>
             </ResponsiveContainer>
           ) : (
-            <p style={{color: '#64748b', textAlign: 'center', marginTop: '100px'}}>Add an expense to see the chart.</p>
+            <div style={{height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+               <p style={{color: '#64748b'}}>No expenses to show.</p>
+            </div>
           )}
         </div>
       </div>

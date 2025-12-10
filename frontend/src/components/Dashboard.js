@@ -1,15 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react'; // 1. Import useCallback
 import { useAuth } from '../context/AuthContext';
 import { auth, db } from '../firebaseConfig'; 
 import { doc, getDoc } from 'firebase/firestore';
 import { signOut } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
 
-// Import Sub-dashboards
 import StudentView from './dashboards/StudentView';
 import IndividualView from './dashboards/IndividualView';
 import BusinessView from './dashboards/BusinessView';
-// Import the new Modal
 import AddTransactionModal from './AddTransactionModal'; 
 
 import './Dashboard.css';
@@ -18,11 +16,11 @@ function Dashboard() {
   const { currentUser } = useAuth();
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [isModalOpen, setIsModalOpen] = useState(false); // State for Modal
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const navigate = useNavigate();
 
-  // Wrapped fetch in a function so we can call it again after adding data
-  const fetchUserData = async () => {
+  // 2. Wrap the function in useCallback so it stays stable
+  const fetchUserData = useCallback(async () => {
     if (currentUser) {
       try {
         const docRef = doc(db, "users", currentUser.uid);
@@ -36,11 +34,12 @@ function Dashboard() {
         setLoading(false);
       }
     }
-  };
+  }, [currentUser]); // Dependency: Re-create function only if currentUser changes
 
+  // 3. Add fetchUserData to the dependency array
   useEffect(() => {
     fetchUserData();
-  }, [currentUser]);
+  }, [fetchUserData]); 
 
   const handleLogout = async () => {
     await signOut(auth);
@@ -60,12 +59,10 @@ function Dashboard() {
         <button onClick={handleLogout} className="logout-btn">Logout</button>
       </header>
 
-      {/* Dynamic Content */}
       {userData?.userType === 'Student' && <StudentView userData={userData} />}
       {userData?.userType === 'Individual' && <IndividualView userData={userData} />}
       {userData?.userType === 'Business' && <BusinessView userData={userData} />}
 
-      {/* Floating Action Button (FAB) to Add Data */}
       <button 
         className="fab-btn"
         onClick={() => setIsModalOpen(true)}
@@ -80,12 +77,11 @@ function Dashboard() {
         +
       </button>
 
-      {/* The Modal */}
       <AddTransactionModal 
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)}
         userType={userData?.userType}
-        refreshData={fetchUserData} // Pass the refresh function
+        refreshData={fetchUserData} 
       />
 
     </div>
