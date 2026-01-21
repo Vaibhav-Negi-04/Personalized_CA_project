@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react'; // 1. Import useCallback
+import React, { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { auth, db } from '../firebaseConfig'; 
 import { doc, getDoc } from 'firebase/firestore';
@@ -19,7 +19,6 @@ function Dashboard() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const navigate = useNavigate();
 
-  // 2. Wrap the function in useCallback so it stays stable
   const fetchUserData = useCallback(async () => {
     if (currentUser) {
       try {
@@ -34,13 +33,14 @@ function Dashboard() {
         setLoading(false);
       }
     }
-  }, [currentUser]); // Dependency: Re-create function only if currentUser changes
+  }, [currentUser]);
 
-  // 3. Add fetchUserData to the dependency array
   useEffect(() => {
     fetchUserData();
   }, [fetchUserData]); 
 
+  // Note: StudentView now handles its own Logout via the HUD.
+  // This function is kept for the Modal or other views if needed.
   const handleLogout = async () => {
     await signOut(auth);
     navigate('/login');
@@ -51,18 +51,19 @@ function Dashboard() {
   return (
     <div className="dashboard-container">
       
-      <header className="dash-header">
-        <div>
-          <h1>Hello, {userData?.name || 'User'} 👋</h1>
-          <p style={{color: '#94a3b8'}}>{userData?.userType} Dashboard</p>
-        </div>
-        <button onClick={handleLogout} className="logout-btn">Logout</button>
-      </header>
+      {/* -------------------------------------------------------
+         HEADER REMOVED:
+         The <header> block was deleted here to prevent the 
+         "Double Header" issue. StudentView now has its own
+         Status Bar / HUD at the top.
+         -------------------------------------------------------
+      */}
 
       {userData?.userType === 'Student' && <StudentView userData={userData} />}
       {userData?.userType === 'Individual' && <IndividualView userData={userData} />}
       {userData?.userType === 'Business' && <BusinessView userData={userData} />}
 
+      {/* Floating Action Button (Global) */}
       <button 
         className="fab-btn"
         onClick={() => setIsModalOpen(true)}
@@ -71,7 +72,8 @@ function Dashboard() {
           backgroundColor: '#3b82f6', color: 'white',
           border: 'none', borderRadius: '50%', width: '60px', height: '60px',
           fontSize: '30px', cursor: 'pointer', boxShadow: '0 10px 20px rgba(59,130,246,0.5)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center'
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          zIndex: 999 /* Ensure it floats above everything */
         }}
       >
         +

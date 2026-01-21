@@ -1,43 +1,98 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useTransactions } from '../hooks/useTransactions'; 
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from 'recharts';
-import './History.css';
+import './History.css'; // Make sure this is imported
+import useSoundFX from '../hooks/useSoundFX'; 
+
+// --- CSV EXPORT FUNCTION ---
+const downloadCSV = (data) => {
+  if (!data || data.length === 0) {
+    alert("No transactions to export!");
+    return;
+  }
+  const headers = ["Date", "Category", "Description", "Type", "Amount"];
+  const rows = data.map(t => {
+    const dateStr = t.date?.toDate ? t.date.toDate().toLocaleDateString() : new Date(t.date).toLocaleDateString();
+    const cleanDesc = (t.text || t.description || "").replace(/,/g, " "); 
+    return [dateStr, t.category || "General", cleanDesc, t.type, t.amount].join(",");
+  });
+  const csvContent = [headers.join(","), ...rows].join("\n");
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.setAttribute("href", url);
+  link.setAttribute("download", `finance_export_${new Date().toISOString().slice(0,10)}.csv`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};
 
 const COLORS = ['#06b6d4', '#8b5cf6', '#10b981', '#f43f5e', '#f59e0b', '#6366f1'];
 
 function TransactionHistory() {
   const { transactions, loading } = useTransactions();
+  const playSound = useSoundFX();
   
-  // State for filters
+  // Refs
+  const prevCountRef = useRef(0);
+  const isFirstLoad = useRef(true);
+
+  // --- SOUND LISTENER ---
+  useEffect(() => {
+    if (loading) return;
+    if (isFirstLoad.current) {
+      prevCountRef.current = transactions.length;
+      isFirstLoad.current = false;
+      return;
+    }
+    if (transactions.length > prevCountRef.current) {
+      const sorted = [...transactions].sort((a, b) => {
+        const dateA = a.date?.toDate ? a.date.toDate() : new Date(a.date);
+        const dateB = b.date?.toDate ? b.date.toDate() : new Date(b.date);
+        return dateB - dateA; 
+      });
+      const latest = sorted[0];
+      if (latest) {
+        if (latest.type === 'income') playSound('coins');
+        else playSound('expense');
+      }
+    }
+    prevCountRef.current = transactions.length;
+  }, [transactions, loading, playSound]);
+
+  // --- STATE ---
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth()); 
-  const [selectedDay, setSelectedDay] = useState('all'); // New: 'all' or specific day number
+  const [selectedDay, setSelectedDay] = useState('all'); 
 
-  // --- HELPER: Get days in selected month ---
-  const getDaysInMonth = (month) => {
-    const year = new Date().getFullYear();
-    // Day 0 of the next month gives us the last day of the current month
-    return new Date(year, month + 1, 0).getDate();
-  };
+  // --- HELPERS ---
+  const yearsRange = Array.from({ length: 5 }, (_, i) => 2024 + i);
+  const getDaysInMonth = (month, year) => new Date(year, month + 1, 0).getDate();
+  const daysArray = Array.from({ length: getDaysInMonth(selectedMonth, selectedYear) }, (_, i) => i + 1);
 
-  // Generate array of days [1, 2, ..., 30, 31]
-  const daysArray = Array.from({ length: getDaysInMonth(selectedMonth) }, (_, i) => i + 1);
-
-  // --- 1. FILTER LOGIC ---
+  // --- FILTER LOGIC ---
   const filteredTransactions = useMemo(() => {
     return transactions.filter(t => {
       if (!t.date) return false;
-      
+      const matchYear = t.date.getFullYear() === selectedYear;
       const matchMonth = t.date.getMonth() === selectedMonth;
-      
-      // If 'all' is selected, show everything for that month.
-      // Otherwise, check if the date matches the selected day.
       const matchDay = selectedDay === 'all' || t.date.getDate() === parseInt(selectedDay);
-
-      return matchMonth && matchDay;
+      return matchYear && matchMonth && matchDay;
     });
-  }, [transactions, selectedMonth, selectedDay]);
+  }, [transactions, selectedYear, selectedMonth, selectedDay]);
 
-  // --- 2. CHART DATA LOGIC ---
+  // --- TOTALS ---
+  const periodTotals = useMemo(() => {
+    let income = 0;
+    let expense = 0;
+    filteredTransactions.forEach(t => {
+      if (t.type === 'income') income += Number(t.amount);
+      else expense += Number(t.amount); 
+    });
+    return { income, expense: Math.abs(expense) };
+  }, [filteredTransactions]);
+
+  // --- CHART DATA ---
   const chartData = filteredTransactions
     .filter(t => t.type === 'expense')
     .reduce((acc, curr) => {
@@ -47,7 +102,6 @@ function TransactionHistory() {
       return acc;
     }, []);
 
-  // Handle month change (Reset day to 'all' when month changes)
   const handleMonthChange = (e) => {
     setSelectedMonth(parseInt(e.target.value));
     setSelectedDay('all');
@@ -56,126 +110,108 @@ function TransactionHistory() {
   if (loading) return <p style={{color: '#94a3b8'}}>Loading history...</p>;
 
   return (
-    <div className="dashboard-content">
+    <div className="history-grid-container">
       
-      {/* --- Left Side: Transaction List --- */}
-      <div className="section-card">
-        <div style={{
-          display: 'flex', 
-          justifyContent: 'space-between', 
-          alignItems: 'center', 
-          marginBottom: '15px', 
-          borderBottom: '1px solid rgba(255,255,255,0.1)', 
-          paddingBottom: '10px',
-          flexWrap: 'wrap',
-          gap: '10px'
-        }}>
-          <h3 style={{margin:0, color: '#94a3b8', fontSize: '1.1rem'}}>Activity Log</h3>
-          
-          <div style={{ display: 'flex', gap: '10px' }}>
-            {/* DAY SELECTOR */}
-            <select 
-              value={selectedDay}
-              onChange={(e) => setSelectedDay(e.target.value)}
-              style={{
-                background: '#0f172a', 
-                border: '1px solid #334155', 
-                color: 'white', 
-                padding: '5px 10px', 
-                borderRadius: '8px', 
-                cursor: 'pointer',
-                outline: 'none'
-              }}
-            >
-              <option value="all">All Days</option>
-              {daysArray.map(day => (
-                <option key={day} value={day}>{day}</option>
-              ))}
-            </select>
+      {/* --- LEFT SIDE: ACTIVITY LOG --- */}
+      <div className="glass-panel"> 
+        
+        {/* Header */}
+        <div className="panel-header">
+          <div className="panel-title">
+            Activity Log
+            <button className="download-btn-glass" onClick={() => downloadCSV(filteredTransactions)} title="Download CSV">
+              📥
+            </button>
+          </div>
 
-            {/* MONTH SELECTOR */}
-            <select 
-              value={selectedMonth}
-              onChange={handleMonthChange}
-              style={{
-                background: '#0f172a', 
-                border: '1px solid #334155', 
-                color: 'white', 
-                padding: '5px 10px', 
-                borderRadius: '8px', 
-                cursor: 'pointer',
-                outline: 'none'
-              }}
-            >
-              <option value={0}>January</option>
-              <option value={1}>February</option>
-              <option value={2}>March</option>
-              <option value={3}>April</option>
-              <option value={4}>May</option>
-              <option value={5}>June</option>
-              <option value={6}>July</option>
-              <option value={7}>August</option>
-              <option value={8}>September</option>
-              <option value={9}>October</option>
-              <option value={10}>November</option>
-              <option value={11}>December</option>
+          <div className="filter-row">
+            <select className="modern-select" value={selectedYear} onChange={(e) => setSelectedYear(parseInt(e.target.value))}>
+              {yearsRange.map(year => <option key={year} value={year}>{year}</option>)}
+            </select>
+            <select className="modern-select" value={selectedMonth} onChange={handleMonthChange}>
+              <option value={0}>Jan</option><option value={1}>Feb</option><option value={2}>Mar</option>
+              <option value={3}>Apr</option><option value={4}>May</option><option value={5}>Jun</option>
+              <option value={6}>Jul</option><option value={7}>Aug</option><option value={8}>Sep</option>
+              <option value={9}>Oct</option><option value={10}>Nov</option><option value={11}>Dec</option>
+            </select>
+            <select className="modern-select" value={selectedDay} onChange={(e) => setSelectedDay(e.target.value)}>
+              <option value="all">All</option>
+              {daysArray.map(day => <option key={day} value={day}>{day}</option>)}
             </select>
           </div>
         </div>
 
-        <div className="history-list">
+        {/* List Content */}
+        <div className="history-list-scroll">
           {filteredTransactions.length === 0 ? (
-            <p style={{color: '#64748b', textAlign: 'center', marginTop: '20px', fontStyle: 'italic'}}>
-              No transactions found for this specific date.
-            </p>
+            <div className="empty-glass">
+              <p>No activity yet.</p>
+            </div>
           ) : (
             filteredTransactions.map((t) => (
-              <div key={t.id} className={`transaction-item ${t.type}`}>
-                <div className="t-info">
+              <div key={t.id} className="glass-item">
+                <div className="item-left">
                   <h4>{t.category}</h4>
-                  <p>{t.description || 'No description'} • {t.date?.toLocaleDateString()}</p>
+                  <p>{t.description || t.text || 'No description'} • {t.date?.toLocaleDateString()}</p>
                 </div>
-                <div className={`t-amount ${t.type === 'income' ? 'inc' : 'exp'}`}>
+                <div className={`item-amount ${t.type === 'income' ? 'inc' : 'exp'}`}>
                   {t.type === 'income' ? '+' : '-'} ₹{t.amount}
                 </div>
               </div>
             ))
           )}
         </div>
+
+        {/* Footer */}
+        <div className="panel-footer">
+          <div className="total-block">
+            <span className="total-label">INCOME</span>
+            <span className="total-val inc">+₹{periodTotals.income}</span>
+          </div>
+          <div className="total-block">
+            <span className="total-label">EXPENSE</span>
+            <span className="total-val exp">-₹{periodTotals.expense}</span>
+          </div>
+        </div>
       </div>
 
-      {/* --- Right Side: Pie Chart --- */}
-      <div className="section-card">
-        <h3 className="section-title">
-          {selectedDay === 'all' ? 'Monthly Breakdown' : 'Daily Breakdown'}
-        </h3>
-        <div style={{ width: '100%', height: 300 }}>
+      {/* --- RIGHT SIDE: PIE CHART --- */}
+      <div className="glass-panel">
+        <div className="panel-header">
+           <span className="panel-title">Breakdown ({selectedYear})</span>
+        </div>
+        
+        <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           {chartData.length > 0 ? (
-            <ResponsiveContainer>
+            <ResponsiveContainer width="100%" height={300}>
               <PieChart>
-                <Pie
-                  data={chartData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={80}
-                  paddingAngle={5}
+                <Pie 
+                  data={chartData} 
+                  cx="50%" 
+                  cy="50%" 
+                  innerRadius={70} 
+                  outerRadius={90} 
+                  paddingAngle={5} 
                   dataKey="value"
+                  stroke="none"
                 >
-                  {chartData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
+                  {chartData.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
                 </Pie>
                 <Tooltip 
-                  contentStyle={{backgroundColor: '#1e293b', border: 'none', borderRadius: '8px'}}
-                  itemStyle={{color: 'white'}}
+                  contentStyle={{
+                    backgroundColor: 'rgba(15, 23, 42, 0.9)', 
+                    border: '1px solid rgba(255,255,255,0.1)', 
+                    borderRadius: '12px',
+                    boxShadow: '0 4px 20px rgba(0,0,0,0.5)'
+                  }} 
+                  itemStyle={{color: 'white'}} 
                 />
-                <Legend />
+                <Legend iconType="circle" />
               </PieChart>
             </ResponsiveContainer>
           ) : (
-            <div style={{height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
-               <p style={{color: '#64748b'}}>No expenses to show.</p>
+            <div className="empty-glass">
+               <p>No expense data.</p>
             </div>
           )}
         </div>
