@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react'; // Added useMemo
 import { useNavigate } from 'react-router-dom'; 
 import { auth } from '../firebaseConfig'; 
 import { signOut } from 'firebase/auth'; 
@@ -45,12 +45,56 @@ function GamificationCard({ transactions, income, expense, goals = [] }) {
   const savingsRate = income > 0 ? ((income - expense) / income) * 100 : 0;
   if (savingsRate > 30) xp += 1000;
 
-  // --- Streak Logic ---
-  const uniqueDates = [...new Set(transactions.map(t => {
-    const date = t.date?.toDate ? t.date.toDate() : new Date(t.date);
-    return date.toDateString();
-  }))];
-  const streakCount = uniqueDates.length;
+  // --- 🆕 STREAK LOGIC (Chain Breaker) ---
+  const streakCount = useMemo(() => {
+    if (!transactions || transactions.length === 0) return 0;
+
+    // 1. Extract unique dates (normalized to Midnight)
+    const uniqueDates = new Set();
+    transactions.forEach(t => {
+      const d = t.date?.toDate ? t.date.toDate() : new Date(t.date);
+      uniqueDates.add(d.toDateString()); // "Mon Jan 01 2024"
+    });
+
+    // 2. Sort Descending (Newest first)
+    const sortedDates = Array.from(uniqueDates)
+      .map(dateStr => new Date(dateStr).getTime())
+      .sort((a, b) => b - a);
+
+    if (sortedDates.length === 0) return 0;
+
+    // 3. The Calculation
+    let streak = 0;
+    const today = new Date().setHours(0,0,0,0);
+    const yesterday = new Date(today - 86400000).setHours(0,0,0,0);
+    
+    // Check if the most recent transaction is Today or Yesterday
+    const lastTxnDate = new Date(sortedDates[0]).setHours(0,0,0,0);
+    
+    // If the last transaction was older than yesterday, the streak is broken (0)
+    if (lastTxnDate !== today && lastTxnDate !== yesterday) {
+      return 0; 
+    }
+
+    // Start counting backwards
+    let currentDateToCheck = lastTxnDate;
+
+    for (let i = 0; i < sortedDates.length; i++) {
+      const thisDate = new Date(sortedDates[i]).setHours(0,0,0,0);
+
+      if (thisDate === currentDateToCheck) {
+        streak++;
+        // Set target for NEXT iteration to be 1 day before
+        currentDateToCheck -= 86400000; 
+      } else {
+        // Gap found! Stop counting.
+        break; 
+      }
+    }
+
+    return streak;
+  }, [transactions]);
+
 
   // --- Rank System ---
   const rankSystem = [
@@ -64,22 +108,15 @@ function GamificationCard({ transactions, income, expense, goals = [] }) {
 
   const level = Math.floor(xp / 500) + 1;
 
-  // 4. --- LEVEL UP SOUND EFFECT (WITH DELAY FIX) ---
+  // 4. --- LEVEL UP SOUND EFFECT ---
   useEffect(() => {
-    // Only play if level INCREASED (ignore first load or decreases)
     if (level > prevLevelRef.current) {
       console.log("Level Up! Queuing sound...");
-      
-      // Wait 1 second (1000ms) for the Coin sound to finish
       const timer = setTimeout(() => {
         playSound('levelUp'); 
       }, 1000);
-
-      // Cleanup if component unmounts fast
       return () => clearTimeout(timer);
     }
-    
-    // Update ref
     prevLevelRef.current = level;
   }, [level, playSound]);
 
@@ -124,8 +161,8 @@ function GamificationCard({ transactions, income, expense, goals = [] }) {
           <div className="xp-info-row">
             <span className="lvl-indicator">LVL {level}</span>
             <span className="xp-numbers">
-  {Math.floor(xp % 500)} / 500 XP
-</span>
+              {Math.floor(xp % 500)} / 500 XP
+            </span>
           </div>
           <div className="navbar-progress-track">
             <div 

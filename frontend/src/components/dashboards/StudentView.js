@@ -11,13 +11,19 @@ import {
   doc, 
   updateDoc 
 } from 'firebase/firestore'; 
+
+// --- COMPONENTS ---
 import TransactionHistory from '../TransactionHistory';
 import GamificationCard from '../GamificationCard';
 import ReportCardModal from '../ReportCardModal';
 import SquadTabs from '../SquadTabs';
 import SubscriptionVault from '../SubscriptionVault';
-// 1. IMPORT BACKGROUND MUSIC
 import BackgroundMusic from '../BackgroundMusic';
+import PredictionCard from '../PredictionCard';
+import QuestCard from '../QuestCard';
+import ExpenseHeatmap from '../ExpenseHeatmap';
+import VibeCheckCard from '../VibeCheckCard';
+import CryoChamber from '../CryoChamber'; // 1. Import CryoChamber
 
 function StudentView() { 
   const { currentUser } = useAuth();
@@ -131,20 +137,24 @@ function StudentView() {
   return (
     <div className="dashboard-layout">
       
-      {/* 1. Gamification HUD */}
-      <GamificationCard transactions={transactions} income={income} expense={expenses} goals={goals} />
+      {/* 🟢 ZONE 1: THE HUD (Identity & Status) */}
+      <div className="section-hud" style={{ marginBottom: '20px' }}>
+        <GamificationCard transactions={transactions} income={income} expense={expenses} goals={goals} />
+      </div>
 
-      {/* 2. Top Stats Grid */}
-      <div className="stats-grid">
+      {/* ⚡ ZONE 2: VITAL SIGNS (Immediate Health) */}
+      <div className="stats-grid" style={{ marginBottom: '20px' }}>
+        {/* Balance Card */}
         <div className="stat-card">
           <h3>Available Balance</h3>
-          <div className="value green">₹{availableBalance}</div>
+          {/* 👻 GHOST MODE: Blur the main balance */}
+          <div className="value green privacy-blur">₹{availableBalance}</div>
           <p className="sub-text" style={{fontSize: '0.7rem', opacity: 0.7}}>
-            (After ₹{totalAllocatedToGoals} saved)
+            (After <span className="privacy-blur">₹{totalAllocatedToGoals}</span> saved)
           </p>
         </div>
 
-        {/* Daily Tracker */}
+        {/* Daily Tracker Card */}
         <div className="stat-card daily-card" style={{ position: 'relative', overflow: 'hidden' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <h3>Today's Spending</h3>
@@ -153,7 +163,8 @@ function StudentView() {
             </span>
           </div>
           <div className="value" style={{ color: isOverLimit ? '#f43f5e' : 'white' }}>
-            ₹{spentToday} <span style={{fontSize: '1rem', color:'#64748b'}}>/ ₹{dailyLimit}</span>
+            {/* 👻 GHOST MODE: Blur Spending and Limit */}
+            <span className="privacy-blur">₹{spentToday}</span> <span style={{fontSize: '1rem', color:'#64748b'}}>/ <span className="privacy-blur">₹{dailyLimit}</span></span>
           </div>
           <div style={{ width: '100%', height: '6px', background: '#334155', borderRadius: '4px', marginTop: '10px' }}>
             <div style={{ 
@@ -170,14 +181,14 @@ function StudentView() {
         </div>
       </div>
 
-      {/* Report Card Button */}
-      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
+      {/* Report Button (Utility) */}
+      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '30px' }}>
         <button 
           onClick={() => setShowReport(true)}
           style={{
             background: 'linear-gradient(90deg, #8b5cf6, #d946ef)',
-            border: 'none', padding: '12px 24px', borderRadius: '30px',
-            color: 'white', fontWeight: 'bold', fontSize: '0.9rem',
+            border: 'none', padding: '10px 20px', borderRadius: '30px',
+            color: 'white', fontWeight: 'bold', fontSize: '0.85rem',
             cursor: 'pointer', boxShadow: '0 4px 15px rgba(217, 70, 239, 0.4)',
             display: 'flex', alignItems: 'center', gap: '8px'
           }}
@@ -187,23 +198,43 @@ function StudentView() {
       </div>
       {showReport && <ReportCardModal transactions={transactions} onClose={() => setShowReport(false)} />}
 
-      {/* --- SECTIONS START HERE --- */}
 
-      {/* 1. TRANSACTION HISTORY (Top) */}
+      {/* 🧠 ZONE 3: ACTIVE INTELLIGENCE (Vibe & Quests) */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px', marginBottom: '40px' }}>
+         <div style={{ flex: 1 }}>
+            <VibeCheckCard transactions={transactions} />
+         </div>
+         <div style={{ flex: 1 }}>
+            <QuestCard transactions={transactions} />
+         </div>
+      </div>
+
+     
+
+      {/* 🔮 ZONE 4: THE ORACLE (Forecast) */}
       <div style={{ marginBottom: '40px' }}>
-        <TransactionHistory />
+        <PredictionCard transactions={transactions} />
       </div>
 
-      {/* 2. SQUAD TABS */}
-      <SquadTabs />
+      {/* 📊 ZONE 5: THE DATA STREAM (History) */}
+      <div style={{ marginBottom: '40px' }}>
+        <ExpenseHeatmap transactions={transactions} />
+        <div style={{ marginTop: '20px' }}>
+           <TransactionHistory /> 
+        </div>
+      </div>
 
-      {/* 3. SUBSCRIPTION VAULT */}
-      <div style={{ marginTop: '30px' }}>
+      {/* 🔒 ZONE 6: THE VAULTS (Commitments) */}
+      <div style={{ marginBottom: '40px' }}>
         <SubscriptionVault />
+        <SquadTabs />
       </div>
-
-      {/* 4. SAVINGS GOALS (Bottom) */}
-      <div style={{ marginTop: '40px' }}>
+        {/* ❄️ ZONE 3.5: CRYO STASIS (New Feature) */}
+      <div style={{ marginBottom: '40px' }}>
+         <CryoChamber />
+      </div>
+      {/* 🚀 ZONE 7: THE HORIZON (Goals) */}
+      <div style={{ marginBottom: '100px' }}>
         <div className="section-header">
           <h3>🎯 Savings Goals</h3>
           <button className="add-btn-small" onClick={() => setShowAddGoal(!showAddGoal)}>
@@ -222,25 +253,56 @@ function StudentView() {
         <div className="goals-grid">
           {goals.length === 0 ? <p className="empty-msg">No goals yet.</p> : goals.map(goal => {
               const percent = Math.min(100, Math.round((goal.saved / goal.target) * 100));
+              const remaining = goal.target - goal.saved;
+              const effectiveSavingsRate = Math.max(500, availableBalance);
+              const monthsToGo = remaining > 0 ? (remaining / effectiveSavingsRate).toFixed(1) : 0;
+              
+              let timeString = "";
+              if (remaining <= 0) timeString = "🎉 Goal Reached!";
+              else if (monthsToGo > 12) timeString = `⏱️ ~${(monthsToGo/12).toFixed(1)} years`;
+              else timeString = `⏱️ ~${monthsToGo} months`;
+
               return (
-                <div key={goal.id} className="goal-card">
+                <div key={goal.id} className="goal-card" style={{ position: 'relative', paddingBottom: '35px' }}>
                   <div className="goal-top">
                     <span className="goal-icon">{goal.icon}</span>
                     <div style={{display:'flex', gap:'10px'}}>
-                      <button onClick={() => handleContribute(goal.id, goal.saved)} style={{background:'#3b82f6', border:'none', borderRadius:'5px', color:'white', cursor:'pointer', padding:'2px 8px', fontSize:'0.8rem'}}>+ Add Funds</button>
+                      <button onClick={() => handleContribute(goal.id, goal.saved)} style={{background:'#3b82f6', border:'none', borderRadius:'5px', color:'white', cursor:'pointer', padding:'2px 8px', fontSize:'0.8rem'}}>+ Add</button>
                       <button className="delete-x" onClick={() => deleteGoal(goal.id)}>×</button>
                     </div>
                   </div>
+                  
                   <h4>{goal.name}</h4>
-                  <div className="goal-progress-bg"><div className="goal-progress-fill" style={{ width: `${percent}%` }}></div></div>
-                  <div className="goal-stats"><span>₹{goal.saved} saved</span><span>Target: ₹{goal.target}</span></div>
+                  
+                  <div className="goal-progress-bg">
+                    <div className="goal-progress-fill" style={{ width: `${percent}%` }}></div>
+                  </div>
+                  
+                  <div className="goal-stats">
+                    {/* 👻 GHOST MODE: Blur amounts in goals */}
+                    <span><span className="privacy-blur">₹{goal.saved}</span> / <span className="privacy-blur">₹{goal.target}</span></span>
+                    <span>{percent}%</span>
+                  </div>
+
+                  {remaining > 0 && (
+                    <div style={{
+                      position: 'absolute', bottom: '8px', left: '15px',
+                      fontSize: '0.75rem', color: '#fbbf24', 
+                      background: 'rgba(251, 191, 36, 0.1)', padding: '2px 8px', borderRadius: '4px',
+                      display: 'flex', alignItems: 'center', gap: '5px'
+                    }}>
+                       {timeString} <span style={{color:'#64748b', fontSize:'0.7rem'}}>(at current pace)</span>
+                    </div>
+                  )}
                 </div>
+                
               );
           })}
+         
         </div>
       </div>
       
-      {/* 5. FLOATING MUSIC PLAYER (Bottom Right) */}
+      {/* 8. FLOATING MUSIC PLAYER */}
       <BackgroundMusic />
       
     </div>

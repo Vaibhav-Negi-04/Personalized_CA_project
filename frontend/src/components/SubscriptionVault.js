@@ -1,175 +1,178 @@
 import React, { useState, useEffect } from 'react';
-import { db } from '../firebaseConfig';
-import { useAuth } from '../context/AuthContext';
-import { 
-  collection, addDoc, deleteDoc, doc, onSnapshot, query, orderBy 
-} from 'firebase/firestore';
+import { db, auth } from '../firebaseConfig';
+import { collection, onSnapshot, addDoc, deleteDoc, doc } from 'firebase/firestore';
 import './Dashboard.css';
 
-// ... (COMMON_SUBS array remains the same) ...
-const COMMON_SUBS = [
-  { name: 'Netflix', defaultPrice: 649, logo: 'https://cdn-icons-png.flaticon.com/512/5977/5977590.png' },
-  { name: 'Spotify', defaultPrice: 119, logo: 'https://cdn-icons-png.flaticon.com/512/408/408748.png' },
-  { name: 'YouTube Prem', defaultPrice: 129, logo: 'https://cdn-icons-png.flaticon.com/512/1384/1384060.png' },
-  { name: 'Amazon Prime', defaultPrice: 299, logo: 'https://cdn-icons-png.flaticon.com/512/5968/5968269.png' },
-  { name: 'Hotstar', defaultPrice: 299, logo: 'https://cdn-icons-png.flaticon.com/512/15569/15569420.png' },
-  { name: 'ChatGPT Plus', defaultPrice: 1999, logo: 'https://cdn-icons-png.flaticon.com/512/12222/12222588.png' },
-  { name: 'Zomato Gold', defaultPrice: 149, logo: 'https://cdn-icons-png.flaticon.com/512/732/732250.png' },
-  { name: 'Gym', defaultPrice: 1500, logo: 'https://cdn-icons-png.flaticon.com/512/2964/2964514.png' }
+// ⚡ PRESET DATA
+const PRESETS = [
+  { id: 'netflix', name: 'Netflix', cost: 199, bgClass: 'brand-netflix', label: 'N' },
+  { id: 'spotify', name: 'Spotify', cost: 119, bgClass: 'brand-spotify', label: 'S' },
+  { id: 'prime',   name: 'Prime',   cost: 299, bgClass: 'brand-prime',   label: 'P' },
+  { id: 'yt',      name: 'YouTube', cost: 129, bgClass: 'brand-yt',      label: 'Y' },
+  { id: 'apple',   name: 'iCloud',  cost: 75,  bgClass: 'brand-apple',   label: '' },
+  { id: 'gpt',     name: 'ChatGPT', cost: 1999, bgClass: 'brand-gpt',    label: 'AI' },
 ];
 
 function SubscriptionVault() {
-  const { currentUser } = useAuth();
   const [subs, setSubs] = useState([]);
-  const [isAdding, setIsAdding] = useState(false);
-  const [newSub, setNewSub] = useState({ name: '', amount: '', date: '' });
+  const [showForm, setShowForm] = useState(false);
+  const [newSub, setNewSub] = useState({ name: '', cost: '', date: '' });
 
-  // 1. Fetch
   useEffect(() => {
-    if (!currentUser) return;
-    const q = query(collection(db, "users", currentUser.uid, "subscriptions"), orderBy("date", "asc"));
-    const unsub = onSnapshot(q, (snap) => {
+    if (!auth.currentUser) return;
+    const unsub = onSnapshot(collection(db, "users", auth.currentUser.uid, "subscriptions"), (snap) => {
       setSubs(snap.docs.map(d => ({ id: d.id, ...d.data() })));
     });
     return () => unsub();
-  }, [currentUser]);
+  }, []);
 
-  // 2. Add Logic
+  const totalBurn = subs.reduce((acc, s) => acc + Number(s.cost), 0);
+
+  // --- 🧠 SMART DATE LOGIC ---
+  const getUrgencyClass = (dateStr) => {
+    if (!dateStr) return '';
+    
+    // Extract the number from "15th", "2nd", etc.
+    const dueDay = parseInt(dateStr); 
+    if (isNaN(dueDay)) return '';
+
+    const today = new Date();
+    const currentDay = today.getDate();
+    
+    // Basic Check: Is it today?
+    if (dueDay === currentDay) return 'critical';
+
+    // Advanced Check: Is it within 3 days? (Handles month wrap-around)
+    // Example: Today is 30th, Due is 2nd. 
+    // Distance = (2 + 30) - 30 = 2 days away.
+    const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+    
+    let diff = dueDay - currentDay;
+    if (diff < 0) {
+        // If due date is "behind" us, checking if it's actually "ahead" in next month
+        diff += daysInMonth; 
+    }
+
+    if (diff > 0 && diff <= 3) return 'warning';
+
+    return '';
+  };
+
+  const handlePresetClick = (preset) => {
+    setNewSub({ name: preset.name, cost: preset.cost, date: '1st' });
+    setShowForm(true);
+  };
+
   const handleAdd = async (e) => {
     e.preventDefault();
-    if (!newSub.name || !newSub.amount || !newSub.date) return;
-    await addDoc(collection(db, "users", currentUser.uid, "subscriptions"), {
-      ...newSub,
-      amount: Number(newSub.amount),
+    if (!newSub.name || !newSub.cost) return;
+    await addDoc(collection(db, "users", auth.currentUser.uid, "subscriptions"), {
+      name: newSub.name,
+      cost: Number(newSub.cost),
+      date: newSub.date,
       createdAt: new Date()
     });
-    setNewSub({ name: '', amount: '', date: '' });
-    setIsAdding(false);
+    setNewSub({ name: '', cost: '', date: '' });
+    setShowForm(false);
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm("Remove this subscription?")) {
-      await deleteDoc(doc(db, "users", currentUser.uid, "subscriptions", id));
+    if (window.confirm("Stop tracking this subscription?")) {
+      await deleteDoc(doc(db, "users", auth.currentUser.uid, "subscriptions", id));
     }
   };
-
-  // 3. Pay Logic
-  const handlePay = async (sub) => {
-    const confirmMsg = `Mark ${sub.name} as paid for ₹${sub.amount}? This will add an expense.`;
-    if (!window.confirm(confirmMsg)) return;
-
-    try {
-      await addDoc(collection(db, "users", currentUser.uid, "transactions"), {
-        text: `Subscription: ${sub.name}`,
-        amount: sub.amount,
-        type: 'expense',
-        date: new Date(),
-        category: 'Subscription'
-      });
-      alert(`Paid! ₹${sub.amount} deducted from balance.`);
-    } catch (error) {
-      console.error("Error paying subscription:", error);
-    }
-  };
-
-  const fillPreset = (sub) => {
-    setNewSub({ ...newSub, name: sub.name, amount: sub.defaultPrice });
-  };
-
-  const totalBurn = subs.reduce((acc, s) => acc + s.amount, 0);
-
-  // --- NEW: URGENCY LOGIC ---
-  const today = new Date().getDate(); // Returns 1-31
-  
-  // Count how many are due soon (within 3 days)
-  const dueSoonCount = subs.filter(s => {
-    const day = parseInt(s.date);
-    const diff = day - today;
-    return diff >= 0 && diff <= 3;
-  }).length;
 
   return (
-    <div className="vault-section">
-      <div className="section-header">
-        <h3>📺 Subscription Vault</h3>
-        <button className="add-btn-small" onClick={() => setIsAdding(!isAdding)}>
-          {isAdding ? 'Close' : '+ Add Sub'}
-        </button>
+    <div className="vault-glass-card">
+      
+      {/* HEADER */}
+      <div className="vault-header-row">
+        <div>
+          <h3 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '8px', color: '#e2e8f0' }}>
+            📺 Subscription Vault
+          </h3>
+          <p style={{ margin: '4px 0 0 0', fontSize: '0.8rem', color: '#94a3b8' }}>
+            Manage recurring expenses
+          </p>
+        </div>
+        <div className="burn-stat">
+          <span className="burn-icon">🔥</span>
+          <div>
+            <div style={{ fontSize: '0.65rem', color: '#fca5a5', textTransform: 'uppercase' }}>Monthly Burn</div>
+            <div className="burn-amount">₹{totalBurn}</div>
+          </div>
+        </div>
       </div>
 
-      {/* NEW: ALERT BANNER */}
-      {dueSoonCount > 0 && (
-        <div className="vault-alert">
-          <span>🔔 <b>{dueSoonCount} Bills</b> due this week! Check your balance.</span>
+      {/* QUICK ADD ICONS */}
+      {!showForm && (
+        <div className="quick-add-row">
+          {PRESETS.map(preset => (
+            <button 
+              key={preset.id} 
+              className="brand-btn" 
+              onClick={() => handlePresetClick(preset)}
+              title={`Quick add ${preset.name}`}
+            >
+              <div className={`brand-logo ${preset.bgClass}`}>{preset.label}</div>
+              <span className="brand-label">{preset.name}</span>
+            </button>
+          ))}
+          <button className="brand-btn" onClick={() => setShowForm(true)}>
+             <div className="brand-logo" style={{background: 'rgba(255,255,255,0.1)', border:'1px dashed rgba(255,255,255,0.3)'}}>+</div>
+             <span className="brand-label">Custom</span>
+          </button>
         </div>
       )}
 
-      <div className="burn-rate-card">
-        <span className="burn-label">Monthly Fixed Burn</span>
-        <div className="burn-value">
-          <span className="fire-anim">🔥</span> ₹{totalBurn}
-          <span className="per-mo">/mo</span>
-        </div>
-      </div>
-
-      {isAdding && (
-        <form onSubmit={handleAdd} className="sub-form">
-          <p className="quick-label">Quick Select:</p>
-          <div className="quick-sub-grid">
-            {COMMON_SUBS.map((s) => (
-              <div key={s.name} className="quick-sub-item" onClick={() => fillPreset(s)}>
-                <img src={s.logo} alt={s.name} />
-                <span>{s.name}</span>
-              </div>
-            ))}
+      {/* FORM */}
+      {showForm && (
+        <form onSubmit={handleAdd} style={{ marginBottom: '20px', background: 'rgba(0,0,0,0.3)', padding: '20px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '15px', marginBottom: '15px' }}>
+            <input className="glass-input" placeholder="Name" value={newSub.name} onChange={e => setNewSub({...newSub, name: e.target.value})} />
+            <input className="glass-input" type="number" placeholder="Cost" value={newSub.cost} onChange={e => setNewSub({...newSub, cost: e.target.value})} />
+            <input className="glass-input" placeholder="Day (e.g. 15th)" value={newSub.date} onChange={e => setNewSub({...newSub, date: e.target.value})} />
           </div>
-
-          <input type="text" placeholder="Service Name" className="debt-input" value={newSub.name} onChange={e => setNewSub({...newSub, name: e.target.value})} />
-          <input type="number" placeholder="Cost (₹)" className="debt-input" value={newSub.amount} onChange={e => setNewSub({...newSub, amount: e.target.value})} />
-          <div className="date-input-group">
-            <label>Renewal Date (Day of Month):</label>
-            <input type="number" min="1" max="31" placeholder="e.g. 15" className="debt-input" value={newSub.date} onChange={e => setNewSub({...newSub, date: e.target.value})} />
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <button type="submit" style={{ flex: 1, background: 'linear-gradient(135deg, #3b82f6, #2563eb)', border: 'none', color: 'white', padding: '12px', borderRadius: '12px', fontWeight: '600', cursor: 'pointer', boxShadow: '0 4px 15px rgba(59, 130, 246, 0.4)' }}>Save</button>
+            <button type="button" onClick={() => setShowForm(false)} style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', color: '#94a3b8', padding: '12px 20px', borderRadius: '12px', cursor: 'pointer' }}>Cancel</button>
           </div>
-          <button type="submit" className="save-debt-btn">Lock In Subscription</button>
         </form>
       )}
 
-      <div className="sub-grid">
-        {subs.length === 0 ? <p className="empty-msg">No active subscriptions.</p> : subs.map(sub => {
-          // CHECK IF DUE SOON
-          const day = parseInt(sub.date);
-          const diff = day - today;
-          const isDueSoon = diff >= 0 && diff <= 3;
-          const isToday = diff === 0;
-
+      {/* GRID LIST (With Smart Glow) */}
+      <div className="subs-grid">
+        {subs.length === 0 ? <p style={{color:'#64748b', fontSize:'0.9rem', textAlign:'center', marginTop:'20px'}}>No active subscriptions.</p> : subs.map(sub => {
+          // Calculate Urgency
+          const urgencyClass = getUrgencyClass(sub.date);
+          
           return (
-            <div key={sub.id} className={`sub-card ${isDueSoon ? 'due-warning' : ''}`}>
-              
-              {/* WARNING BADGE */}
-              {isDueSoon && (
-                <div className="due-badge">
-                  {isToday ? 'DUE TODAY' : `Due in ${diff} days`}
+            <div key={sub.id} className={`sub-chip ${urgencyClass}`}>
+              <div className="sub-header">
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  <div className="sub-icon-box">
+                    {sub.name.charAt(0).toUpperCase()}
+                  </div>
+                  <div>
+                    <div className="sub-name">{sub.name}</div>
+                    <div className="sub-date">
+                       {urgencyClass === 'critical' ? '⚠️ DUE TODAY' : (urgencyClass === 'warning' ? 'Due Soon' : `Renews: ${sub.date}`)}
+                    </div>
+                  </div>
                 </div>
-              )}
-
-              <div className="sub-icon">{sub.name.charAt(0).toUpperCase()}</div>
-              <div className="sub-info">
-                <h4>{sub.name}</h4>
-                <span className="sub-date" style={{color: isDueSoon ? '#fcd34d' : '#94a3b8'}}>
-                  Renews on {sub.date}th
-                </span>
               </div>
-              <div className="sub-cost">₹{sub.amount}</div>
-              
-              <button className="pay-sub-btn" onClick={() => handlePay(sub)} title="Pay & Add to Expenses">
-                Pay
-              </button>
-
-              <button className="sub-del-btn" onClick={() => handleDelete(sub.id)}>×</button>
+              <div className="sub-actions">
+                <div className="sub-cost">₹{sub.cost}</div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <button className="pay-btn-mini">Paid</button>
+                  <button className="delete-sub-btn" onClick={() => handleDelete(sub.id)}>×</button>
+                </div>
+              </div>
             </div>
           );
         })}
       </div>
+
     </div>
   );
 }

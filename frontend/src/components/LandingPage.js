@@ -125,7 +125,7 @@ function LandingPage() {
           <div className="bento-tile tile-large">
             <div className="tile-content">
               <h3>🔮 Future-Ready AI</h3>
-              <p>Stop guessing. Our predictive engine analyzes history to forecast next month's expenses with 94% accuracy.</p>
+              <p>Stop guessing. Our predictive engine analyzes history to forecast next month's expenses with accuracy.</p>
             </div>
             <div className="tile-visual graph-visual">
               <div className="line-segment"></div>

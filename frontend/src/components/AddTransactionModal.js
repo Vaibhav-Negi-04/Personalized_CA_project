@@ -2,12 +2,17 @@ import React, { useState } from 'react';
 import { db, auth } from '../firebaseConfig';
 import { doc, updateDoc, increment, collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import './AddTransaction.css';
+// Ensure Dashboard.css is imported globally or imported here if it contains the .vibe-btn styles
 
 function AddTransactionModal({ isOpen, onClose, userType, refreshData }) {
   const [amount, setAmount] = useState('');
   const [description, setDescription] = useState('');
-  const [category, setCategory] = useState(''); // NEW: Category State
+  const [category, setCategory] = useState(''); 
   const [type, setType] = useState('expense');
+  
+  // 🆕 NEW: Vibe State
+  const [vibe, setVibe] = useState('essential'); 
+  
   const [loading, setLoading] = useState(false);
 
   // --- Pre-defined Categories ---
@@ -45,19 +50,22 @@ function AddTransactionModal({ isOpen, onClose, userType, refreshData }) {
       }
       await updateDoc(userRef, updates);
 
-      // 2. Add Transaction to History (Now with Category!)
+      // 2. Add Transaction to History
       await addDoc(collection(db, "users", userId, "transactions"), {
         amount: numAmount,
         description: description,
-        category: category || 'Uncategorized', // Save the category
+        category: category || 'Uncategorized',
         type: type,
+        // 🆕 NEW: Save the Vibe (only for expenses)
+        vibe: type === 'expense' ? vibe : 'income', 
         date: serverTimestamp(),
       });
 
       setLoading(false);
       setAmount('');
       setDescription('');
-      setCategory(''); // Reset category
+      setCategory('');
+      setVibe('essential'); // Reset vibe
       refreshData();
       onClose();
 
@@ -67,7 +75,6 @@ function AddTransactionModal({ isOpen, onClose, userType, refreshData }) {
     }
   };
 
-  // Helper to handle chip click
   const handleChipClick = (catName) => {
     setCategory(catName);
   };
@@ -86,7 +93,7 @@ function AddTransactionModal({ isOpen, onClose, userType, refreshData }) {
             <button 
               type="button"
               className={`toggle-btn ${type === 'income' ? 'active income' : ''}`}
-              onClick={() => { setType('income'); setCategory(''); }} // Reset category on switch
+              onClick={() => { setType('income'); setCategory(''); }}
             >
               Income
             </button>
@@ -113,7 +120,7 @@ function AddTransactionModal({ isOpen, onClose, userType, refreshData }) {
             />
           </div>
 
-          {/* NEW: Category Chips */}
+          {/* Category Chips */}
           <div className="category-section">
             <span className="category-label">Category</span>
             <div className="chips-container">
@@ -127,7 +134,6 @@ function AddTransactionModal({ isOpen, onClose, userType, refreshData }) {
                 </div>
               ))}
             </div>
-            {/* Manual Category Input */}
             <input 
               type="text" 
               className="text-input" 
@@ -149,6 +155,40 @@ function AddTransactionModal({ isOpen, onClose, userType, refreshData }) {
               onChange={(e) => setDescription(e.target.value)}
             />
           </div>
+
+          {/* 🆕 NEW: Vibe Selector (Only for Expenses) */}
+          {type === 'expense' && (
+            <div className="input-group">
+              <label>How did this spending feel?</label>
+              <div className="vibe-group">
+                
+                <div 
+                  className={`vibe-btn vibe-essential ${vibe === 'essential' ? 'selected' : ''}`}
+                  onClick={() => setVibe('essential')}
+                >
+                  <span>🔥</span>
+                  <p>Essential</p>
+                </div>
+
+                <div 
+                  className={`vibe-btn vibe-joy ${vibe === 'joy' ? 'selected' : ''}`}
+                  onClick={() => setVibe('joy')}
+                >
+                  <span>😎</span>
+                  <p>Joy</p>
+                </div>
+
+                <div 
+                  className={`vibe-btn vibe-regret ${vibe === 'regret' ? 'selected' : ''}`}
+                  onClick={() => setVibe('regret')}
+                >
+                  <span>💀</span>
+                  <p>Regret</p>
+                </div>
+
+              </div>
+            </div>
+          )}
 
           <button type="submit" className="save-btn" disabled={loading}>
             {loading ? 'Saving...' : 'Save Transaction'}
