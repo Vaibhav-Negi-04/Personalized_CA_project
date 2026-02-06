@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { db, auth } from '../firebaseConfig';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+// 🛑 FIX 1: Added missing imports for updating balance
+import { collection, addDoc, serverTimestamp, doc, updateDoc, increment } from 'firebase/firestore';
 import './Dashboard.css';
 
 function OmniCommand({ isOpen, onClose, onToggleGhost }) {
@@ -22,7 +23,7 @@ function OmniCommand({ isOpen, onClose, onToggleGhost }) {
   // --- PARSER ---
   const parseCommand = (text) => {
     const clean = text.trim();
-    if (!clean) return { type: 'empty' }; // Return 'empty' to trigger cheatsheet
+    if (!clean) return { type: 'empty' };
 
     // 1. System
     if (clean.toLowerCase() === 'ghost') return { type: 'system', action: 'ghost', msg: '👻 Toggle Ghost Mode' };
@@ -73,14 +74,38 @@ function OmniCommand({ isOpen, onClose, onToggleGhost }) {
     }
 
     try {
-      await addDoc(collection(db, "users", auth.currentUser.uid, "transactions"), {
+      const userId = auth.currentUser.uid;
+      const userRef = doc(db, "users", userId);
+
+      // 🛑 FIX 2: Update the User's Balance (Totals)
+      // Without this, your dashboard numbers won't change!
+      if (preview.type === 'income') {
+        await updateDoc(userRef, {
+          monthlyAllowance: increment(preview.amount), // For Students
+          totalIncome: increment(preview.amount)       // For Individuals
+        });
+      } else {
+        await updateDoc(userRef, {
+          totalSpent: increment(preview.amount),       // For Students
+          totalExpenses: increment(preview.amount)     // For Individuals
+        });
+      }
+
+      // 3. Add Transaction
+      await addDoc(collection(db, "users", userId, "transactions"), {
         amount: preview.amount,
-        description: preview.desc,
+        description: preview.desc, // Keep description as is
         type: preview.type,
-        category: 'Quick Add', 
+        
+        // 🛑 FIX 3: Use the typed description as the Category
+        // Before: category: 'Quick Add'
+        // Now: It uses "Burger", "Taxi", etc.
+        category: preview.desc || 'General', 
+        
         vibe: preview.vibe,
         date: serverTimestamp()
       });
+
       onClose();
       setInput('');
     } catch (error) {
@@ -94,7 +119,6 @@ function OmniCommand({ isOpen, onClose, onToggleGhost }) {
     <div className="omni-overlay" onClick={onClose}>
       <div className="omni-box" onClick={e => e.stopPropagation()}>
         
-        {/* INPUT ROW */}
         <form onSubmit={executeCommand} className="omni-input-row">
           <span className="omni-icon">⚡</span>
           <input 
@@ -106,7 +130,6 @@ function OmniCommand({ isOpen, onClose, onToggleGhost }) {
           />
         </form>
 
-        {/* CHEATSHEET (Shows only when typing area is empty) */}
         {input.trim() === '' ? (
           <div className="omni-cheatsheet">
             <div className="cheat-group">
@@ -122,7 +145,6 @@ function OmniCommand({ isOpen, onClose, onToggleGhost }) {
             </div>
           </div>
         ) : (
-          /* PREVIEW (Shows when typing) */
           <div className="omni-hint">
             <span className={
               preview.type === 'income' ? 'cmd-preview' : 

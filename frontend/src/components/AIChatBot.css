@@ -1,0 +1,225 @@
+/* src/components/AIChatBot.css */
+
+/* --- 1. CONTAINER & POSITIONING --- */
+.ai-chatbot-container {
+  position: fixed;
+  /* 📍 Moved to Top-Left as requested */
+  top: 95px;
+  left: 35px;
+  z-index: 10000;
+  font-family: 'Inter', sans-serif;
+}
+
+/* --- CONTAINER (Invisible wrapper for positioning) --- */
+/* --- CONTAINER (Made Smaller: 45px) --- */
+/* --- 1. THE GLASS CONTAINER (The Button Housing) --- */
+.ai-fab-container {
+  position: relative;
+  z-index: 10001;
+  cursor: pointer;
+  
+  /* 📏 Button Size */
+  width: 50px;
+  height: 50px;
+  
+  /* 🌑 Glass Look */
+  background: rgba(15, 23, 42, 0.6); /* Dark Blue-Grey tint */
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.1); /* Subtle rim */
+  border-radius: 50%; /* Perfect Circle */
+  
+  /* Centering the animation inside */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.ai-fab-container:hover {
+  transform: scale(1.1);
+  background: rgba(15, 23, 42, 0.9);
+  border-color: rgba(255, 255, 255, 0.3);
+  box-shadow: 0 0 20px rgba(0, 219, 222, 0.4); /* Glow on hover */
+}
+
+/* --- 2. THE ANIMATION (Smaller & Inside) --- */
+.loader {
+  /* 📏 Smaller size so it fits inside the button */
+  width: 24px;
+  height: 24px;
+  
+  position: relative;
+  /* Pink/Cyan Gradient */
+  background: linear-gradient(-45deg, #fc00ff 0%, #00dbde 100%);
+  
+  /* 🐢 Slow Morph Animation */
+  animation: spin 6s infinite ease-in-out;
+}
+
+/* The Glow Effect (Confined mostly inside) */
+.loader::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background: linear-gradient(-45deg, #fc00ff 0%, #00dbde 100%);
+  transform: scale(0.9);
+  filter: blur(8px); /* Soft glow */
+}
+
+/* --- ANIMATION (Same as before) --- */
+@keyframes spin {
+  0% { transform: rotate(0deg); border-radius: 20%; } /* Soft Square */
+  50% { transform: rotate(180deg); border-radius: 50%; } /* Circle */
+  100% { transform: rotate(360deg); border-radius: 20%; } /* Soft Square */
+}
+/* --- GLOW RING (Adjusted) --- */
+.ai-glow-ring {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  border-top-color: rgba(0, 225, 255, 0.9);
+  border-right-color: rgba(0, 102, 255, 0.5);
+  animation: gentle-spin 4s linear infinite;
+  pointer-events: none;
+  
+  /* Ensure ring sits ON TOP of the video */
+  z-index: 10; 
+}
+/* --- 3. GLASSMORPHIC WINDOW (Opens Downwards) --- */
+.ai-window {
+  position: absolute;
+  /* ⬇️ CHANGED: Opens BELOW the button now */
+  top: 60px; 
+  left: 0;
+  
+  width: 350px;
+  height: 500px;
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  
+  /* Animation: Slide DOWN */
+  transform-origin: top left;
+  animation: slide-down 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* --- 4. HEADER --- */
+.ai-header {
+  padding: 15px 18px;
+  background: linear-gradient(90deg, rgba(59, 130, 246, 0.15), transparent);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.ai-header h3 {
+  margin: 0;
+  color: #eff6ff;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.ai-header button {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 1.4rem;
+  cursor: pointer;
+  padding: 0 5px;
+}
+
+.ai-header button:hover {
+  color: #f87171;
+}
+
+/* --- 5. MESSAGES AREA --- */
+.ai-messages {
+  flex: 1;
+  padding: 15px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ai-messages::-webkit-scrollbar { width: 5px; }
+.ai-messages::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.15); border-radius: 10px; }
+
+.message {
+  max-width: 85%;
+  padding: 10px 14px;
+  border-radius: 14px;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.message.ai {
+  align-self: flex-start;
+  background: rgba(255, 255, 255, 0.08);
+  color: #e2e8f0;
+  border-bottom-left-radius: 2px;
+}
+
+.message.user {
+  align-self: flex-end;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: white;
+  border-bottom-right-radius: 2px;
+}
+
+/* --- 6. INPUT AREA --- */
+.ai-input-area {
+  padding: 12px 15px;
+  background: rgba(0, 0, 0, 0.3);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  gap: 8px;
+}
+
+.ai-input-area input {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 10px 14px;
+  color: white;
+  font-size: 0.9rem;
+  outline: none;
+}
+
+.ai-input-area input:focus {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: #3b82f6;
+}
+
+.ai-input-area button {
+  background: #3b82f6;
+  border: none;
+  width: 40px;
+  border-radius: 10px;
+  color: white;
+  cursor: pointer;
+}
+
+/* --- ANIMATIONS --- */
+@keyframes core-pulse {
+  0%, 100% { transform: scale(0.9); opacity: 0.7; }
+  50% { transform: scale(1.1); opacity: 1; box-shadow: 0 0 15px #60a5fa; }
+}
+
+@keyframes slide-down {
+  from { opacity: 0; transform: translateY(-10px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}

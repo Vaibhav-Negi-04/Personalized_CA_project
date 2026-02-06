@@ -9,7 +9,8 @@ import StudentView from './dashboards/StudentView';
 import IndividualView from './dashboards/IndividualView';
 import BusinessView from './dashboards/BusinessView';
 import AddTransactionModal from './AddTransactionModal'; 
-import OmniCommand from './OmniCommand'; // 1. Import OmniCommand
+import OmniCommand from './OmniCommand'; 
+import AIChatBot from './AIChatBot'; // 👈 1. IMPORT THE BOT
 
 import './Dashboard.css';
 
@@ -21,9 +22,32 @@ function Dashboard() {
   
   // --- STATES ---
   const [isGhostMode, setIsGhostMode] = useState(false);
-  const [isOmniOpen, setIsOmniOpen] = useState(false); // 2. Omni State
+  const [isOmniOpen, setIsOmniOpen] = useState(false); 
+
+  // --- 💰 2. SHARED FINANCIAL STATE (The Bridge) ---
+  const [financialStats, setFinancialStats] = useState({
+    balance: 0,
+    income: 0,
+    expense: 0
+  });
 
   const navigate = useNavigate();
+
+  // --- 📡 3. THE LISTENER FUNCTION ---
+  // This allows child views (Student/Individual) to send their calculated math up here.
+  const updateFinancials = useCallback((newStats) => {
+    setFinancialStats(prev => {
+      // Only update if numbers actually changed (prevents infinite re-renders)
+      if (
+        prev.balance !== newStats.balance || 
+        prev.income !== newStats.income || 
+        prev.expense !== newStats.expense
+      ) {
+        return newStats;
+      }
+      return prev;
+    });
+  }, []);
 
   const fetchUserData = useCallback(async () => {
     if (currentUser) {
@@ -72,14 +96,14 @@ function Dashboard() {
 
       // ⚡ Ctrl + K (or Cmd + K) -> Omni Command
       if ((e.ctrlKey || e.metaKey) && (e.key === 'k' || e.key === 'K')) {
-        e.preventDefault(); // Prevent browser search focus
+        e.preventDefault(); 
         setIsOmniOpen(prev => !prev);
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isGhostMode]); // Dependency ensures toggleGhostMode has latest state
+  }, [isGhostMode]); 
 
 
   // --- LOADING SCREEN ---
@@ -95,7 +119,7 @@ function Dashboard() {
   return (
     <div className="dashboard-container">
       
-      {/* 3. Render OmniCommand (Always accessible) */}
+      {/* OmniCommand (Always accessible) */}
       <OmniCommand 
         isOpen={isOmniOpen} 
         onClose={() => setIsOmniOpen(false)} 
@@ -112,9 +136,29 @@ function Dashboard() {
       </button>
 
       {/* View Switcher based on User Type */}
-      {userData?.userType === 'Student' && <StudentView userData={userData} />}
-      {userData?.userType === 'Individual' && <IndividualView userData={userData} />}
-      {userData?.userType === 'Business' && <BusinessView userData={userData} />}
+      {/* 👇 4. PASS THE 'updateFinancials' PROP TO ALL VIEWS */}
+      
+      {userData?.userType === 'Student' && (
+        <StudentView 
+          userData={userData} 
+          onUpdateFinance={updateFinancials} 
+        />
+      )}
+      
+      {userData?.userType === 'Individual' && (
+        <IndividualView 
+          userData={userData} 
+          onUpdateFinance={updateFinancials} 
+        />
+      )}
+      
+      {userData?.userType === 'Business' && (
+  <BusinessView 
+    userData={userData} 
+    onUpdateFinance={updateFinancials} 
+    onLogout={handleLogout}  /* 👈 THIS MUST BE HERE */
+  />
+)}
 
       {/* Floating Action Button (Global) */}
       <button 
@@ -131,6 +175,13 @@ function Dashboard() {
       >
         +
       </button>
+
+      {/* 🤖 5. THE AI BOT (Connected to the Live Data) */}
+      <AIChatBot 
+         dashboardBalance={financialStats.balance}
+         dashboardIncome={financialStats.income}
+         dashboardExpense={financialStats.expense}
+      />
 
       <AddTransactionModal 
         isOpen={isModalOpen} 

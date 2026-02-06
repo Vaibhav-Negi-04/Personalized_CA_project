@@ -23,9 +23,10 @@ import PredictionCard from '../PredictionCard';
 import QuestCard from '../QuestCard';
 import ExpenseHeatmap from '../ExpenseHeatmap';
 import VibeCheckCard from '../VibeCheckCard';
-import CryoChamber from '../CryoChamber'; // 1. Import CryoChamber
+import CryoChamber from '../CryoChamber'; 
 
-function StudentView() { 
+// 👇 ACCEPT THE PROP 'onUpdateFinance'
+function StudentView({ onUpdateFinance }) { 
   const { currentUser } = useAuth();
   
   // --- STATE ---
@@ -78,6 +79,17 @@ function StudentView() {
   const totalAllocatedToGoals = goals.reduce((acc, goal) => acc + (goal.saved || 0), 0);
   const rawBalance = income - expenses;
   const availableBalance = Math.max(0, rawBalance - totalAllocatedToGoals);
+
+  // --- 📢 3. REPORT DATA TO PARENT DASHBOARD (For AI Bot) ---
+  useEffect(() => {
+    if (onUpdateFinance) {
+      onUpdateFinance({
+        balance: availableBalance,
+        income: income,
+        expense: expenses
+      });
+    }
+  }, [availableBalance, income, expenses, onUpdateFinance]);
 
   // --- DAILY LIMIT LOGIC ---
   const today = new Date();
@@ -209,7 +221,7 @@ function StudentView() {
          </div>
       </div>
 
-     
+      
 
       {/* 🔮 ZONE 4: THE ORACLE (Forecast) */}
       <div style={{ marginBottom: '40px' }}>
@@ -220,7 +232,7 @@ function StudentView() {
       <div style={{ marginBottom: '40px' }}>
         <ExpenseHeatmap transactions={transactions} />
         <div style={{ marginTop: '20px' }}>
-           <TransactionHistory /> 
+          <TransactionHistory transactions={transactions} />
         </div>
       </div>
 
@@ -298,7 +310,7 @@ function StudentView() {
                 
               );
           })}
-         
+          
         </div>
       </div>
       

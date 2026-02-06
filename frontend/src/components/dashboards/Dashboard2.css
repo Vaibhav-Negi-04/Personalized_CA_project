@@ -1,0 +1,209 @@
+/* =========================================================
+   DASHBOARD 2: INDIVIDUAL (WEALTH THEME - EMERALD)
+   ========================================================= */
+
+/* --- 1. CORE LAYOUT & SCROLLBAR --- */
+/* 🛑 FIX: Removed ".dashboard-container" so it matches your JS exactly */
+.theme-wealth {
+  /* Background */
+  background: radial-gradient(circle at 80% 20%, #064e3b, #020617 60%) !important;
+  
+  /* Layout Engine */
+  position: fixed !important; 
+  top: 0;
+  left: 0;
+  width: 100vw !important;
+  height: 100vh !important;
+  
+  /* Internal Scrolling */
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  
+  /* Flex Flow - This enables the GAP */
+  display: flex !important;
+  flex-direction: column !important;
+  
+  /* Breathing Room */
+  gap: 40px !important; 
+  
+  padding: 30px 40px !important;
+  box-sizing: border-box !important;
+  z-index: 10 !important;
+}
+
+/* Custom Emerald Scrollbar */
+.theme-wealth::-webkit-scrollbar {
+  width: 8px !important;
+}
+
+.theme-wealth::-webkit-scrollbar-track {
+  background: #020617 !important; 
+}
+
+.theme-wealth::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #064e3b, #10b981) !important; 
+  border-radius: 4px;
+  border: 1px solid #020617;
+}
+/* Custom Emerald Scrollbar */
+.dashboard-container.theme-wealth::-webkit-scrollbar {
+  width: 8px !important;
+}
+
+.dashboard-container.theme-wealth::-webkit-scrollbar-track {
+  background: #020617 !important; 
+}
+
+.dashboard-container.theme-wealth::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #064e3b, #10b981) !important; 
+  border-radius: 4px;
+  border: 1px solid #020617;
+}
+/* --- 2. GLOBAL COMPONENT STYLING --- */
+/* Green Glass Effect for all Cards, Panels, and Modals */
+.theme-wealth .stat-card,
+.theme-wealth .portfolio-card,
+.theme-wealth .glass-panel,
+.theme-wealth .section-card,
+.theme-wealth .modal-content {
+  background: rgba(6, 78, 59, 0.4) !important;
+  border: 1px solid rgba(16, 185, 129, 0.2) !important;
+  backdrop-filter: blur(20px) !important;
+  border-radius: 20px !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4) !important;
+}
+
+/* Text Colors */
+.theme-wealth h2, 
+.theme-wealth h3, 
+.theme-wealth h4, 
+.theme-wealth label,
+.theme-wealth .category-label { 
+  color: #a7f3d0 !important; /* Mint Green */
+}
+
+.theme-wealth .value.green { color: #34d399 !important; }
+.theme-wealth .value.gold { color: #fbbf24 !important; }
+
+
+/* --- 3. INPUTS & FORMS --- */
+/* Input Fields */
+.dashboard-container.theme-wealth input,
+.dashboard-container.theme-wealth select,
+.dashboard-container.theme-wealth textarea {
+  background-color: rgba(2, 44, 34, 0.95) !important;
+  border: 1px solid rgba(16, 185, 129, 0.3) !important;
+  color: #ecfdf5 !important;
+  border-radius: 10px !important;
+}
+
+.dashboard-container.theme-wealth input:focus,
+.dashboard-container.theme-wealth select:focus {
+  border-color: #10b981 !important;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2) !important;
+  outline: none !important;
+}
+
+/* Toggle Buttons (Income/Expense) */
+.dashboard-container.theme-wealth .type-toggle .toggle-btn {
+  background-color: rgba(6, 78, 59, 0.4) !important; /* Inactive */
+  color: #94a3b8 !important;
+  border: 1px solid rgba(16, 185, 129, 0.2) !important;
+  box-shadow: none !important;
+}
+
+.dashboard-container.theme-wealth .type-toggle .toggle-btn.active {
+  background-color: #10b981 !important; /* Active */
+  color: white !important;
+  border-color: #10b981 !important;
+  box-shadow: 0 0 15px rgba(16, 185, 129, 0.4) !important;
+}
+
+/* Category Chips */
+.dashboard-container.theme-wealth .chips-container .chip:not(.active) {
+  background-color: rgba(6, 78, 59, 0.4) !important; 
+  color: #a7f3d0 !important;
+  border: 1px solid rgba(16, 185, 129, 0.2) !important;
+}
+
+.dashboard-container.theme-wealth .chips-container .chip.active {
+  background-color: #10b981 !important;
+  color: white !important;
+  border-color: #10b981 !important;
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.4) !important;
+}
+
+
+/* --- 4. PORTFOLIO SECTION (Fixed Alignment) --- */
+.theme-wealth .portfolio-card {
+  min-height: 200px !important;
+  height: auto !important;
+  
+  /* Ensure internal content flows correctly */
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: flex-start !important;
+}
+
+/* 🛑 THE FIX: Align the Header Text & Button properly */
+.theme-wealth .portfolio-header {
+  display: flex !important;
+  justify-content: space-between !important; /* Push text left, button right */
+  align-items: center !important; /* Vertically center them */
+  width: 100% !important;
+  margin-bottom: 20px !important; /* Space below the header */
+  padding-bottom: 10px !important;
+  margin-left: 10px;
+  border-bottom: 1px solid rgba(16, 185, 129, 0.1); /* Optional: nice divider */
+}
+
+.theme-wealth .portfolio-header h3 {
+  margin: 0 !important;
+  font-size: 1.1rem !important;
+  display: flex;
+  align-items: center;
+  gap: 10px; /* Space between icon and text */
+}
+
+/* Transaction Amount Colors */
+.dashboard-container.theme-wealth .item-amount.inc { color: #34d399 !important; } /* Income */
+.dashboard-container.theme-wealth .item-amount.exp { color: #f43f5e !important; } /* Expense */
+
+
+/* --- 5. BUTTONS & ACTIONS --- */
+.theme-wealth .save-btn,
+.theme-wealth .modal-submit-btn,
+.theme-wealth .fab-btn,
+.theme-wealth .add-btn-small {
+  background: linear-gradient(135deg, #10b981, #059669) !important;
+  color: white !important;
+  padding:10px;
+  margin-top: 10px;
+  margin-right: 22px;
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3) !important;
+  border: none !important;
+}
+
+.theme-wealth .add-btn-small:hover,
+.theme-wealth .fab-btn:hover {
+  background: #34d399 !important;
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.6) !important;
+}
+
+
+/* --- 6. UTILITIES --- */
+/* Stats Grid Layout */
+.theme-wealth .stats-grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)) !important;
+  gap: 20px;
+  width: 100%;
+  flex-shrink: 0;
+}
+
+/* Asset Icons */
+.theme-wealth .asset-icon {
+  background: rgba(16, 185, 129, 0.2) !important;
+  color: white;
+  border-radius: 50%;
+}
