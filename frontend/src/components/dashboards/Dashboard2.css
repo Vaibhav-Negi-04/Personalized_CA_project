@@ -1,209 +1,317 @@
-/* =========================================================
-   DASHBOARD 2: INDIVIDUAL (WEALTH THEME - EMERALD)
-   ========================================================= */
+/* --- THEME: WALL STREET PRO (MASTER FIXED & SCOPED) --- */
 
-/* --- 1. CORE LAYOUT & SCROLLBAR --- */
-/* 🛑 FIX: Removed ".dashboard-container" so it matches your JS exactly */
-.theme-wealth {
-  /* Background */
-  background: radial-gradient(circle at 80% 20%, #064e3b, #020617 60%) !important;
-  
-  /* Layout Engine */
-  position: fixed !important; 
-  top: 0;
-  left: 0;
-  width: 100vw !important;
-  height: 100vh !important;
-  
-  /* Internal Scrolling */
-  overflow-y: auto !important;
-  overflow-x: hidden !important;
-  
-  /* Flex Flow - This enables the GAP */
-  display: flex !important;
-  flex-direction: column !important;
-  
-  /* Breathing Room */
-  gap: 40px !important; 
-  
-  padding: 30px 40px !important;
-  box-sizing: border-box !important;
-  z-index: 10 !important;
-}
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&family=JetBrains+Mono:wght@400;500;700&display=swap');
 
-/* Custom Emerald Scrollbar */
-.theme-wealth::-webkit-scrollbar {
-  width: 8px !important;
-}
-
-.theme-wealth::-webkit-scrollbar-track {
-  background: #020617 !important; 
-}
-
-.theme-wealth::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #064e3b, #10b981) !important; 
-  border-radius: 4px;
-  border: 1px solid #020617;
-}
-/* Custom Emerald Scrollbar */
-.dashboard-container.theme-wealth::-webkit-scrollbar {
-  width: 8px !important;
-}
-
-.dashboard-container.theme-wealth::-webkit-scrollbar-track {
-  background: #020617 !important; 
-}
-
-.dashboard-container.theme-wealth::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #064e3b, #10b981) !important; 
-  border-radius: 4px;
-  border: 1px solid #020617;
-}
-/* --- 2. GLOBAL COMPONENT STYLING --- */
-/* Green Glass Effect for all Cards, Panels, and Modals */
-.theme-wealth .stat-card,
-.theme-wealth .portfolio-card,
-.theme-wealth .glass-panel,
-.theme-wealth .section-card,
-.theme-wealth .modal-content {
-  background: rgba(6, 78, 59, 0.4) !important;
-  border: 1px solid rgba(16, 185, 129, 0.2) !important;
-  backdrop-filter: blur(20px) !important;
-  border-radius: 20px !important;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4) !important;
-}
-
-/* Text Colors */
-.theme-wealth h2, 
-.theme-wealth h3, 
-.theme-wealth h4, 
-.theme-wealth label,
-.theme-wealth .category-label { 
-  color: #a7f3d0 !important; /* Mint Green */
-}
-
-.theme-wealth .value.green { color: #34d399 !important; }
-.theme-wealth .value.gold { color: #fbbf24 !important; }
-
-
-/* --- 3. INPUTS & FORMS --- */
-/* Input Fields */
-.dashboard-container.theme-wealth input,
-.dashboard-container.theme-wealth select,
-.dashboard-container.theme-wealth textarea {
-  background-color: rgba(2, 44, 34, 0.95) !important;
-  border: 1px solid rgba(16, 185, 129, 0.3) !important;
-  color: #ecfdf5 !important;
-  border-radius: 10px !important;
-}
-
-.dashboard-container.theme-wealth input:focus,
-.dashboard-container.theme-wealth select:focus {
-  border-color: #10b981 !important;
-  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2) !important;
-  outline: none !important;
-}
-
-/* Toggle Buttons (Income/Expense) */
-.dashboard-container.theme-wealth .type-toggle .toggle-btn {
-  background-color: rgba(6, 78, 59, 0.4) !important; /* Inactive */
-  color: #94a3b8 !important;
-  border: 1px solid rgba(16, 185, 129, 0.2) !important;
-  box-shadow: none !important;
-}
-
-.dashboard-container.theme-wealth .type-toggle .toggle-btn.active {
-  background-color: #10b981 !important; /* Active */
-  color: white !important;
-  border-color: #10b981 !important;
-  box-shadow: 0 0 15px rgba(16, 185, 129, 0.4) !important;
-}
-
-/* Category Chips */
-.dashboard-container.theme-wealth .chips-container .chip:not(.active) {
-  background-color: rgba(6, 78, 59, 0.4) !important; 
-  color: #a7f3d0 !important;
-  border: 1px solid rgba(16, 185, 129, 0.2) !important;
-}
-
-.dashboard-container.theme-wealth .chips-container .chip.active {
-  background-color: #10b981 !important;
-  color: white !important;
-  border-color: #10b981 !important;
-  box-shadow: 0 0 10px rgba(16, 185, 129, 0.4) !important;
-}
-
-
-/* --- 4. PORTFOLIO SECTION (Fixed Alignment) --- */
-.theme-wealth .portfolio-card {
-  min-height: 200px !important;
-  height: auto !important;
-  
-  /* Ensure internal content flows correctly */
-  display: flex !important;
-  flex-direction: column !important;
-  justify-content: flex-start !important;
-}
-
-/* 🛑 THE FIX: Align the Header Text & Button properly */
-.theme-wealth .portfolio-header {
-  display: flex !important;
-  justify-content: space-between !important; /* Push text left, button right */
-  align-items: center !important; /* Vertically center them */
-  width: 100% !important;
-  margin-bottom: 20px !important; /* Space below the header */
-  padding-bottom: 10px !important;
-  margin-left: 10px;
-  border-bottom: 1px solid rgba(16, 185, 129, 0.1); /* Optional: nice divider */
-}
-
-.theme-wealth .portfolio-header h3 {
-  margin: 0 !important;
-  font-size: 1.1rem !important;
-  display: flex;
-  align-items: center;
-  gap: 10px; /* Space between icon and text */
-}
-
-/* Transaction Amount Colors */
-.dashboard-container.theme-wealth .item-amount.inc { color: #34d399 !important; } /* Income */
-.dashboard-container.theme-wealth .item-amount.exp { color: #f43f5e !important; } /* Expense */
-
-
-/* --- 5. BUTTONS & ACTIONS --- */
-.theme-wealth .save-btn,
-.theme-wealth .modal-submit-btn,
-.theme-wealth .fab-btn,
-.theme-wealth .add-btn-small {
-  background: linear-gradient(135deg, #10b981, #059669) !important;
-  color: white !important;
-  padding:10px;
-  margin-top: 10px;
-  margin-right: 22px;
-  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3) !important;
-  border: none !important;
-}
-
-.theme-wealth .add-btn-small:hover,
-.theme-wealth .fab-btn:hover {
-  background: #34d399 !important;
-  box-shadow: 0 0 20px rgba(16, 185, 129, 0.6) !important;
-}
-
-
-/* --- 6. UTILITIES --- */
-/* Stats Grid Layout */
-.theme-wealth .stats-grid {
-  display: grid !important;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)) !important;
-  gap: 20px;
+/* 1. MAIN CONTAINER (Force Black Background) */
+.theme-pro-mono {
+  background-color: #050505 !important; /* Deep Matte Black */
+  background-image: none !important; /* Remove any purple gradients */
+  color: #ffffff !important;
+  min-height: 100vh;
   width: 100%;
-  flex-shrink: 0;
+  position: absolute; /* Cover the whole screen */
+  top: 0; 
+  left: 0;
+  padding: 30px;
+  box-sizing: border-box;
+  font-family: 'Inter', sans-serif;
+  overflow-y: auto; /* Enable Page Scrolling */
+  z-index: 10;
 }
 
-/* Asset Icons */
-.theme-wealth .asset-icon {
-  background: rgba(16, 185, 129, 0.2) !important;
-  color: white;
-  border-radius: 50%;
+/* 2. HEADER */
+.theme-pro-mono .pro-header {
+  display: flex; justify-content: space-between; align-items: flex-end;
+  border-bottom: 2px solid #ffffff; padding-bottom: 15px; margin-bottom: 30px;
+  flex-wrap: wrap; gap: 15px;
+}
+.theme-pro-mono .pro-title h1 {
+  font-size: 2rem; font-weight: 800; letter-spacing: 2px; margin: 0;
+  text-transform: uppercase;
+}
+.theme-pro-mono .pro-tag {
+  font-size: 0.7rem; background: #fff; color: #000; padding: 3px 8px;
+  font-weight: 700; margin-left: 15px; display: inline-block; vertical-align: middle;
+}
+.theme-pro-mono .pro-date {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: #888;
+}
+
+/* 3. METRICS GRID */
+.theme-pro-mono .pro-metrics-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px; margin-bottom: 40px;
+}
+.theme-pro-mono .metric-box {
+  border: 1px solid #333; padding: 20px; background: #000;
+}
+.theme-pro-mono .metric-box label {
+  font-size: 0.7rem; color: #666; display: block; margin-bottom: 8px;
+  letter-spacing: 1.5px; font-weight: 600; text-transform: uppercase;
+}
+.theme-pro-mono .metric-val {
+  font-family: 'JetBrains Mono', monospace; font-size: 1.6rem; font-weight: 700; color: #fff;
+}
+
+/* 4. TOOLBAR */
+.theme-pro-mono .pro-toolbar {
+  border-top: 1px solid #222; border-bottom: 1px solid #222;
+  padding: 20px 0; margin-bottom: 30px;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 15px;
+}
+.theme-pro-mono .pro-toolbar label { font-size: 0.8rem; font-weight: 700; letter-spacing: 2px; color: #444; }
+.theme-pro-mono .tool-group { display: flex; gap: 10px; flex-wrap: wrap; }
+
+.theme-pro-mono .pro-btn {
+  background: transparent; border: 1px solid #fff; color: #fff;
+  padding: 10px 20px; font-weight: 700; font-size: 0.8rem; letter-spacing: 1px;
+  cursor: pointer; text-transform: uppercase; transition: all 0.2s;
+}
+.theme-pro-mono .pro-btn:hover { background: #fff; color: #000; }
+
+/* 5. MAIN LAYOUT (Split Screen) */
+.theme-pro-mono .pro-main-layout {
+  display: grid; 
+  grid-template-columns: 2fr 1fr; /* 66% Assets | 33% Logs */
+  gap: 30px;
+  align-items: start;
+}
+
+.theme-pro-mono .pro-panel {
+  border: 1px solid #333; background: #080808; display: flex; flex-direction: column;
+}
+.theme-pro-mono .panel-header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 15px 20px; border-bottom: 1px solid #222; background: #0a0a0a;
+}
+.theme-pro-mono .panel-header h3 { margin: 0; font-size: 0.9rem; letter-spacing: 1.5px; color: #aaa; text-transform: uppercase; }
+
+.theme-pro-mono .pro-btn-small {
+  background: #fff; color: #000; border: none; padding: 5px 10px;
+  font-size: 0.7rem; font-weight: 700; cursor: pointer;
+}
+
+/* 6. TABLE STYLES */
+.theme-pro-mono .pro-table { width: 100%; border-collapse: collapse; }
+.theme-pro-mono .pro-table th {
+  text-align: left; font-size: 0.7rem; color: #555; padding: 15px 20px;
+  border-bottom: 1px solid #222;
+}
+.theme-pro-mono .pro-table td {
+  padding: 15px 20px; border-bottom: 1px solid #111; font-size: 0.9rem; color: #eee;
+}
+.theme-pro-mono .asset-name { font-weight: 600; }
+.theme-pro-mono .asset-type { font-size: 0.65rem; color: #666; text-transform: uppercase; }
+.theme-pro-mono .mono-num { font-family: 'JetBrains Mono', monospace; }
+.theme-pro-mono .pos { color: #fff; } 
+.theme-pro-mono .neg { color: #888; }
+
+/* 7. TRANSACTION LOG FIXES */
+.theme-pro-mono .transaction-wrapper-mono { padding: 0; }
+
+/* Force vertical stacking to prevent squishing */
+.theme-pro-mono .transaction-wrapper-mono > div {
+  display: flex !important;
+  flex-direction: column !important; 
+  gap: 0 !important;
+}
+
+/* Override the blue cards to match the black theme */
+.theme-pro-mono .transaction-wrapper-mono .activity-log-card, 
+.theme-pro-mono .transaction-wrapper-mono .breakdown-card {
+  background: transparent !important;
+  border: none !important;
+  border-bottom: 1px solid #222 !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  width: 100% !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+/* Fix text colors inside the log */
+.theme-pro-mono .transaction-wrapper-mono h3, 
+.theme-pro-mono .transaction-wrapper-mono h4 { display: none !important; }
+.theme-pro-mono .transaction-wrapper-mono .desc { color: #fff !important; font-weight: 600 !important; }
+.theme-pro-mono .transaction-wrapper-mono .date { color: #555 !important; }
+.theme-pro-mono .transaction-wrapper-mono .amount { color: #fff !important; font-family: 'JetBrains Mono' !important; }
+
+/* Hide floating buttons inside the ledger */
+.theme-pro-mono .transaction-wrapper-mono .fab-btn,
+.theme-pro-mono .transaction-wrapper-mono .add-btn-round { 
+  display: none !important; 
+}
+
+
+/* =========================================================
+   8. AGGRESSIVE MODAL FIXES (Add Transaction Modal)
+   ========================================================= */
+.theme-pro-mono .modal-overlay { background: rgba(0,0,0,0.9) !important; position: fixed; z-index: 100; }
+
+.theme-pro-mono .modal-theme-wealth {
+  background: #0a0a0a !important; /* Pure Black */
+  border: 1px solid #333 !important;
+  border-radius: 0 !important; /* Sharp corners */
+  box-shadow: 0 15px 40px rgba(0,0,0,0.9) !important;
+}
+
+.theme-pro-mono .modal-theme-wealth .modal-header h2 {
+  font-family: 'JetBrains Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #fff !important;
+}
+
+.theme-pro-mono .modal-theme-wealth .type-toggle {
+  background: #000 !important;
+  border: 1px solid #222 !important;
+  border-radius: 0 !important;
+}
+
+.theme-pro-mono .modal-theme-wealth .toggle-btn {
+  border-radius: 0 !important;
+  color: #888 !important;
+}
+
+.theme-pro-mono .modal-theme-wealth .toggle-btn.active.income,
+.theme-pro-mono .modal-theme-wealth .toggle-btn.active.expense {
+  background: #fff !important;
+  color: #000 !important;
+}
+
+/* KILLS THE BLUE BACKGROUND ON INPUTS */
+.theme-pro-mono .modal-theme-wealth .money-input,
+.theme-pro-mono .modal-theme-wealth .text-input {
+  background-color: #000 !important; 
+  background-image: none !important;
+  border: 1px solid #333 !important;
+  color: #fff !important;
+  border-radius: 0 !important;
+}
+
+.theme-pro-mono .modal-theme-wealth .money-input {
+  border: none !important;
+  border-bottom: 2px solid #555 !important;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* CHIPS (Categories) */
+.theme-pro-mono .modal-theme-wealth .chip {
+  background: #000 !important;
+  border: 1px solid #333 !important;
+  border-radius: 0 !important;
+  color: #aaa !important;
+}
+
+.theme-pro-mono .modal-theme-wealth .chip:hover { border-color: #fff !important; }
+.theme-pro-mono .modal-theme-wealth .chip.active {
+  background: #fff !important;
+  color: #000 !important;
+  border-color: #fff !important;
+  font-weight: 800 !important;
+}
+
+/* KILLS THE BLUE GRADIENT ON SAVE BUTTON */
+.theme-pro-mono .modal-theme-wealth .save-btn {
+  background-color: #fff !important;
+  background-image: none !important; 
+  color: #000 !important;
+  border-radius: 0 !important;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-weight: 800 !important;
+}
+
+.theme-pro-mono .modal-theme-wealth .save-btn:hover { background-color: #ccc !important; }
+
+/* 9. LOGOUT BUTTON */
+.theme-pro-mono .pro-logout-btn {
+  background: transparent; border: 1px solid #f43f5e; color: #f43f5e;
+  padding: 5px 12px; font-family: 'JetBrains Mono', monospace; font-size: 0.7rem;
+  cursor: pointer; text-transform: uppercase; font-weight: 700;
+}
+.theme-pro-mono .pro-logout-btn:hover { background: #f43f5e; color: #fff; }
+
+@media (max-width: 900px) {
+  .theme-pro-mono .pro-main-layout { grid-template-columns: 1fr; }
+}
+
+/* =========================================================
+   10. TRANSACTION HISTORY OVERRIDES (PIE CHART FIX)
+   ========================================================= */
+.theme-pro-mono .history-compact-container {
+  display: block;
+  width: 100%;
+}
+
+/* Force the Activity Log and Pie Chart to stack vertically */
+.theme-pro-mono .theme-executive-override.history-grid-container {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 20px !important;
+    width: 100% !important;
+}
+
+/* Strip away the blue student theme when inside the Executive View */
+.theme-pro-mono .theme-executive-override .glass-panel {
+  background: #080808 !important; 
+  border: 1px solid #222 !important;
+  box-shadow: none !important;
+  border-radius: 0 !important; 
+  width: 100% !important;
+}
+
+.theme-pro-mono .theme-executive-override .panel-header {
+  border-bottom: 1px solid #222 !important;
+  padding: 15px 20px !important;
+}
+
+.theme-pro-mono .theme-executive-override .glass-item {
+  background: transparent !important;
+  border: none !important;
+  border-bottom: 1px solid #111 !important;
+  border-radius: 0 !important;
+  padding: 15px 20px !important;
+  margin-bottom: 0 !important;
+}
+
+.theme-pro-mono .theme-executive-override .glass-item:hover { background: #111 !important; }
+.theme-pro-mono .theme-executive-override .item-left h4 { color: #fff !important; font-family: 'Inter', sans-serif; font-weight: 600; }
+.theme-pro-mono .theme-executive-override .item-left p { color: #666 !important; font-size: 0.75rem; text-transform: uppercase; }
+.theme-pro-mono .theme-executive-override .item-amount { font-family: 'JetBrains Mono', monospace !important; }
+.theme-pro-mono .theme-executive-override .panel-footer { background: #050505 !important; border-top: 1px solid #222 !important; border-radius: 0 !important; }
+.theme-pro-mono .theme-executive-override .total-block { background: transparent !important; }
+.theme-pro-mono .theme-executive-override .total-label { color: #666 !important; letter-spacing: 1px; }
+.theme-pro-mono .theme-executive-override .modern-select { background: #111 !important; border: 1px solid #333 !important; color: #fff !important; }
+
+/* Restyle the Pie Chart Panel to match the black theme */
+.theme-pro-mono .theme-executive-override .breakdown-panel {
+    background: #080808 !important;
+    border: 1px solid #222 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+}
+
+/* =========================================================
+   11. GLOBAL FLOATING BUTTON FIX 
+   ========================================================= */
+/* Turns the floating blue '+' button into a sharp black/white button ONLY when in Wall Street Pro view */
+.theme-pro-mono .add-btn-round, 
+.theme-pro-mono .fab-btn, 
+.theme-pro-mono .fab-container .toggle {
+    background-color: #fff !important;
+    background-image: none !important; 
+    color: #000 !important;
+    border-radius: 0 !important; /* Square shape */
+    border: 1px solid #fff !important;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 800 !important;
+    box-shadow: 0 4px 15px rgba(255,255,255,0.2) !important;
+}
+
+.theme-pro-mono .add-btn-round:hover, 
+.theme-pro-mono .fab-btn:hover {
+    background-color: #ccc !important;
+    color: #000 !important;
 }

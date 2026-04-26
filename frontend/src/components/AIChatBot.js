@@ -71,7 +71,6 @@ function AIChatBot({ dashboardBalance, dashboardIncome, dashboardExpense }) {
     if (isOpen) fetchData();
   }, [isOpen, dashboardBalance]); 
 
-  // 🛡️ THE NEW "DEMO-PROOF" SEND FUNCTION
   const handleSend = async () => {
     if (!input.trim()) return;
 

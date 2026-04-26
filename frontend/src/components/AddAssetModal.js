@@ -1,12 +1,17 @@
 import React, { useState } from 'react';
-import { db, auth } from '../firebaseConfig'; // Go up one level to src/ to find firebaseConfig
-import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
-import './AddTransaction.css'; // Sits in the same folder
+import { db, auth } from '../firebaseConfig';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import './AddTransaction.css'; // We reuse the styles
+import AIReceiptScanner from './AIReceiptScanner'; // Adjust path if needed (e.g., '../AIReceiptScanner')
 
-function AddAssetModal({ isOpen, onClose, refreshData }) {
+function AddAssetModal({ isOpen, onClose }) {
   const [name, setName] = useState('');
-  const [value, setValue] = useState('');
   const [type, setType] = useState('Stock');
+  
+  // 🟢 State for Invested vs Current value
+  const [investedValue, setInvestedValue] = useState('');
+  const [currentValue, setCurrentValue] = useState('');
+  
   const [loading, setLoading] = useState(false);
 
   if (!isOpen) return null;
@@ -16,36 +21,51 @@ function AddAssetModal({ isOpen, onClose, refreshData }) {
     setLoading(true);
 
     try {
-      const userId = auth.currentUser.uid;
-      
-      // Save to a specific sub-collection "assets"
-      await addDoc(collection(db, "users", userId, "assets"), {
-        name: name,
-        value: parseFloat(value),
-        type: type,
-        date: serverTimestamp()
-      });
-
-      refreshData(); // Refresh the dashboard
-      onClose(); // Close modal
-      setName('');
-      setValue('');
-
+      const user = auth.currentUser;
+      if (user) {
+        await addDoc(collection(db, "users", user.uid, "assets"), {
+          name: name,
+          type: type,
+          // 🟢 Saving both values to Firestore
+          invested: parseFloat(investedValue),
+          value: parseFloat(currentValue),
+          date: serverTimestamp()
+        });
+        
+        // Reset form
+        setName('');
+        setInvestedValue('');
+        setCurrentValue('');
+        setType('Stock');
+        setLoading(false);
+        onClose();
+      }
     } catch (error) {
       console.error("Error adding asset:", error);
-    } finally {
       setLoading(false);
     }
   };
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: '400px' }}>
+      {/* Added 'modal-theme-wealth' to force Green Theme */}
+      <div className="modal-content modal-theme-wealth" onClick={(e) => e.stopPropagation()}>
         
         <div className="modal-header">
-          <h2>Add Asset 🏛️</h2>
+          <h2>+ Add Asset</h2>
           <button className="close-btn" onClick={onClose}>&times;</button>
         </div>
+
+        {/* 🤖 AI INVESTMENT SCANNER */}
+        <AIReceiptScanner 
+            onScanSuccess={(aiData) => {
+                // Auto-fill the asset form with the AI data!
+                setName(aiData.merchant || "Scanned Asset");
+                // For a new receipt, invested amount and current value are usually the same
+                setInvestedValue(aiData.total || "");
+                setCurrentValue(aiData.total || "");
+            }} 
+        />
 
         <form onSubmit={handleSubmit}>
           
@@ -55,47 +75,59 @@ function AddAssetModal({ isOpen, onClose, refreshData }) {
             <input 
               type="text" 
               className="text-input" 
-              placeholder="e.g. Tesla Stock, Gold Ring" 
-              value={name} 
-              onChange={e => setName(e.target.value)} 
-              required 
-              autoFocus 
+              placeholder="e.g. Reliance, Gold Bond" 
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+              autoFocus
             />
           </div>
 
-          {/* Value */}
+          {/* Asset Type */}
           <div className="input-group">
-            <label>Current Value (₹)</label>
-            <input 
-              type="number" 
-              className="money-input" 
-              placeholder="0" 
-              value={value} 
-              onChange={e => setValue(e.target.value)} 
-              required 
-            />
+            <label>Type</label>
+            <select 
+              className="text-input" 
+              value={type} 
+              onChange={(e) => setType(e.target.value)}
+            >
+              <option value="Stock">Stock / Mutual Fund</option>
+              <option value="Gold">Gold / Precious Metal</option>
+              <option value="Crypto">Crypto / Digital</option>
+              <option value="Real Estate">Real Estate</option>
+            </select>
           </div>
 
-          {/* Type Selector (Chips) */}
-          <div className="category-section">
-            <span className="category-label">Type</span>
-            <div className="chips-container">
-              {['Stock', 'Mutual Fund', 'Gold', 'Real Estate', 'Crypto'].map(t => (
-                <div 
-                  key={t} 
-                  className={`chip ${type === t ? 'active' : ''}`} 
-                  onClick={() => setType(t)}
-                >
-                  {t}
-                </div>
-              ))}
+          {/* 🟢 Invested vs Current Value Row */}
+          <div style={{ display: 'flex', gap: '15px' }}>
+            <div className="input-group">
+              <label>Invested Amount (₹)</label>
+              <input 
+                type="number" 
+                className="money-input" 
+                placeholder="5000" 
+                value={investedValue}
+                onChange={(e) => setInvestedValue(e.target.value)}
+                required
+              />
+            </div>
+
+            <div className="input-group">
+              <label>Current Value (₹)</label>
+              <input 
+                type="number" 
+                className="money-input" 
+                placeholder="5500" 
+                value={currentValue}
+                onChange={(e) => setCurrentValue(e.target.value)}
+                required
+              />
             </div>
           </div>
 
           <button type="submit" className="save-btn" disabled={loading}>
             {loading ? 'Adding...' : 'Add to Portfolio'}
           </button>
-
         </form>
       </div>
     </div>

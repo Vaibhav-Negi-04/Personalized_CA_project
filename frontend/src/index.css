@@ -26,6 +26,7 @@ body {
   margin: 0;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   -webkit-font-smoothing: antialiased;
+  color:black;
   
   /* Apply the Galaxy Background Globally */
   background: var(--bg-galaxy);

@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useTransactions } from '../hooks/useTransactions'; 
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from 'recharts';
-import './History.css'; // Make sure this is imported
+import './History.css'; 
 import useSoundFX from '../hooks/useSoundFX'; 
 
 // --- CSV EXPORT FUNCTION ---
@@ -29,7 +29,7 @@ const downloadCSV = (data) => {
 
 const COLORS = ['#06b6d4', '#8b5cf6', '#10b981', '#f43f5e', '#f59e0b', '#6366f1'];
 
-function TransactionHistory() {
+function TransactionHistory({ compactMode = false, theme = 'student' }) {
   const { transactions, loading } = useTransactions();
   const playSound = useSoundFX();
   
@@ -109,15 +109,19 @@ function TransactionHistory() {
 
   if (loading) return <p style={{color: '#94a3b8'}}>Loading history...</p>;
 
+  // 🆕 DYNAMIC CLASS ASSIGNMENT based on theme prop
+  const containerClass = compactMode ? "history-compact-container" : "history-grid-container";
+  const themeClass = theme === 'executive' ? 'theme-executive-override' : '';
+
   return (
-    <div className="history-grid-container">
+    <div className={`${containerClass} ${themeClass}`}>
       
       {/* --- LEFT SIDE: ACTIVITY LOG --- */}
-      <div className="glass-panel"> 
+      <div className="glass-panel main-ledger-panel"> 
         
         {/* Header */}
         <div className="panel-header">
-          <div className="panel-title">
+          <div className="panel-title" style={{ color: theme === 'executive' ? '#fff' : '' }}>
             Activity Log
             <button className="download-btn-glass" onClick={() => downloadCSV(filteredTransactions)} title="Download CSV">
               📥
@@ -175,48 +179,37 @@ function TransactionHistory() {
         </div>
       </div>
 
-      {/* --- RIGHT SIDE: PIE CHART --- */}
-      <div className="glass-panel">
-        <div className="panel-header">
-           <span className="panel-title">Breakdown ({selectedYear})</span>
+      {/* --- RIGHT SIDE: PIE CHART (HIDDEN IN COMPACT MODE) --- */}
+      {!compactMode && (
+        <div className="glass-panel breakdown-panel">
+          <div className="panel-header">
+             <span className="panel-title">Breakdown ({selectedYear})</span>
+          </div>
+          
+          <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            {chartData.length > 0 ? (
+              <ResponsiveContainer width="100%" height={300}>
+                <PieChart>
+                  <Pie 
+                    data={chartData} cx="50%" cy="50%" innerRadius={70} outerRadius={90} paddingAngle={5} dataKey="value" stroke="none"
+                  >
+                    {chartData.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
+                  </Pie>
+                  <Tooltip 
+                    contentStyle={{ backgroundColor: 'rgba(15, 23, 42, 0.9)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', boxShadow: '0 4px 20px rgba(0,0,0,0.5)' }} 
+                    itemStyle={{color: 'white'}} 
+                  />
+                  <Legend iconType="circle" />
+                </PieChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="empty-glass">
+                 <p>No expense data.</p>
+              </div>
+            )}
+          </div>
         </div>
-        
-        <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          {chartData.length > 0 ? (
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie 
-                  data={chartData} 
-                  cx="50%" 
-                  cy="50%" 
-                  innerRadius={70} 
-                  outerRadius={90} 
-                  paddingAngle={5} 
-                  dataKey="value"
-                  stroke="none"
-                >
-                  {chartData.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
-                </Pie>
-                <Tooltip 
-                  contentStyle={{
-                    backgroundColor: 'rgba(15, 23, 42, 0.9)', 
-                    border: '1px solid rgba(255,255,255,0.1)', 
-                    borderRadius: '12px',
-                    boxShadow: '0 4px 20px rgba(0,0,0,0.5)'
-                  }} 
-                  itemStyle={{color: 'white'}} 
-                />
-                <Legend iconType="circle" />
-              </PieChart>
-            </ResponsiveContainer>
-          ) : (
-            <div className="empty-glass">
-               <p>No expense data.</p>
-            </div>
-          )}
-        </div>
-      </div>
-
+      )}
     </div>
   );
 }

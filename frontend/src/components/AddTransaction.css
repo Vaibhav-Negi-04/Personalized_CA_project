@@ -155,3 +155,77 @@
   from { transform: translateY(50px); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
 }
+/* =========================================================
+   EXECUTIVE THEME OVERRIDES (INDIVIDUAL VIEW) 
+   ========================================================= */
+.modal-content.modal-theme-wealth {
+  background: #0a0a0a !important; /* Pure Black */
+  border: 1px solid #333 !important;
+  border-radius: 0 !important; /* Sharp professional corners */
+  box-shadow: 0 15px 40px rgba(0,0,0,0.9) !important;
+}
+
+.modal-theme-wealth .modal-header h2 {
+  font-family: 'JetBrains Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.modal-theme-wealth .type-toggle {
+  background: #000 !important;
+  border: 1px solid #222 !important;
+  border-radius: 0 !important;
+}
+
+.modal-theme-wealth .toggle-btn {
+  border-radius: 0 !important;
+}
+
+/* Make active Income/Expense toggles stark white and black */
+.modal-theme-wealth .toggle-btn.active.income,
+.modal-theme-wealth .toggle-btn.active.expense {
+  background: #fff !important;
+  color: #000 !important;
+}
+
+.modal-theme-wealth .money-input {
+  border-bottom: 2px solid #444 !important;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.modal-theme-wealth .text-input {
+  background: #000 !important;
+  border: 1px solid #333 !important;
+  border-radius: 0 !important;
+}
+
+.modal-theme-wealth .chip {
+  background: #000 !important;
+  border: 1px solid #333 !important;
+  border-radius: 0 !important;
+}
+
+.modal-theme-wealth .chip:hover {
+  border-color: #fff !important;
+}
+
+/* Active chips become solid white */
+.modal-theme-wealth .chip.active {
+  background: #fff !important;
+  color: #000 !important;
+  border-color: #fff !important;
+  font-weight: 800 !important;
+}
+
+/* Remove gradient, make Save button solid white */
+.modal-theme-wealth .save-btn {
+  background: #fff !important;
+  color: #000 !important;
+  border-radius: 0 !important;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.modal-theme-wealth .save-btn:hover {
+  background: #ccc !important;
+}

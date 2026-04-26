@@ -14,6 +14,7 @@ import {
 
 // --- COMPONENTS ---
 import TransactionHistory from '../TransactionHistory';
+import AIInsightBox from '../AIInsightBox';
 import GamificationCard from '../GamificationCard';
 import ReportCardModal from '../ReportCardModal';
 import SquadTabs from '../SquadTabs';
@@ -24,8 +25,9 @@ import QuestCard from '../QuestCard';
 import ExpenseHeatmap from '../ExpenseHeatmap';
 import VibeCheckCard from '../VibeCheckCard';
 import CryoChamber from '../CryoChamber'; 
+import AIReceiptScanner from '../AIReceiptScanner';
 
-// 👇 ACCEPT THE PROP 'onUpdateFinance'
+//  ACCEPT THE PROP 'onUpdateFinance'
 function StudentView({ onUpdateFinance }) { 
   const { currentUser } = useAuth();
   
@@ -80,7 +82,7 @@ function StudentView({ onUpdateFinance }) {
   const rawBalance = income - expenses;
   const availableBalance = Math.max(0, rawBalance - totalAllocatedToGoals);
 
-  // --- 📢 3. REPORT DATA TO PARENT DASHBOARD (For AI Bot) ---
+  // ---  3. REPORT DATA TO PARENT DASHBOARD (For AI Bot) ---
   useEffect(() => {
     if (onUpdateFinance) {
       onUpdateFinance({
@@ -146,20 +148,37 @@ function StudentView({ onUpdateFinance }) {
     } catch (error) { console.error("Error updating goal:", error); }
   };
 
+  // 🆕 AI SCANNER HANDLER FOR STUDENT VIEW
+  const handleStudentScanSuccess = async (aiData) => {
+    try {
+      await addDoc(collection(db, "users", currentUser.uid, "transactions"), {
+        desc: aiData.merchant || "Scanned Bill",
+        amount: Number(aiData.total) || 0,
+        type: 'expense',
+        category: 'Misc',
+        date: new Date() 
+      });
+      alert("Expense logged successfully via AI!");
+    } catch(e) {
+      console.error(e);
+      alert("Error saving expense to Firebase.");
+    }
+  };
+
   return (
     <div className="dashboard-layout">
       
-      {/* 🟢 ZONE 1: THE HUD (Identity & Status) */}
+      {/* ZONE 1: THE HUD (Identity & Status) */}
       <div className="section-hud" style={{ marginBottom: '20px' }}>
         <GamificationCard transactions={transactions} income={income} expense={expenses} goals={goals} />
       </div>
 
-      {/* ⚡ ZONE 2: VITAL SIGNS (Immediate Health) */}
+      {/* ZONE 2: VITAL SIGNS (Immediate Health) */}
       <div className="stats-grid" style={{ marginBottom: '20px' }}>
         {/* Balance Card */}
         <div className="stat-card">
           <h3>Available Balance</h3>
-          {/* 👻 GHOST MODE: Blur the main balance */}
+          {/* GHOST MODE: Blur the main balance */}
           <div className="value green privacy-blur">₹{availableBalance}</div>
           <p className="sub-text" style={{fontSize: '0.7rem', opacity: 0.7}}>
             (After <span className="privacy-blur">₹{totalAllocatedToGoals}</span> saved)
@@ -175,7 +194,7 @@ function StudentView({ onUpdateFinance }) {
             </span>
           </div>
           <div className="value" style={{ color: isOverLimit ? '#f43f5e' : 'white' }}>
-            {/* 👻 GHOST MODE: Blur Spending and Limit */}
+            {/* GHOST MODE: Blur Spending and Limit */}
             <span className="privacy-blur">₹{spentToday}</span> <span style={{fontSize: '1rem', color:'#64748b'}}>/ <span className="privacy-blur">₹{dailyLimit}</span></span>
           </div>
           <div style={{ width: '100%', height: '6px', background: '#334155', borderRadius: '4px', marginTop: '10px' }}>
@@ -210,7 +229,10 @@ function StudentView({ onUpdateFinance }) {
       </div>
       {showReport && <ReportCardModal transactions={transactions} onClose={() => setShowReport(false)} />}
 
-
+{/* 🔮 ZONE 2.5: THE AI ORACLE */}
+      <div style={{ marginBottom: '30px' }}>
+          <AIInsightBox balance={availableBalance} transactions={transactions} />
+      </div>
       {/* 🧠 ZONE 3: ACTIVE INTELLIGENCE (Vibe & Quests) */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px', marginBottom: '40px' }}>
          <div style={{ flex: 1 }}>
@@ -228,6 +250,15 @@ function StudentView({ onUpdateFinance }) {
         <PredictionCard transactions={transactions} />
       </div>
 
+      {/* 🤖 ZONE 4.5: QUICK AI SCANNER (New Feature) */}
+      <div style={{ marginBottom: '40px' }}>
+        <div className="section-header">
+          <h3>🤖 Quick Scan Expense</h3>
+        </div>
+        <p style={{color: '#94a3b8', fontSize: '0.85rem', marginBottom: '10px'}}>Upload a picture of a receipt and the AI will instantly log it as an expense!</p>
+        <AIReceiptScanner onScanSuccess={handleStudentScanSuccess} />
+      </div>
+
       {/* 📊 ZONE 5: THE DATA STREAM (History) */}
       <div style={{ marginBottom: '40px' }}>
         <ExpenseHeatmap transactions={transactions} />
@@ -236,12 +267,12 @@ function StudentView({ onUpdateFinance }) {
         </div>
       </div>
 
-      {/* 🔒 ZONE 6: THE VAULTS (Commitments) */}
+      {/* 🔒 ZONE 6: THE VAULTS  */}
       <div style={{ marginBottom: '40px' }}>
         <SubscriptionVault />
         <SquadTabs />
       </div>
-        {/* ❄️ ZONE 3.5: CRYO STASIS (New Feature) */}
+        {/* ❄️ ZONE 3.5: CRYO STASIS */}
       <div style={{ marginBottom: '40px' }}>
          <CryoChamber />
       </div>

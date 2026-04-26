@@ -1,53 +1,40 @@
 import React from 'react';
-import './Dashboard.css';
+import './Dashboard.css'; // or Dashboard2.css, wherever you keep the student styles
 
 function ReportCardModal({ transactions, onClose }) {
-  // 1. Filter Transactions for THIS MONTH
+  // ... (Logic stays exactly the same) ...
   const now = new Date();
   const currentMonthTrans = transactions.filter(t => {
     const tDate = t.date?.toDate ? t.date.toDate() : new Date(t.date);
-    return (
-      tDate.getMonth() === now.getMonth() &&
-      tDate.getFullYear() === now.getFullYear()
-    );
+    return tDate.getMonth() === now.getMonth() && tDate.getFullYear() === now.getFullYear();
   });
 
-  // 2. Calculate Stats
-  const income = currentMonthTrans
-    .filter(t => t.type === 'income')
-    .reduce((acc, t) => acc + Number(t.amount), 0);
-    
-  const expense = currentMonthTrans
-    .filter(t => t.type === 'expense')
-    .reduce((acc, t) => acc + Number(t.amount), 0);
-
+  const income = currentMonthTrans.filter(t => t.type === 'income').reduce((acc, t) => acc + Number(t.amount), 0);
+  const expense = currentMonthTrans.filter(t => t.type === 'expense').reduce((acc, t) => acc + Number(t.amount), 0);
   const savings = income - expense;
   const savingsRate = income > 0 ? (savings / income) * 100 : 0;
 
-  // 3. Determine Grade & Color
   let grade = "F";
-  let gradeColor = "#ef4444"; // Red
-  let remark = "Critical Condition. Stop Spending!";
+  let gradeColor = "#ef4444"; 
+  let remark = "Critical Condition.";
 
-  if (savingsRate >= 0) { grade = "C"; gradeColor = "#f59e0b"; remark = "You survived. barely."; } // Orange
-  if (savingsRate >= 10) { grade = "B"; gradeColor = "#3b82f6"; remark = "Decent. You have some savings."; } // Blue
-  if (savingsRate >= 30) { grade = "A"; gradeColor = "#10b981"; remark = "Excellent! Great discipline."; } // Green
-  if (savingsRate >= 50) { grade = "S"; gradeColor = "#facc15"; remark = "LEGENDARY. FINANCIAL GOD."; } // Gold
+  if (savingsRate >= 0) { grade = "C"; gradeColor = "#f59e0b"; remark = "You survived."; }
+  if (savingsRate >= 10) { grade = "B"; gradeColor = "#3b82f6"; remark = "Decent savings."; }
+  if (savingsRate >= 30) { grade = "A"; gradeColor = "#10b981"; remark = "Excellent!"; }
+  if (savingsRate >= 50) { grade = "S"; gradeColor = "#facc15"; remark = "LEGENDARY."; }
 
-  // Month Name
   const monthName = now.toLocaleString('default', { month: 'long' });
 
   return (
-    <div className="report-overlay" onClick={onClose}>
-      <div className="report-card" onClick={e => e.stopPropagation()}>
+    // 👇 CHANGED CLASS NAMES HERE
+    <div className="gamified-overlay" onClick={onClose}>
+      <div className="gamified-card" onClick={e => e.stopPropagation()}>
         
-        {/* Header */}
         <div className="report-header">
           <h2>MONTHLY EVALUATION</h2>
           <span className="report-date">{monthName} {now.getFullYear()}</span>
         </div>
 
-        {/* The Big Grade Stamp */}
         <div className="grade-container">
           <div className="grade-stamp" style={{ borderColor: gradeColor, color: gradeColor }}>
             {grade}
@@ -55,7 +42,6 @@ function ReportCardModal({ transactions, onClose }) {
           <p className="grade-remark" style={{ color: gradeColor }}>{remark}</p>
         </div>
 
-        {/* Stats Grid */}
         <div className="report-stats">
           <div className="r-stat-row">
             <span>Total Earnings</span>
