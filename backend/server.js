@@ -1,7 +1,11 @@
-// Import necessary libraries
+// backend/server.js
 const express = require('express');
 const cors = require('cors');
 const admin = require('firebase-admin');
+const multer = require('multer'); // For file uploads
+const { spawn } = require('child_process'); // To run Python
+const path = require('path');
+const fs = require('fs');
 
 // --- SETUP ---
 
@@ -13,49 +17,95 @@ admin.initializeApp({
   credential: admin.credential.cert(serviceAccount)
 });
 
-// Create an instance of an Express application
 const app = express();
 
 // Configure middleware
-app.use(cors()); // Enable Cross-Origin Resource Sharing
-app.use(express.json()); // Enable parsing of JSON request bodies
+app.use(cors()); 
+app.use(express.json()); 
 
+// --- FILE UPLOAD SETUP ---
+// This ensures the 'uploads' folder exists so the server doesn't error out
+const uploadDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadDir)){
+    fs.mkdirSync(uploadDir);
+}
 
-// Test route to ensure the server is running
+const upload = multer({ dest: 'uploads/' });
+
+// --- ROUTES ---
+
+// Test route
 app.get('/', (req, res) => {
-  res.send('Hello from the Personalized CA backend!');
+  res.send('Hello from the Personalized CA backend with Analytics!');
 });
 
 /**
- * API Endpoint for User Registration (Email/Password)
- * Expects: { email, password, name, userType } in the request body
+ * API Endpoint: Automated Data Analytics (The "GitHub" Replication)
+ * This takes a CSV file and sends it to our Python engine
+ */
+app.post('/api/analytics/upload', upload.single('file'), (req, res) => {
+    if (!req.file) return res.status(400).send({ message: 'No file uploaded.' });
+
+    const filePath = req.file.path;
+
+    // 1. Call the Python script (Make sure analytics/auto_analyzer.py exists!)
+    const pythonProcess = spawn('python', [
+        path.join(__dirname, '../analytics/auto_analyzer.py'),
+        filePath
+    ]);
+
+    let rawData = '';
+
+    // 2. Collect data from Python
+    pythonProcess.stdout.on('data', (data) => {
+        rawData += data.toString();
+    });
+
+    // 3. Handle errors from Python
+    pythonProcess.stderr.on('data', (data) => {
+        console.error(`Python Error: ${data}`);
+    });
+
+    // 4. When Python is finished, send results to React
+    pythonProcess.on('close', (code) => {
+        // Clean up: Delete the temp file from the uploads folder
+        if (fs.existsSync(filePath)) {
+            fs.unlinkSync(filePath);
+        }
+        
+        try {
+            const result = JSON.parse(rawData);
+            res.json(result);
+        } catch (e) {
+            res.status(500).json({ 
+                error: "Analysis failed", 
+                message: "Python script did not return valid JSON. Check your Python code." 
+            });
+        }
+    });
+});
+
+/**
+ * API Endpoint for User Registration
  */
 app.post('/api/auth/register', async (req, res) => {
   try {
     const { email, password, name, userType } = req.body;
-
-    // 1. Create the user in Firebase Authentication
     const userRecord = await admin.auth().createUser({
       email: email,
       password: password,
       displayName: name,
     });
 
-    // 2. Create the user profile in Firestore Database
-    // We use the UID from the auth record as the document ID
     await admin.firestore().collection('users').doc(userRecord.uid).set({
       name: name,
       email: email,
-      userType: userType, // 'Student', 'Individual', or 'Business'
+      userType: userType, 
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
     });
 
-    console.log(`Successfully created new user: ${name} (${userRecord.uid})`);
     res.status(201).send({ uid: userRecord.uid, message: 'User created successfully!' });
-
   } catch (error) {
-    console.error('Error creating user:', error.message);
-    // Handle specific errors, like email already in use
     if (error.code === 'auth/email-already-exists') {
         return res.status(409).send({ message: 'Email is already in use.' });
     }
@@ -63,38 +113,31 @@ app.post('/api/auth/register', async (req, res) => {
   }
 });
 
-
 /**
- * API Endpoint for Handling Google Sign-In
- * This is a "sign-up or sign-in" endpoint.
+ * API Endpoint for Google Sign-In
  */
 app.post('/api/auth/google', async (req, res) => {
     try {
         const { token, userType } = req.body;
-
-        // 1. Verify the ID token sent from the frontend
         const decodedToken = await admin.auth().verifyIdToken(token);
         const { uid, name, email, picture } = decodedToken;
-        // 2. Check if the user already exists in Firestore
+
         const userRef = admin.firestore().collection('users').doc(uid);
         const userDoc = await userRef.get();
+
         if (!userDoc.exists) {
             await userRef.set({
                 name: name || 'Google User',
                 email: email,
                 userType: userType || 'Student', 
-                photoURL: picture || '', //
+                photoURL: picture || '', 
                 createdAt: admin.firestore.FieldValue.serverTimestamp(),
             });
-            console.log(`New Google User Created: ${name} (${uid})`);
             res.status(201).send({ uid, message: 'User profile created successfully.' });
         } else {
-            console.log(`User already exists, logging in: ${name} (${uid})`);
             res.status(200).send({ uid, message: 'User logged in successfully.' });
         }
-
     } catch (error) {
-        console.error('Error with Google Sign-In:', error.message);
         res.status(500).send({ message: 'Error with Google Sign-In.', error: error.message });
     }
 });

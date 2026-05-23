@@ -5,8 +5,9 @@ import { useAuth } from '../../context/AuthContext';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import '../../components/Dashboard3.css'; 
-import AIReceiptScanner from '../AIReceiptScanner'; // Make sure this path is correct for your folder structure!
+import AIReceiptScanner from '../AIReceiptScanner'; 
 import AIInsightBox from '../AIInsightBox';
+import BusinessPredictionCard from '../BusinessPredictionCard'; 
 
 // --- HELPER FUNCTIONS ---
 const formatCurrency = (val) => {
@@ -62,7 +63,6 @@ const SimplePieChart = ({ data, size = 200, hollow = false }) => {
     );
 };
 
-// 🆕 NEW 7-DAY BAR CHART
 const SimpleBarChart = ({ ledger }) => {
     const chartData = useMemo(() => {
         const days = Array.from({length: 7}, (_, i) => {
@@ -118,12 +118,15 @@ function BusinessView({ onLogout, onUpdateFinance }) {
     const [isEditingName, setIsEditingName] = useState(false); 
     const [showHelp, setShowHelp] = useState(false); 
 
-    // 🆕 CASHIER MODE STATE
     const [isCashierMode, setIsCashierMode] = useState(false);
 
     const [openingBalance, setOpeningBalance] = useState(0);
     const [expenses, setExpenses] = useState(0); 
     const [employees, setEmployees] = useState([]);
+    
+    // 🌟 Asset Portfolio State
+    const [assets, setAssets] = useState([]); 
+    
     const [empInput, setEmpInput] = useState({ name: '', salary: '', designation: '' });
     const [investInput, setInvestInput] = useState({ name: '', cost: '' });
     const [ledger, setLedger] = useState([]); 
@@ -137,7 +140,9 @@ function BusinessView({ onLogout, onUpdateFinance }) {
     const [transForm, setTransForm] = useState({ desc: '', amount: '', type: 'Debit', category: 'Misc', source: 'direct' });
     const [showFinancials, setShowFinancials] = useState(false);
     const [deleteId, setDeleteId] = useState(null);
+    
     const [searchTerm, setSearchTerm] = useState("");
+    const [ledgerDate, setLedgerDate] = useState(""); 
 
     const [invForm, setInvForm] = useState({ name: '', variant: '', price: '', stockQty: '', barcode: '' }); 
     const [isFetchingName, setIsFetchingName] = useState(false);
@@ -154,6 +159,13 @@ function BusinessView({ onLogout, onUpdateFinance }) {
     const [scannedCode, setScannedCode] = useState('');
     const billItemsRef = useRef([]);
 
+    // 🌟 DEV TOOL STATES
+    const [seedMonth, setSeedMonth] = useState(() => {
+        const d = new Date();
+        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+    });
+    const [seedCount, setSeedCount] = useState(25);
+
     const UI = useMemo(() => {
         return businessType === 'startup' ? {
             role: "Founder", revTitle: "Revenue (Live Ledger)", rev1: "SaaS / Sales", rev2: "Services", rev3: "Investments",
@@ -164,7 +176,7 @@ function BusinessView({ onLogout, onUpdateFinance }) {
         } : { 
             role: "Shopkeeper", revTitle: "Sales (Live Ledger)", rev1: "Counter Sales", rev2: "Online Orders", rev3: "Other Income",
             costTitle: "Fixed Bills (Rent/Elec)", staffTitle: "Staff & Helpers", staffBtn: "ADD STAFF",
-            assetTitle: "Store Equipment / Stock", assetLabel: "Item Name (e.g. Fridge)", metricRev: "Total Sales",
+            assetTitle: "Business Assets / Equipment", assetLabel: "Item Name (e.g. Fridge)", metricRev: "Total Sales",
             metricExp: "Total Costs", metricNet: "Net Cash", ranks: ["New Shop", "Local Favorite", "Market Leader", "Chain Owner"],
             quickTags: { income: ["Counter Sale", "Home Delivery", "UPI Payment", "Credit Recovery"], expense: ["New Stock", "Rent Payment", "Electricity Bill", "Tea/Snacks", "Transport"] }
         };
@@ -181,6 +193,7 @@ function BusinessView({ onLogout, onUpdateFinance }) {
                 if(data.openingBalance) setOpeningBalance(data.openingBalance);
                 if(data.expenses) setExpenses(data.expenses);
                 if(data.employees) setEmployees(data.employees);
+                if(data.assets) setAssets(data.assets); 
                 if(data.ledger) setLedger(data.ledger);
                 if(data.inventory) setInventory(data.inventory);
                 if(data.khata) setKhata(data.khata); 
@@ -212,6 +225,8 @@ function BusinessView({ onLogout, onUpdateFinance }) {
     const totalExpenses = operationalExpenses + payrollExpenses + ledgerExpenses;
     const takeHome = (Number(openingBalance) + totalRevenue) - totalExpenses;
     
+    const totalAssetValue = assets.reduce((sum, a) => sum + Number(a.cost), 0);
+
     const businessXP = totalRevenue; 
     let currentRank = UI.ranks[0];
     let nextLevel = 50000;
@@ -258,7 +273,17 @@ function BusinessView({ onLogout, onUpdateFinance }) {
         document.body.removeChild(link);
     };
 
-    const filteredLedger = ledger.filter(entry => entry.desc.toLowerCase().includes(searchTerm.toLowerCase()) || entry.amount.toString().includes(searchTerm));
+    const filteredLedger = ledger.filter(entry => {
+        const matchesSearch = entry.desc.toLowerCase().includes(searchTerm.toLowerCase()) || entry.amount.toString().includes(searchTerm);
+        let matchesDate = true;
+        if (ledgerDate) {
+            const d = new Date(entry.date);
+            const entryDateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+            matchesDate = entryDateStr === ledgerDate;
+        }
+        return matchesSearch && matchesDate;
+    });
+
     const handleNameChange = () => { if(companyName.trim() === "") setCompanyName("My Shop Name"); setIsEditingName(false); saveData({ companyName }); };
     
     const addToLedger = (desc, amount, type, category, source) => { const newEntry = { id: Date.now(), date: new Date().toLocaleDateString(), desc, amount, category, type, source }; const newLedger = [newEntry, ...ledger]; setLedger(newLedger); return newLedger; };
@@ -267,8 +292,29 @@ function BusinessView({ onLogout, onUpdateFinance }) {
     const handleExpenseChange = (value) => { const val = Number(value.replace(/[^0-9]/g, '')); setExpenses(val); saveData({ expenses: val }); };
     const handleHire = () => { if(!empInput.name || !empInput.salary) return; const salary = Number(empInput.salary); const newEmps = [...employees, { ...empInput, id: Date.now(), salary }]; const updatedLedger = addToLedger(`Hired: ${empInput.name}`, salary, 'Debit', 'Payroll', null); setEmployees(newEmps); setEmpInput({ name: '', salary: '', designation: '' }); saveData({ employees: newEmps, ledger: updatedLedger }); };
     const handleFire = (id) => { const newEmps = employees.filter(e => e.id !== id); setEmployees(newEmps); saveData({ employees: newEmps }); };
-    const handleCustomInvest = () => { if(!investInput.name || !investInput.cost) return; const cost = Number(investInput.cost); const updatedLedger = addToLedger(`Asset: ${investInput.name}`, cost, 'Debit', 'Asset', null); setLedger(updatedLedger); saveData({ ledger: updatedLedger }); setInvestInput({ name: '', cost: '' }); };
     const handleQuickTag = (tag) => { setTransForm({ ...transForm, desc: tag }); };
+
+    const handleCustomInvest = () => { 
+        if(!investInput.name || !investInput.cost) return; 
+        const cost = Number(investInput.cost); 
+        
+        const newAsset = { id: Date.now(), name: investInput.name, cost };
+        const updatedAssets = [...assets, newAsset];
+        setAssets(updatedAssets);
+
+        const updatedLedger = addToLedger(`Asset Purchased: ${investInput.name}`, cost, 'Debit', 'Asset', null); 
+        
+        saveData({ assets: updatedAssets, ledger: updatedLedger }); 
+        setInvestInput({ name: '', cost: '' }); 
+    };
+
+    const handleRemoveAsset = (id) => {
+        if(window.confirm("Are you sure you want to remove this asset from your portfolio?")) {
+            const updatedAssets = assets.filter(a => a.id !== id);
+            setAssets(updatedAssets);
+            saveData({ assets: updatedAssets });
+        }
+    };
 
     const handleSettleKhata = (k) => {
         const newKhata = khata.filter(x => x.id !== k.id);
@@ -277,21 +323,16 @@ function BusinessView({ onLogout, onUpdateFinance }) {
         saveData({ khata: newKhata, ledger: updatedLedger });
     };
 
-    // ==========================================
-    // 🌍 DUAL-API AUTO-FETCH (SMARTER BARCODES)
-    // ==========================================
     const fetchProductData = async (code) => {
         if (!code || code.length < 8) return; 
         setIsFetchingName(true);
         try {
-            // ATTEMPT 1: Open Food Facts
             const res = await fetch(`https://world.openfoodfacts.org/api/v0/product/${code}.json`);
             const data = await res.json();
             
             if (data.status === 1 && data.product && data.product.product_name) {
                 setInvForm(prev => ({ ...prev, name: data.product.product_name }));
             } else {
-                // ATTEMPT 2: Fallback to UPCItemDB
                 const fallbackRes = await fetch(`https://api.upcitemdb.com/prod/trial/lookup?upc=${code}`);
                 const fallbackData = await fallbackRes.json();
                 
@@ -308,7 +349,6 @@ function BusinessView({ onLogout, onUpdateFinance }) {
         setIsFetchingName(false);
     };
 
-    // --- INVENTORY MANAGEMENT ---
     const handleAddInventory = () => {
         if (!invForm.name || !invForm.price) return;
         const fullName = invForm.variant ? `${invForm.name} - ${invForm.variant}` : invForm.name;
@@ -325,10 +365,7 @@ function BusinessView({ onLogout, onUpdateFinance }) {
         saveData({ inventory: newInventory });
     };
 
-    // --- BILLING ENGINE ---
-    const addBillItem = () => { 
-        setBillItems(prev => [...prev, { id: Date.now(), item: '', qty: 1, price: '' }]); 
-    };
+    const addBillItem = () => { setBillItems(prev => [...prev, { id: Date.now(), item: '', qty: 1, price: '' }]); };
     
     const handleBarcodeSubmit = (e) => {
         if (e.key === 'Enter') {
@@ -390,7 +427,6 @@ function BusinessView({ onLogout, onUpdateFinance }) {
         }
     };
 
-    // --- PDF GENERATOR ---
     const handleGenerateBill = (shareWhatsapp = false) => {
         const subTotal = getBillTotal();
         if(subTotal === 0) return;
@@ -400,7 +436,6 @@ function BusinessView({ onLogout, onUpdateFinance }) {
 
         const doc = new jsPDF();
         const pageWidth = doc.internal.pageSize.getWidth();
-
         const activeTheme = INVOICE_THEMES[invoiceTheme];
         const colorPrimary = activeTheme.primary;
         const colorSecondary = activeTheme.secondary;
@@ -409,13 +444,11 @@ function BusinessView({ onLogout, onUpdateFinance }) {
 
         doc.setFillColor(...colorWhite);
         doc.rect(0, 0, pageWidth, doc.internal.pageSize.getHeight(), 'F');
-        
         doc.setFillColor(...colorPrimary);
         doc.roundedRect(15, 15, 110, 30, 3, 3, 'F');
         doc.setDrawColor(...colorBlack);
         doc.setLineWidth(1.5);
         doc.roundedRect(17, 17, 110, 30, 3, 3, 'S');
-
         doc.setTextColor(255, 255, 255);
         doc.setFontSize(22);
         doc.setFont("helvetica", "bold");
@@ -423,23 +456,19 @@ function BusinessView({ onLogout, onUpdateFinance }) {
 
         doc.setFillColor(...colorSecondary);
         doc.roundedRect(pageWidth - 65, 18, 50, 16, 2, 2, 'FD'); 
-        
         doc.setTextColor(...colorPrimary);
         doc.setFontSize(14);
         doc.text("INVOICE", pageWidth - 40, 29, { align: 'center' });
-
         doc.setTextColor(...colorBlack);
         doc.setFontSize(10);
         doc.text(`#INV-${Date.now().toString().slice(-6)}`, pageWidth - 40, 42, { align: 'center' });
         
         doc.setFillColor(...colorPrimary);
         doc.rect(15, 60, 6, 20, 'F');
-        
         doc.setTextColor(...colorBlack);
         doc.setFontSize(10);
         doc.setFont("helvetica", "bold");
         doc.text("BILLED TO:", 26, 66);
-        
         doc.setFontSize(14);
         doc.text(billCustomer.name ? billCustomer.name.toUpperCase() : "CASH CUSTOMER", 26, 74);
         if(billCustomer.phone) { doc.setFontSize(10); doc.setFont("helvetica", "normal"); doc.text(`PH: ${billCustomer.phone}`, 26, 80); }
@@ -486,7 +515,6 @@ function BusinessView({ onLogout, onUpdateFinance }) {
         doc.setDrawColor(...colorBlack);
         doc.setLineWidth(1.5);
         doc.line(15, currentY + 35, pageWidth - 15, currentY + 35);
-
         doc.setTextColor(100);
         doc.setFontSize(9);
         doc.setFont("helvetica", "italic");
@@ -535,6 +563,111 @@ function BusinessView({ onLogout, onUpdateFinance }) {
         setPaymentStatus('Paid');
         setApplyGST(false);
     };
+
+    // =========================================
+    // 🛠️ BUSINESS DEVELOPER TOOLS (CRUD)
+    // =========================================
+
+    const handleSeedBusinessDatabase = async () => {
+        if (!currentUser) return;
+        if (!seedMonth) return alert("Please select a month and year first.");
+
+        const [yearStr, monthStr] = seedMonth.split('-');
+        const year = parseInt(yearStr);
+        const month = parseInt(monthStr) - 1; 
+        const countToInject = parseInt(seedCount) || 25;
+
+        const confirm = window.confirm(`Inject ${countToInject} dummy business transactions into ${seedMonth}?`);
+        if (!confirm) return;
+
+        const creditDescs = ["Walk-in Sale", "Bulk Order Payment", "Consulting Fee", "Online Marketplace Sale", "Udhaar Recovery"];
+        const debitDescs = ["Wholesale Restock", "Electricity Bill", "Staff Lunch", "Packaging Material", "Shop Rent", "Marketing Ads"];
+
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        let newEntries = [];
+
+        for (let i = 0; i < countToInject; i++) {
+            const isCredit = Math.random() > 0.4; 
+            
+            const randomAmount = isCredit 
+                ? Math.floor(Math.random() * 8000) + 150 
+                : Math.floor(Math.random() * 3000) + 50;
+
+            const randomDesc = isCredit 
+                ? creditDescs[Math.floor(Math.random() * creditDescs.length)]
+                : debitDescs[Math.floor(Math.random() * debitDescs.length)];
+
+            const randomDay = Math.floor(Math.random() * daysInMonth) + 1;
+            const randomDate = new Date(year, month, randomDay).toLocaleDateString();
+
+            const type = isCredit ? 'Credit' : 'Debit';
+            const category = isCredit ? 'Sale' : 'Misc';
+            
+            let source = null;
+            if (isCredit) {
+                const rand = Math.random();
+                if (rand > 0.7) source = 'direct';
+                else if (rand > 0.4) source = 'services';
+                else source = 'investments';
+            }
+
+            newEntries.push({
+                id: Date.now() + i + Math.floor(Math.random() * 10000), 
+                date: randomDate, 
+                desc: randomDesc, 
+                amount: randomAmount, 
+                category: category, 
+                type: type, 
+                source: source 
+            });
+        }
+        
+        const updatedLedger = [...newEntries, ...ledger];
+        setLedger(updatedLedger);
+        await saveData({ ledger: updatedLedger });
+        alert(`✅ Successfully injected ${countToInject} business transactions into ${seedMonth}!`);
+    };
+
+    const handleClearBusinessMonth = async () => {
+        if (!currentUser) return;
+        if (!seedMonth) return alert("Select a month first.");
+
+        const confirm = window.confirm(`⚠️ WARNING: Delete ALL business ledger entries in ${seedMonth}?`);
+        if (!confirm) return;
+
+        const [yearStr, monthStr] = seedMonth.split('-');
+        const year = parseInt(yearStr);
+        const month = parseInt(monthStr) - 1; 
+
+        const updatedLedger = ledger.filter(entry => {
+            const d = new Date(entry.date);
+            if (!isNaN(d.getTime())) {
+                return !(d.getFullYear() === year && d.getMonth() === month);
+            }
+            return true;
+        });
+
+        const deletedCount = ledger.length - updatedLedger.length;
+        if (deletedCount === 0) return alert(`No transactions found in ${seedMonth}.`);
+
+        setLedger(updatedLedger);
+        await saveData({ ledger: updatedLedger });
+        alert(`🗑️ Deleted ${deletedCount} business transactions from ${seedMonth}.`);
+    };
+
+    const handleNukeBusinessDatabase = async () => {
+        if (!currentUser) return;
+        const confirm1 = window.confirm(`☢️ DANGER: You are about to wipe EVERY entry in your business ledger. Proceed?`);
+        if (!confirm1) return;
+        const confirm2 = window.prompt('Type "NUKE" to confirm complete deletion of the ledger.');
+        if (confirm2 !== "NUKE") return alert("Database nuke aborted.");
+
+        setLedger([]);
+        await saveData({ ledger: [] });
+        alert(`☢️ Clean Slate. Entire business ledger wiped.`);
+    };
+
+    // =========================================
 
     const profitData = [{ label: 'Ops', value: totalExpenses, color: '#ef4444' }, { label: 'Revenue', value: totalRevenue, color: '#10b981' }];
 
@@ -611,10 +744,13 @@ function BusinessView({ onLogout, onUpdateFinance }) {
                                     <div><label className="b-label">{UI.rev3}</label><div className="b-input" style={{background:'#f3f4f6', color:'#6b7280', border:'1px solid #e5e7eb'}}>{formatCurrency(revenue.investments)}</div></div>
                                 </div>
                                 
-                                {/* 🆕 7-DAY REVENUE CHART */}
                                 <div style={{marginTop: '20px'}}>
                                     <h4 className="b-label" style={{marginBottom: '10px', color: '#111827'}}>7-Day Income Trend</h4>
                                     <SimpleBarChart ledger={ledger} />
+                                </div>
+
+                                <div style={{marginTop: '30px'}}>
+                                    <BusinessPredictionCard ledger={ledger} />
                                 </div>
                             </div>
 
@@ -665,17 +801,37 @@ function BusinessView({ onLogout, onUpdateFinance }) {
                             <div className="b-card">
                                 <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom: '20px'}}>
                                     <h3 className="b-title" style={{ fontSize: '1.2rem' }}>🚀 {UI.assetTitle}</h3>
-                                    <span style={{fontSize:'0.7rem', background:'#fef3c7', color:'#d97706', padding:'4px 8px', borderRadius:'6px', fontWeight:'bold'}}>ONE-TIME</span>
+                                    <span style={{fontSize:'0.7rem', background:'#fef3c7', color:'#d97706', padding:'4px 8px', borderRadius:'6px', fontWeight:'bold'}}>
+                                        TOTAL VALUE: {formatCurrency(totalAssetValue)}
+                                    </span>
                                 </div>
+                                
                                 <div style={{ display: 'flex', gap: '10px', marginBottom: '20px', alignItems: 'flex-end' }}>
                                     <div style={{flex: 2}}><label className="b-label">{UI.assetLabel}</label><input className="b-input" placeholder="Item Name" value={investInput.name} onChange={(e) => setInvestInput({...investInput, name: e.target.value})}/></div>
                                     <div style={{flex: 1}}><label className="b-label">Cost</label><input className="b-input" placeholder="₹0" value={investInput.cost} onChange={(e) => setInvestInput({...investInput, cost: e.target.value})}/></div>
                                     <button onClick={handleCustomInvest} className="b-btn b-btn-primary" style={{height:'50px'}}>ADD</button>
                                 </div>
+
+                                <div style={{ maxHeight: '150px', overflowY: 'auto' }}>
+                                    {assets.length === 0 ? <p style={{color:'#9ca3af', fontSize:'0.9rem'}}>No assets recorded in your portfolio.</p> : assets.map(a => (
+                                        <div key={a.id} style={{display:'flex', justifyContent:'space-between', alignItems: 'center', padding:'10px 12px', background:'#f9fafb', borderRadius:'8px', marginBottom:'8px'}}>
+                                            <span style={{fontWeight:'bold', color:'#374151'}}>{a.name}</span>
+                                            <div style={{display:'flex', gap:'15px', alignItems:'center'}}>
+                                                <span style={{color:'#10b981', fontWeight:'600'}}>{formatCurrency(a.cost)}</span>
+                                                <button onClick={() => handleRemoveAsset(a.id)} style={{color:'#ef4444', background:'none', border:'none', cursor:'pointer', fontSize: '0.8rem', fontWeight: 'bold'}}>Remove</button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
+
                         </div>
 
                         <div>
+                            <div style={{ marginBottom: '20px' }}>
+                                <AIInsightBox balance={takeHome} transactions={ledger.map(l => ({...l, type: l.type === 'Debit' ? 'expense' : 'income'}))} />
+                            </div>
+
                             <div className="b-card">
                                 <h3 className="b-title" style={{ fontSize: '1rem', marginBottom: '15px' }}>💡 {UI.role} Analysis</h3>
                                 {smartInsights.map((alert, i) => <div key={i} className={`alert-card alert-${alert.type}`}>{alert.text}</div>)}
@@ -698,15 +854,40 @@ function BusinessView({ onLogout, onUpdateFinance }) {
                                 </div>
                             )}
 
-                            <div className="b-card"><label className="b-label">{UI.costTitle}</label><input className="b-input" placeholder="₹0" value={expenses} onChange={(e) => handleExpenseChange(e.target.value)} /></div>
+                            {/* 👇 REMOVED THE FIXED BILLS TEXT BOX ENTIRELY 👇 */}
                             
                             <div className="b-card" style={{ flex: 1 }}>
                                 <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom: '15px'}}>
                                     <h3 className="b-title" style={{ fontSize: '1rem' }}>📖 Daily Ledger</h3>
-                                    <span style={{fontSize:'0.7rem', background:'#e0f2fe', padding:'3px 6px', borderRadius:'4px', color:'#0284c7'}}>{ledger.length} entries</span>
+                                    <span style={{fontSize:'0.7rem', background:'#e0f2fe', padding:'3px 6px', borderRadius:'4px', color:'#0284c7'}}>{filteredLedger.length} entries</span>
                                 </div>
-                                <input className="b-input" placeholder="🔍 Search..." style={{fontSize:'0.9rem', padding:'8px 12px', marginBottom:'15px', background:'#f9fafb'}} value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+                                
+                                {/* 🌟 UPDATED DATE SELECTOR TOOL: Now opens native calendar instantly on click */}
+                                <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
+                                    <input 
+                                        type="date" 
+                                        className="b-input" 
+                                        style={{ flex: 1, fontSize: '0.85rem', padding: '8px', cursor: 'pointer' }} 
+                                        value={ledgerDate} 
+                                        onChange={(e) => setLedgerDate(e.target.value)} 
+                                        onClick={(e) => {
+                                            try { e.target.showPicker(); } catch (err) { /* Catch for older browsers */ }
+                                        }}
+                                    />
+                                    {ledgerDate && (
+                                        <button 
+                                            onClick={() => setLedgerDate("")}
+                                            style={{ background: '#fef2f2', border: '1px solid #fca5a5', borderRadius: '8px', padding: '0 15px', cursor: 'pointer', fontSize: '0.8rem', color: '#ef4444', fontWeight: 'bold' }}
+                                        >
+                                            Clear
+                                        </button>
+                                    )}
+                                </div>
+
+                                <input className="b-input" placeholder="🔍 Search description or amount..." style={{fontSize:'0.9rem', padding:'8px 12px', marginBottom:'15px', background:'#f9fafb'}} value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+                                
                                 <div style={{ maxHeight: '350px', overflowY: 'auto' }}>
+                                    {filteredLedger.length === 0 && <div style={{textAlign:'center', color:'#9ca3af', padding:'20px'}}>No transactions found.</div>}
                                     {filteredLedger.map((entry, i) => (
                                         <div key={i} style={{ padding:'12px', borderBottom:'1px solid #f3f4f6' }}>
                                             <div style={{display:'flex', justifyContent:'space-between', marginBottom:'4px'}}>
@@ -722,6 +903,58 @@ function BusinessView({ onLogout, onUpdateFinance }) {
                     </div>
                     
                     <div className="fab-container"><div className={`toggle ${showTransModal ? 'active' : ''}`} onClick={() => setShowTransModal(!showTransModal)}><span className="label">+</span></div></div>
+
+                    {/* =======================================================
+                        🛠️ DISCRETE BUSINESS DEV TOOLS (HIDDEN AT BOTTOM)
+                        ======================================================= */}
+                    <div 
+                        style={{ 
+                        display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '15px', flexWrap: 'wrap',
+                        marginTop: '50px', marginBottom: '20px', 
+                        opacity: 0.15, transition: 'opacity 0.3s', cursor: 'default'
+                        }} 
+                        onMouseEnter={(e) => e.currentTarget.style.opacity = 1}
+                        onMouseLeave={(e) => e.currentTarget.style.opacity = 0.15}
+                    >
+                        <input 
+                        type="month" 
+                        value={seedMonth} 
+                        onChange={(e) => setSeedMonth(e.target.value)} 
+                        style={{ background: 'rgba(0,0,0,0.05)', border: '1px solid #d1d5db', color: '#6b7280', padding: '4px 8px', borderRadius: '4px', fontSize: '0.75rem' }}
+                        />
+                        
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                        <span style={{ fontSize: '0.7rem', color: '#6b7280' }}>Qty:</span>
+                        <input 
+                            type="number" 
+                            value={seedCount} 
+                            onChange={(e) => setSeedCount(e.target.value)} 
+                            style={{ width: '50px', background: 'rgba(0,0,0,0.05)', border: '1px solid #d1d5db', color: '#6b7280', padding: '4px', borderRadius: '4px', fontSize: '0.75rem' }}
+                            min="1" max="100"
+                        />
+                        </div>
+
+                        <button 
+                        onClick={handleSeedBusinessDatabase}
+                        style={{ background: 'transparent', border: 'none', color: '#10b981', fontSize: '0.75rem', cursor: 'pointer', fontWeight: 'bold' }}
+                        >
+                        + Inject Ledger Data
+                        </button>
+                        
+                        <button 
+                        onClick={handleClearBusinessMonth}
+                        style={{ background: 'transparent', border: 'none', color: '#ef4444', fontSize: '0.75rem', cursor: 'pointer', fontWeight: 'bold' }}
+                        >
+                        - Clear Month
+                        </button>
+
+                        <button 
+                        onClick={handleNukeBusinessDatabase}
+                        style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid #ef4444', color: '#ef4444', fontSize: '0.75rem', cursor: 'pointer', padding: '4px 8px', borderRadius: '4px', marginLeft: '10px' }}
+                        >
+                        ☢️ Nuke Ledger
+                        </button>
+                    </div>
                 </>
             )}
 
@@ -892,7 +1125,6 @@ function BusinessView({ onLogout, onUpdateFinance }) {
                             <div style={{marginBottom:'20px'}}><label className="b-label">Business Name</label><input className="b-input" value={companyName} onChange={(e) => setCompanyName(e.target.value)} placeholder="Enter Name..." /></div>
                             <div style={{marginBottom:'20px'}}><label className="b-label">Opening Cash Balance (Galla)</label><input className="b-input" type="number" value={openingBalance} onChange={(e) => setOpeningBalance(e.target.value)} placeholder="₹0" /></div>
                             
-                            {/* 🆕 CASHIER MODE TOGGLE */}
                             <div style={{marginBottom:'20px', background:'#fffbeb', padding:'10px', borderRadius:'8px', border:'1px solid #fde68a'}}>
                                 <label style={{display:'flex', alignItems:'center', gap:'10px', cursor:'pointer'}}>
                                     <input type="checkbox" checked={isCashierMode} onChange={(e) => {
@@ -916,19 +1148,17 @@ function BusinessView({ onLogout, onUpdateFinance }) {
                     <div style={{display:'flex', flexDirection:'column', gap:'15px'}}>
                         <div style={{display:'flex', gap:'8px', flexWrap:'wrap', marginBottom:'5px'}}>{UI.quickTags[transForm.type === 'Credit' ? 'income' : 'expense'].map((tag, i) => (<button key={i} onClick={() => handleQuickTag(tag)} style={{background: '#f3f4f6', border: '1px solid #e5e7eb', borderRadius:'20px', padding:'6px 12px', fontSize:'0.75rem', cursor:'pointer', color:'#4b5563', transition: 'all 0.2s ease'}} onMouseOver={(e) => {e.target.style.background = '#e5e7eb'; e.target.style.color = '#111827'}} onMouseOut={(e) => {e.target.style.background = '#f3f4f6'; e.target.style.color = '#4b5563'}}>+ {tag}</button>))}</div>
                         
-                        {/* 👇 AI SCANNER COMPONENT HERE 👇 */}
                         <AIReceiptScanner 
                             onScanSuccess={(aiData) => {
                                 setTransForm(prev => ({
                                     ...prev,
                                     desc: aiData.merchant || "Scanned Bill",
                                     amount: aiData.total || "",
-                                    type: 'Debit' // Receipts are usually expenses
+                                    type: 'Debit'
                                 }));
                                 alert("Receipt scanned successfully!");
                             }} 
                         />
-                        {/* 👆 AI SCANNER COMPONENT HERE 👆 */}
 
                         <div><label className="b-label">Description</label><input className="b-input" placeholder="e.g. Sale #101" value={transForm.desc} onChange={e => setTransForm({...transForm, desc: e.target.value})} /></div>
                         <div><label className="b-label">Amount</label><input className="b-input" type="number" placeholder="₹0" value={transForm.amount} onChange={e => setTransForm({...transForm, amount: e.target.value})} /></div>

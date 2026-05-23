@@ -9,7 +9,9 @@ import {
   addDoc, 
   deleteDoc, 
   doc, 
-  updateDoc 
+  updateDoc,
+  getDocs,
+  where
 } from 'firebase/firestore'; 
 
 // --- COMPONENTS ---
@@ -27,7 +29,6 @@ import VibeCheckCard from '../VibeCheckCard';
 import CryoChamber from '../CryoChamber'; 
 import AIReceiptScanner from '../AIReceiptScanner';
 
-//  ACCEPT THE PROP 'onUpdateFinance'
 function StudentView({ onUpdateFinance }) { 
   const { currentUser } = useAuth();
   
@@ -37,6 +38,13 @@ function StudentView({ onUpdateFinance }) {
   const [newGoal, setNewGoal] = useState({ name: '', target: '' });
   const [showAddGoal, setShowAddGoal] = useState(false);
   const [showReport, setShowReport] = useState(false);
+  
+  // 🌟 DEV TOOL STATES
+  const [seedMonth, setSeedMonth] = useState(() => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+  });
+  const [seedCount, setSeedCount] = useState(25); 
 
   // --- 1. FETCH DATA ---
   useEffect(() => {
@@ -69,20 +77,20 @@ function StudentView({ onUpdateFinance }) {
     };
   }, [currentUser]);
 
-  // --- 2. CALCULATE FINANCIALS ---
-  const income = transactions
+  // --- 2. CALCULATE FINANCIALS (FIXED DECIMALS) ---
+  const income = Number(transactions
     .filter(t => t.type === 'income')
-    .reduce((acc, t) => acc + Number(t.amount), 0);
+    .reduce((acc, t) => acc + Number(t.amount), 0).toFixed(2));
 
-  const expenses = transactions
+  const expenses = Number(transactions
     .filter(t => t.type === 'expense')
-    .reduce((acc, t) => acc + Number(t.amount), 0);
+    .reduce((acc, t) => acc + Number(t.amount), 0).toFixed(2));
 
   const totalAllocatedToGoals = goals.reduce((acc, goal) => acc + (goal.saved || 0), 0);
   const rawBalance = income - expenses;
-  const availableBalance = Math.max(0, rawBalance - totalAllocatedToGoals);
+  const availableBalance = Number(Math.max(0, rawBalance - totalAllocatedToGoals).toFixed(2));
 
-  // ---  3. REPORT DATA TO PARENT DASHBOARD (For AI Bot) ---
+  // ---  3. REPORT DATA TO PARENT DASHBOARD ---
   useEffect(() => {
     if (onUpdateFinance) {
       onUpdateFinance({
@@ -95,7 +103,7 @@ function StudentView({ onUpdateFinance }) {
 
   // --- DAILY LIMIT LOGIC ---
   const today = new Date();
-  const spentToday = transactions
+  const spentToday = Number(transactions
     .filter(t => {
       if (t.type !== 'expense') return false;
       const tDate = t.date;
@@ -105,7 +113,7 @@ function StudentView({ onUpdateFinance }) {
         tDate.getFullYear() === today.getFullYear()
       );
     })
-    .reduce((acc, t) => acc + Number(t.amount), 0);
+    .reduce((acc, t) => acc + Number(t.amount), 0).toFixed(2));
 
   const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
   const daysLeft = daysInMonth - today.getDate() + 1;
@@ -148,7 +156,6 @@ function StudentView({ onUpdateFinance }) {
     } catch (error) { console.error("Error updating goal:", error); }
   };
 
-  // 🆕 AI SCANNER HANDLER FOR STUDENT VIEW
   const handleStudentScanSuccess = async (aiData) => {
     try {
       await addDoc(collection(db, "users", currentUser.uid, "transactions"), {
@@ -165,27 +172,168 @@ function StudentView({ onUpdateFinance }) {
     }
   };
 
+  // =========================================
+  // 🛠️ DEVELOPER TOOLS (CRUD OPERATIONS)
+  // =========================================
+
+  // 1. INJECT DYNAMIC DATA (WITH STREAK BUILDER)
+  const handleSeedDatabase = async () => {
+    if (!currentUser) return;
+    if (!seedMonth) {
+      alert("Please select a month and year first.");
+      return;
+    }
+
+    const [yearStr, monthStr] = seedMonth.split('-');
+    const year = parseInt(yearStr);
+    const month = parseInt(monthStr) - 1; 
+    const countToInject = parseInt(seedCount) || 25;
+
+    const confirm = window.confirm(`Inject ${countToInject} realistic student transactions + build a 7-day streak?`);
+    if (!confirm) return;
+
+    const expenseMerchants = ["Zomato", "Uber", "Amazon", "Starbucks", "Jio Recharge", "Steam", "PVR Cinemas", "Blinkit", "H&M", "Gym", "College Canteen", "Stationery"];
+    const expenseCategories = ["Food/Dining", "Transport", "Shopping/Retail", "Misc", "Utilities", "Entertainment"];
+    const vibes = ["joy", "regret", "essential"]; 
+    
+    const incomeSources = ["Pocket Money", "Freelance Web Dev", "UPI Cash Gift", "Internship Stipend", "Splitwise Settle"];
+    const incomeCategories = ["Allowance", "Salary", "Gifts", "Refund"];
+
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    let count = 0;
+
+    try {
+      // --- PART A: The Random Scatter Data ---
+      for (let i = 0; i < countToInject; i++) {
+        const isExpense = Math.random() > 0.15; 
+        
+        const randomAmount = isExpense 
+          ? Math.floor(Math.random() * 2900) + 100 
+          : Math.floor(Math.random() * 5500) + 6000; 
+
+        const randomDesc = isExpense 
+          ? expenseMerchants[Math.floor(Math.random() * expenseMerchants.length)]
+          : incomeSources[Math.floor(Math.random() * incomeSources.length)];
+
+        const randomCategory = isExpense 
+          ? expenseCategories[Math.floor(Math.random() * expenseCategories.length)]
+          : incomeCategories[Math.floor(Math.random() * incomeCategories.length)];
+        
+        const randomDay = Math.floor(Math.random() * daysInMonth) + 1;
+        const randomDate = new Date(year, month, randomDay);
+
+        const payload = {
+          desc: randomDesc,
+          amount: randomAmount,
+          type: isExpense ? "expense" : "income",
+          category: randomCategory,
+          date: randomDate
+        };
+
+        if (isExpense) {
+          payload.vibe = vibes[Math.floor(Math.random() * vibes.length)];
+        }
+
+        await addDoc(collection(db, "users", currentUser.uid, "transactions"), payload);
+        count++;
+      }
+
+      // --- PART B: THE STREAK BUILDER 🔥 ---
+      // Forces 7 consecutive days of activity leading right up to TODAY
+      const todayDate = new Date();
+      for (let j = 0; j < 7; j++) {
+        const streakDate = new Date(todayDate);
+        streakDate.setDate(todayDate.getDate() - j); // Goes back j days
+
+        await addDoc(collection(db, "users", currentUser.uid, "transactions"), {
+          desc: "Daily Coffee (Streak Builder)",
+          amount: 120,
+          type: "expense",
+          category: "Food/Dining",
+          date: streakDate,
+          vibe: "essential"
+        });
+      }
+
+      alert(`✅ Successfully injected ${count} transactions AND generated a 7-Day Streak!`);
+    } catch (error) {
+      console.error("Error seeding database:", error);
+      alert("Error seeding data.");
+    }
+  };
+
+  // 2. CLEAR SPECIFIC MONTH
+  const handleClearMonthData = async () => {
+    if (!currentUser) return;
+    if (!seedMonth) return alert("Select a month first.");
+
+    const confirm = window.confirm(`⚠️ WARNING: Delete ALL transactions in ${seedMonth}?`);
+    if (!confirm) return;
+
+    const [yearStr, monthStr] = seedMonth.split('-');
+    const year = parseInt(yearStr);
+    const month = parseInt(monthStr) - 1; 
+    const startDate = new Date(year, month, 1);
+    const endDate = new Date(year, month + 1, 0, 23, 59, 59, 999);
+
+    try {
+      const q = query(
+        collection(db, "users", currentUser.uid, "transactions"),
+        where("date", ">=", startDate),
+        where("date", "<=", endDate)
+      );
+      const querySnapshot = await getDocs(q);
+      if (querySnapshot.empty) return alert(`No transactions found in ${seedMonth}.`);
+
+      const deletePromises = querySnapshot.docs.map(document => deleteDoc(doc(db, "users", currentUser.uid, "transactions", document.id)));
+      await Promise.all(deletePromises);
+      alert(`🗑️ Deleted ${querySnapshot.size} transactions from ${seedMonth}.`);
+    } catch (error) {
+      console.error("Error clearing month:", error);
+    }
+  };
+
+  // 3. THE NUKE BUTTON (Total Reset)
+  const handleNukeDatabase = async () => {
+    if (!currentUser) return;
+    const confirm1 = window.confirm(`☢️ DANGER: You are about to wipe EVERY transaction in your account. Proceed?`);
+    if (!confirm1) return;
+    const confirm2 = window.prompt('Type "NUKE" to confirm complete deletion of all history.');
+    if (confirm2 !== "NUKE") return alert("Database nuke aborted.");
+
+    try {
+      const q = query(collection(db, "users", currentUser.uid, "transactions"));
+      const querySnapshot = await getDocs(q);
+      const deletePromises = querySnapshot.docs.map(document => deleteDoc(doc(db, "users", currentUser.uid, "transactions", document.id)));
+      await Promise.all(deletePromises);
+      alert(`☢️ Clean Slate. ${querySnapshot.size} total transactions wiped.`);
+    } catch (error) {
+      console.error("Error nuking database:", error);
+    }
+  };
+
+  // =========================================
+
   return (
     <div className="dashboard-layout">
       
-      {/* ZONE 1: THE HUD (Identity & Status) */}
+      {/* ZONE 1: THE HUD */}
       <div className="section-hud" style={{ marginBottom: '20px' }}>
         <GamificationCard transactions={transactions} income={income} expense={expenses} goals={goals} />
       </div>
 
-      {/* ZONE 2: VITAL SIGNS (Immediate Health) */}
+      {/* ZONE 2: VITAL SIGNS */}
       <div className="stats-grid" style={{ marginBottom: '20px' }}>
-        {/* Balance Card */}
         <div className="stat-card">
           <h3>Available Balance</h3>
-          {/* GHOST MODE: Blur the main balance */}
-          <div className="value green privacy-blur">₹{availableBalance}</div>
+          <div className="value green privacy-blur">
+  ₹{availableBalance.toLocaleString('en-IN', { maximumFractionDigits: 2, minimumFractionDigits: 0 })}
+</div>
           <p className="sub-text" style={{fontSize: '0.7rem', opacity: 0.7}}>
-            (After <span className="privacy-blur">₹{totalAllocatedToGoals}</span> saved)
+            (After <span className="privacy-blur">₹{totalAllocatedToGoals.toLocaleString('en-IN')}</span> saved)
           </p>
         </div>
 
-        {/* Daily Tracker Card */}
         <div className="stat-card daily-card" style={{ position: 'relative', overflow: 'hidden' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <h3>Today's Spending</h3>
@@ -194,8 +342,7 @@ function StudentView({ onUpdateFinance }) {
             </span>
           </div>
           <div className="value" style={{ color: isOverLimit ? '#f43f5e' : 'white' }}>
-            {/* GHOST MODE: Blur Spending and Limit */}
-            <span className="privacy-blur">₹{spentToday}</span> <span style={{fontSize: '1rem', color:'#64748b'}}>/ <span className="privacy-blur">₹{dailyLimit}</span></span>
+            <span className="privacy-blur">₹{spentToday.toLocaleString('en-IN', { maximumFractionDigits: 2, minimumFractionDigits: 0 })}</span> <span style={{fontSize: '1rem', color:'#64748b'}}>/ <span className="privacy-blur">₹{Number(dailyLimit).toLocaleString('en-IN')}</span></span>
           </div>
           <div style={{ width: '100%', height: '6px', background: '#334155', borderRadius: '4px', marginTop: '10px' }}>
             <div style={{ 
@@ -212,7 +359,7 @@ function StudentView({ onUpdateFinance }) {
         </div>
       </div>
 
-      {/* Report Button (Utility) */}
+      {/* Utility Button */}
       <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '30px' }}>
         <button 
           onClick={() => setShowReport(true)}
@@ -229,28 +376,19 @@ function StudentView({ onUpdateFinance }) {
       </div>
       {showReport && <ReportCardModal transactions={transactions} onClose={() => setShowReport(false)} />}
 
-{/* 🔮 ZONE 2.5: THE AI ORACLE */}
       <div style={{ marginBottom: '30px' }}>
           <AIInsightBox balance={availableBalance} transactions={transactions} />
       </div>
-      {/* 🧠 ZONE 3: ACTIVE INTELLIGENCE (Vibe & Quests) */}
+
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px', marginBottom: '40px' }}>
-         <div style={{ flex: 1 }}>
-            <VibeCheckCard transactions={transactions} />
-         </div>
-         <div style={{ flex: 1 }}>
-            <QuestCard transactions={transactions} />
-         </div>
+         <div style={{ flex: 1 }}><VibeCheckCard transactions={transactions} /></div>
+         <div style={{ flex: 1 }}><QuestCard transactions={transactions} /></div>
       </div>
 
-      
-
-      {/* 🔮 ZONE 4: THE ORACLE (Forecast) */}
       <div style={{ marginBottom: '40px' }}>
         <PredictionCard transactions={transactions} />
       </div>
 
-      {/* 🤖 ZONE 4.5: QUICK AI SCANNER (New Feature) */}
       <div style={{ marginBottom: '40px' }}>
         <div className="section-header">
           <h3>🤖 Quick Scan Expense</h3>
@@ -259,7 +397,6 @@ function StudentView({ onUpdateFinance }) {
         <AIReceiptScanner onScanSuccess={handleStudentScanSuccess} />
       </div>
 
-      {/* 📊 ZONE 5: THE DATA STREAM (History) */}
       <div style={{ marginBottom: '40px' }}>
         <ExpenseHeatmap transactions={transactions} />
         <div style={{ marginTop: '20px' }}>
@@ -267,16 +404,15 @@ function StudentView({ onUpdateFinance }) {
         </div>
       </div>
 
-      {/* 🔒 ZONE 6: THE VAULTS  */}
       <div style={{ marginBottom: '40px' }}>
         <SubscriptionVault />
         <SquadTabs />
       </div>
-        {/* ❄️ ZONE 3.5: CRYO STASIS */}
+        
       <div style={{ marginBottom: '40px' }}>
          <CryoChamber />
       </div>
-      {/* 🚀 ZONE 7: THE HORIZON (Goals) */}
+
       <div style={{ marginBottom: '100px' }}>
         <div className="section-header">
           <h3>🎯 Savings Goals</h3>
@@ -322,7 +458,6 @@ function StudentView({ onUpdateFinance }) {
                   </div>
                   
                   <div className="goal-stats">
-                    {/* 👻 GHOST MODE: Blur amounts in goals */}
                     <span><span className="privacy-blur">₹{goal.saved}</span> / <span className="privacy-blur">₹{goal.target}</span></span>
                     <span>{percent}%</span>
                   </div>
@@ -338,15 +473,64 @@ function StudentView({ onUpdateFinance }) {
                     </div>
                   )}
                 </div>
-                
               );
           })}
-          
         </div>
       </div>
       
-      {/* 8. FLOATING MUSIC PLAYER */}
       <BackgroundMusic />
+
+      {/* =======================================================
+          🛠️ DISCRETE CRUD DEV TOOLS (HIDDEN AT BOTTOM)
+          ======================================================= */}
+      <div 
+        style={{ 
+          display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '15px', flexWrap: 'wrap',
+          marginTop: '50px', marginBottom: '20px', 
+          opacity: 0.15, transition: 'opacity 0.3s', cursor: 'default'
+        }} 
+        onMouseEnter={(e) => e.currentTarget.style.opacity = 1}
+        onMouseLeave={(e) => e.currentTarget.style.opacity = 0.15}
+      >
+         <input 
+           type="month" 
+           value={seedMonth} 
+           onChange={(e) => setSeedMonth(e.target.value)} 
+           style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid #475569', color: '#94a3b8', padding: '4px 8px', borderRadius: '4px', fontSize: '0.75rem' }}
+         />
+         
+         <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+           <span style={{ fontSize: '0.7rem', color: '#64748b' }}>Qty:</span>
+           <input 
+             type="number" 
+             value={seedCount} 
+             onChange={(e) => setSeedCount(e.target.value)} 
+             style={{ width: '50px', background: 'rgba(255,255,255,0.05)', border: '1px solid #475569', color: '#94a3b8', padding: '4px', borderRadius: '4px', fontSize: '0.75rem' }}
+             min="1" max="100"
+           />
+         </div>
+
+         <button 
+           onClick={handleSeedDatabase}
+           style={{ background: 'transparent', border: 'none', color: '#10b981', fontSize: '0.75rem', cursor: 'pointer', fontWeight: 'bold' }}
+         >
+           + Inject Data
+         </button>
+         
+         <button 
+           onClick={handleClearMonthData}
+           style={{ background: 'transparent', border: 'none', color: '#ef4444', fontSize: '0.75rem', cursor: 'pointer', fontWeight: 'bold' }}
+         >
+           - Clear Month
+         </button>
+
+         <button 
+           onClick={handleNukeDatabase}
+           style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid #ef4444', color: '#ef4444', fontSize: '0.75rem', cursor: 'pointer', padding: '4px 8px', borderRadius: '4px', marginLeft: '10px' }}
+         >
+           ☢️ Nuke All
+         </button>
+      </div>
       
     </div>
   );
