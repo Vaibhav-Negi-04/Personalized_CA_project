@@ -88,17 +88,17 @@ function SubscriptionVault() {
       {/* HEADER */}
       <div className="vault-header-row">
         <div>
-          <h3 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '8px', color: '#e2e8f0' }}>
+          <h3 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-main)' }}>
             📺 Subscription Vault
           </h3>
-          <p style={{ margin: '4px 0 0 0', fontSize: '0.8rem', color: '#94a3b8' }}>
+          <p style={{ margin: '4px 0 0 0', fontSize: '0.8rem', color: 'var(--border-strong)' }}>
             Manage recurring expenses
           </p>
         </div>
         <div className="burn-stat">
           <span className="burn-icon">🔥</span>
           <div>
-            <div style={{ fontSize: '0.65rem', color: '#fca5a5', textTransform: 'uppercase' }}>Monthly Burn</div>
+            <div style={{ fontSize: '0.65rem', color: 'var(--status-danger)', textTransform: 'uppercase' }}>Monthly Burn</div>
             <div className="burn-amount">₹{totalBurn}</div>
           </div>
         </div>
@@ -127,15 +127,15 @@ function SubscriptionVault() {
 
       {/* FORM */}
       {showForm && (
-        <form onSubmit={handleAdd} style={{ marginBottom: '20px', background: 'rgba(0,0,0,0.3)', padding: '20px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
+        <form onSubmit={handleAdd} style={{ marginBottom: '20px', background: 'var(--overlay-dark)', padding: '20px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
           <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '15px', marginBottom: '15px' }}>
             <input className="glass-input" placeholder="Name" value={newSub.name} onChange={e => setNewSub({...newSub, name: e.target.value})} />
             <input className="glass-input" type="number" placeholder="Cost" value={newSub.cost} onChange={e => setNewSub({...newSub, cost: e.target.value})} />
             <input className="glass-input" placeholder="Day (e.g. 15th)" value={newSub.date} onChange={e => setNewSub({...newSub, date: e.target.value})} />
           </div>
           <div style={{ display: 'flex', gap: '10px' }}>
-            <button type="submit" style={{ flex: 1, background: 'linear-gradient(135deg, #3b82f6, #2563eb)', border: 'none', color: 'white', padding: '12px', borderRadius: '12px', fontWeight: '600', cursor: 'pointer', boxShadow: '0 4px 15px rgba(59, 130, 246, 0.4)' }}>Save</button>
-            <button type="button" onClick={() => setShowForm(false)} style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', color: '#94a3b8', padding: '12px 20px', borderRadius: '12px', cursor: 'pointer' }}>Cancel</button>
+            <button type="submit" style={{ flex: 1, background: 'linear-gradient(135deg, #3b82f6, var(--primary))', border: 'none', color: 'white', padding: '12px', borderRadius: '12px', fontWeight: '600', cursor: 'pointer', boxShadow: '0 4px 15px rgba(59, 130, 246, 0.4)' }}>Save</button>
+            <button type="button" onClick={() => setShowForm(false)} style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', color: 'var(--border-strong)', padding: '12px 20px', borderRadius: '12px', cursor: 'pointer' }}>Cancel</button>
           </div>
         </form>
       )}

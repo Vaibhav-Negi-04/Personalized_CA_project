@@ -100,7 +100,7 @@ function PredictionCard({ transactions }) {
 
   if (!chartData.data || chartData.data.length === 0) {
     return (
-      <div className="squad-glass-card" style={{ textAlign: 'center', color: '#94a3b8' }}>
+      <div className="squad-glass-card" style={{ textAlign: 'center', color: 'var(--border-strong)' }}>
         <h3>🔮 Spending Forecast</h3>
         <p>Not enough transaction data to generate a forecast yet.</p>
       </div>
@@ -111,10 +111,10 @@ function PredictionCard({ transactions }) {
     <div className="squad-glass-card">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px', flexWrap: 'wrap', gap: '10px' }}>
         <div>
-          <h3 style={{ margin: 0, color: '#e2e8f0', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <h3 style={{ margin: 0, color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '8px' }}>
             {chartData.isCurrentMonth ? '🔮 End-of-Month Forecast' : '📊 Monthly Spend Analysis'}
           </h3>
-          <p style={{ margin: '5px 0 0 0', color: '#94a3b8', fontSize: '0.85rem' }}>
+          <p style={{ margin: '5px 0 0 0', color: 'var(--border-strong)', fontSize: '0.85rem' }}>
             {chartData.monthLabel}
           </p>
           
@@ -127,7 +127,7 @@ function PredictionCard({ transactions }) {
                style={{
                  background: 'rgba(255,255,255,0.05)',
                  border: '1px solid #475569',
-                 color: '#e2e8f0',
+                 color: 'var(--text-main)',
                  padding: '6px 12px',
                  borderRadius: '8px',
                  fontSize: '0.85rem',
@@ -140,10 +140,10 @@ function PredictionCard({ transactions }) {
 
         </div>
         <div style={{ textAlign: 'right' }}>
-          <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
+          <div style={{ fontSize: '0.75rem', color: 'var(--border-strong)' }}>
             {chartData.isCurrentMonth ? 'Projected Total' : 'Final Total'}
           </div>
-          <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: chartData.isCurrentMonth ? '#f43f5e' : '#10b981' }}>
+          <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: chartData.isCurrentMonth ? '#f43f5e' : 'var(--accent)' }}>
             <span className="privacy-blur">₹{chartData.projectedTotal.toLocaleString('en-IN')}</span>
           </div>
         </div>
@@ -169,7 +169,7 @@ function PredictionCard({ transactions }) {
             
             <Tooltip 
               contentStyle={{ background: 'rgba(15, 23, 42, 0.9)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', color: '#fff' }}
-              itemStyle={{ color: '#e2e8f0' }}
+              itemStyle={{ color: 'var(--text-main)' }}
               formatter={(value, name) => [`₹${value.toLocaleString('en-IN')}`, name === 'actual' ? 'Actual Spend' : 'Predicted Spend']}
             />
             
@@ -185,7 +185,7 @@ function PredictionCard({ transactions }) {
         </ResponsiveContainer>
       </div>
       
-      <div style={{ marginTop: '15px', fontSize: '0.8rem', color: '#94a3b8', display: 'flex', gap: '15px', justifyContent: 'center' }}>
+      <div style={{ marginTop: '15px', fontSize: '0.8rem', color: 'var(--border-strong)', display: 'flex', gap: '15px', justifyContent: 'center' }}>
         <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}><div style={{width: '10px', height: '10px', background: '#8b5cf6', borderRadius: '50%'}}></div> Actual Spend</span>
         {chartData.isCurrentMonth && (
           <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}><div style={{width: '10px', height: '10px', background: '#f43f5e', borderRadius: '50%'}}></div> Forecast</span>

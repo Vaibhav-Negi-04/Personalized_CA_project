@@ -17,15 +17,15 @@
 
 /* 2. The Popup Card - Centers it */
 .modal-content {
-  background: #1e293b; /* Solid dark blue-gray */
+  background: var(--surface-dark); /* Solid dark blue-gray */
   border: 1px solid rgba(255, 255, 255, 0.1);
   padding: 2rem;
   border-radius: 24px;
   width: 90%;
   max-width: 400px;
-  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 25px 50px var(--overlay-dark);
   position: relative;
-  animation: slideUp 0.3s ease-out;
+  animation: slideUp 0.3s var(--ease-out-strong);
   display: flex;
   flex-direction: column;
   gap: 15px;
@@ -48,7 +48,7 @@
 .close-btn {
   background: none;
   border: none;
-  color: #94a3b8;
+  color: var(--border-strong);
   font-size: 2rem;
   line-height: 1;
   cursor: pointer;
@@ -59,7 +59,7 @@
 /* Type Toggle Buttons */
 .type-toggle {
   display: flex;
-  background: #0f172a;
+  background: var(--bg-black);
   padding: 5px;
   border-radius: 12px;
   gap: 5px;
@@ -70,20 +70,20 @@
   padding: 10px;
   border: none;
   background: transparent;
-  color: #94a3b8;
+  color: var(--border-strong);
   font-weight: bold;
   cursor: pointer;
   border-radius: 8px;
   transition: 0.3s;
 }
 
-.toggle-btn.active.income { background: rgba(16, 185, 129, 0.2); color: #10b981; }
+.toggle-btn.active.income { background: rgba(16, 185, 129, 0.2); color: var(--accent); }
 .toggle-btn.active.expense { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
 
 /* Inputs */
 .input-group label {
   display: block;
-  color: #94a3b8;
+  color: var(--border-strong);
   margin-bottom: 5px;
   font-size: 0.9rem;
 }
@@ -92,7 +92,7 @@
   width: 100%;
   background: transparent;
   border: none;
-  border-bottom: 2px solid #334155;
+  border-bottom: 2px solid var(--border-strong);
   color: white;
   font-size: 2rem;
   font-weight: bold;
@@ -103,8 +103,8 @@
 .text-input {
   width: 100%;
   padding: 12px;
-  background: #0f172a;
-  border: 1px solid #334155;
+  background: var(--bg-black);
+  border: 1px solid var(--border-strong);
   border-radius: 10px;
   color: white;
   box-sizing: border-box;
@@ -114,7 +114,8 @@
 .save-btn {
   width: 100%;
   padding: 15px;
-  background: linear-gradient(135deg, #10b981, #3b82f6);
+  background: var(--primary);
+  transition: all 0.3s ease-out;
   color: white;
   border: none;
   border-radius: 12px;
@@ -124,9 +125,11 @@
   margin-top: 10px;
 }
 
+.save-btn:hover { filter: brightness(1.1); transform: scale(0.98); }
+
 /* Chip Styling (The Categories) */
 .category-section { margin-top: 10px; }
-.category-label { color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 5px;}
+.category-label { color: var(--border-strong); font-size: 0.9rem; display: block; margin-bottom: 5px;}
 
 .chips-container {
   display: flex;
@@ -137,9 +140,9 @@
 }
 
 .chip {
-  background: #0f172a;
-  border: 1px solid #334155;
-  color: #cbd5e1;
+  background: var(--bg-black);
+  border: 1px solid var(--border-strong);
+  color: var(--text-muted);
   padding: 6px 12px;
   border-radius: 20px;
   white-space: nowrap;
@@ -189,7 +192,7 @@
 }
 
 .modal-theme-wealth .money-input {
-  border-bottom: 2px solid #444 !important;
+  border-bottom: 2px solid var(--text-tertiary) !important;
   font-family: 'JetBrains Mono', monospace;
 }
 

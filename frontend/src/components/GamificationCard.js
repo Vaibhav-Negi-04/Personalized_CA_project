@@ -15,7 +15,7 @@ import bRankImg from '../assets/ranks/brank.png';
 import aRankImg from '../assets/ranks/arank.png';
 import sRankImg from '../assets/ranks/srank.png';
 
-function GamificationCard({ transactions, income, expense, goals = [] }) {
+function GamificationCard({ transactions, income, expense, goals = [], onOpenAddTransaction }) {
   const navigate = useNavigate();
   const [showRankModal, setShowRankModal] = useState(false);
   
@@ -49,47 +49,36 @@ function GamificationCard({ transactions, income, expense, goals = [] }) {
   const streakCount = useMemo(() => {
     if (!transactions || transactions.length === 0) return 0;
 
-    // 1. Extract unique dates (normalized to Midnight)
     const uniqueDates = new Set();
     transactions.forEach(t => {
-      const d = t.date?.toDate ? t.date.toDate() : new Date(t.date);
-      uniqueDates.add(d.toDateString()); // "Mon Jan 01 2024"
+      if (!t.date) return; // Ignore pending
+      const tDate = t.date?.toDate ? t.date.toDate() : new Date(t.date);
+      if (isNaN(tDate.getTime())) return;
+      uniqueDates.add(tDate.toDateString()); 
     });
 
-    // 2. Sort Descending (Newest first)
-    const sortedDates = Array.from(uniqueDates)
-      .map(dateStr => new Date(dateStr).getTime())
-      .sort((a, b) => b - a);
-
-    if (sortedDates.length === 0) return 0;
-
-    // 3. The Calculation
     let streak = 0;
-    const today = new Date().setHours(0,0,0,0);
-    const yesterday = new Date(today - 86400000).setHours(0,0,0,0);
+    let checkDate = new Date(); // Start checking from today
     
-    // Check if the most recent transaction is Today or Yesterday
-    const lastTxnDate = new Date(sortedDates[0]).setHours(0,0,0,0);
-    
-    // If the last transaction was older than yesterday, the streak is broken (0)
-    if (lastTxnDate !== today && lastTxnDate !== yesterday) {
-      return 0; 
+    // Check if there is a transaction today
+    if (uniqueDates.has(checkDate.toDateString())) {
+      streak++;
+      checkDate.setDate(checkDate.getDate() - 1); // Move to yesterday
+    } else {
+      // If no transaction today, check if the streak is still alive from yesterday
+      checkDate.setDate(checkDate.getDate() - 1);
+      if (uniqueDates.has(checkDate.toDateString())) {
+        streak++;
+        checkDate.setDate(checkDate.getDate() - 1);
+      } else {
+        return 0; // Streak broken (no transactions today or yesterday)
+      }
     }
 
-    // Start counting backwards
-    let currentDateToCheck = lastTxnDate;
-
-    for (let i = 0; i < sortedDates.length; i++) {
-      const thisDate = new Date(sortedDates[i]).setHours(0,0,0,0);
-
-      if (thisDate === currentDateToCheck) {
-        streak++;
-        // Set target for NEXT iteration to be 1 day before
-        currentDateToCheck -= 86400000; 
-      } else {
-        // Gap found! Stop counting.
-        break; 
-      }
+    // Now continuously loop backwards day by day to count the rest of the streak
+    while (uniqueDates.has(checkDate.toDateString())) {
+      streak++;
+      checkDate.setDate(checkDate.getDate() - 1);
     }
 
     return streak;
@@ -174,6 +163,19 @@ function GamificationCard({ transactions, income, expense, goals = [] }) {
 
         {/* RIGHT Section */}
         <div className="status-right">
+          <button className="add-transaction-btn neon-pulse" onClick={onOpenAddTransaction} style={{
+            background: 'var(--primary)',
+            color: 'white',
+            border: 'none',
+            padding: '8px 16px',
+            borderRadius: '20px',
+            fontWeight: 'bold',
+            cursor: 'pointer',
+            marginRight: '15px'
+          }}>
+            + Add Expense
+          </button>
+          
           <div className="streak-pill">
             <span className="streak-icon">🔥</span>
             <span className="streak-text">{streakCount} DAY STREAK</span>

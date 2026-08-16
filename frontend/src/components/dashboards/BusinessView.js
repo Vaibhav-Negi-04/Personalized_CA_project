@@ -669,7 +669,7 @@ function BusinessView({ onLogout, onUpdateFinance }) {
 
     // =========================================
 
-    const profitData = [{ label: 'Ops', value: totalExpenses, color: '#ef4444' }, { label: 'Revenue', value: totalRevenue, color: '#10b981' }];
+    const profitData = [{ label: 'Ops', value: totalExpenses, color: '#ef4444' }, { label: 'Revenue', value: totalRevenue, color: 'var(--accent)' }];
 
     if (loading) return <div className="b-view" style={{display:'flex', justifyContent:'center', alignItems:'center'}}>Loading...</div>;
 
@@ -727,7 +727,7 @@ function BusinessView({ onLogout, onUpdateFinance }) {
                     <div className="b-grid-3" style={{ marginBottom: '30px' }}>
                         <div className="b-card"><span className="b-label" style={{color:'#3b82f6'}}>{UI.metricRev}</span><div style={{ fontSize: '2.2rem', fontWeight: '800' }}>{formatCurrency(totalRevenue)}</div></div>
                         <div className="b-card"><span className="b-label" style={{color:'#6b7280'}}>Opening Balance</span><div style={{ fontSize: '2.2rem', fontWeight: '800', color: '#6b7280' }}>{formatCurrency(openingBalance)}</div></div>
-                        <div className="b-card" style={{background:'#111827', border:'none'}}><span className="b-label" style={{color:'#10b981'}}>{UI.metricNet}</span><div style={{ fontSize: '2.2rem', fontWeight: '800', color: '#ffffff' }}>{formatCurrency(takeHome)}</div></div>
+                        <div className="b-card" style={{background:'#111827', border:'none'}}><span className="b-label" style={{color:'var(--accent)'}}>{UI.metricNet}</span><div style={{ fontSize: '2.2rem', fontWeight: '800', color: '#ffffff' }}>{formatCurrency(takeHome)}</div></div>
                     </div>
 
                     {/* Main Layout Area */}
@@ -790,7 +790,7 @@ function BusinessView({ onLogout, onUpdateFinance }) {
                                                 </div>
                                                 <div style={{textAlign:'right'}}>
                                                     <span style={{color:'#ef4444', fontWeight:'bold', display:'block', marginBottom:'4px'}}>{formatCurrency(k.amount)}</span>
-                                                    <button onClick={() => handleSettleKhata(k)} style={{background:'#10b981', color:'white', border:'none', borderRadius:'4px', padding:'4px 8px', fontSize:'0.75rem', cursor:'pointer', fontWeight:'bold'}}>SETTLE</button>
+                                                    <button onClick={() => handleSettleKhata(k)} style={{background:'var(--accent)', color:'white', border:'none', borderRadius:'4px', padding:'4px 8px', fontSize:'0.75rem', cursor:'pointer', fontWeight:'bold'}}>SETTLE</button>
                                                 </div>
                                             </div>
                                         ))}
@@ -817,7 +817,7 @@ function BusinessView({ onLogout, onUpdateFinance }) {
                                         <div key={a.id} style={{display:'flex', justifyContent:'space-between', alignItems: 'center', padding:'10px 12px', background:'#f9fafb', borderRadius:'8px', marginBottom:'8px'}}>
                                             <span style={{fontWeight:'bold', color:'#374151'}}>{a.name}</span>
                                             <div style={{display:'flex', gap:'15px', alignItems:'center'}}>
-                                                <span style={{color:'#10b981', fontWeight:'600'}}>{formatCurrency(a.cost)}</span>
+                                                <span style={{color:'var(--accent)', fontWeight:'600'}}>{formatCurrency(a.cost)}</span>
                                                 <button onClick={() => handleRemoveAsset(a.id)} style={{color:'#ef4444', background:'none', border:'none', cursor:'pointer', fontSize: '0.8rem', fontWeight: 'bold'}}>Remove</button>
                                             </div>
                                         </div>
@@ -859,7 +859,7 @@ function BusinessView({ onLogout, onUpdateFinance }) {
                             <div className="b-card" style={{ flex: 1 }}>
                                 <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom: '15px'}}>
                                     <h3 className="b-title" style={{ fontSize: '1rem' }}>📖 Daily Ledger</h3>
-                                    <span style={{fontSize:'0.7rem', background:'#e0f2fe', padding:'3px 6px', borderRadius:'4px', color:'#0284c7'}}>{filteredLedger.length} entries</span>
+                                    <span style={{fontSize:'0.7rem', background:'#e0f2fe', padding:'3px 6px', borderRadius:'4px', color:'var(--primary)'}}>{filteredLedger.length} entries</span>
                                 </div>
                                 
                                 {/* 🌟 UPDATED DATE SELECTOR TOOL: Now opens native calendar instantly on click */}
@@ -877,7 +877,7 @@ function BusinessView({ onLogout, onUpdateFinance }) {
                                     {ledgerDate && (
                                         <button 
                                             onClick={() => setLedgerDate("")}
-                                            style={{ background: '#fef2f2', border: '1px solid #fca5a5', borderRadius: '8px', padding: '0 15px', cursor: 'pointer', fontSize: '0.8rem', color: '#ef4444', fontWeight: 'bold' }}
+                                            style={{ background: '#fef2f2', border: '1px solid var(--status-danger)', borderRadius: '8px', padding: '0 15px', cursor: 'pointer', fontSize: '0.8rem', color: '#ef4444', fontWeight: 'bold' }}
                                         >
                                             Clear
                                         </button>
@@ -892,7 +892,7 @@ function BusinessView({ onLogout, onUpdateFinance }) {
                                         <div key={i} style={{ padding:'12px', borderBottom:'1px solid #f3f4f6' }}>
                                             <div style={{display:'flex', justifyContent:'space-between', marginBottom:'4px'}}>
                                                 <span style={{fontWeight:'600', fontSize:'0.9rem'}}>{entry.desc}</span>
-                                                <div style={{display:'flex', alignItems:'center', gap:'10px'}}><span style={{fontWeight:'700', color: entry.type === 'Credit' ? '#10b981' : '#ef4444'}}>{entry.type === 'Credit' ? '+' : '-'} {formatCurrency(entry.amount)}</span><button onClick={() => setDeleteId(entry.id)} style={{background:'none', border:'none', color:'#9ca3af', cursor:'pointer', fontSize:'1.2rem', lineHeight:1}}>×</button></div>
+                                                <div style={{display:'flex', alignItems:'center', gap:'10px'}}><span style={{fontWeight:'700', color: entry.type === 'Credit' ? 'var(--accent)' : '#ef4444'}}>{entry.type === 'Credit' ? '+' : '-'} {formatCurrency(entry.amount)}</span><button onClick={() => setDeleteId(entry.id)} style={{background:'none', border:'none', color:'#9ca3af', cursor:'pointer', fontSize:'1.2rem', lineHeight:1}}>×</button></div>
                                             </div>
                                             <div style={{fontSize:'0.75rem', color:'#9ca3af'}}>{entry.date} • {entry.source ? entry.source.toUpperCase() : entry.category}</div>
                                         </div>
@@ -936,7 +936,7 @@ function BusinessView({ onLogout, onUpdateFinance }) {
 
                         <button 
                         onClick={handleSeedBusinessDatabase}
-                        style={{ background: 'transparent', border: 'none', color: '#10b981', fontSize: '0.75rem', cursor: 'pointer', fontWeight: 'bold' }}
+                        style={{ background: 'transparent', border: 'none', color: 'var(--accent)', fontSize: '0.75rem', cursor: 'pointer', fontWeight: 'bold' }}
                         >
                         + Inject Ledger Data
                         </button>
@@ -1164,7 +1164,7 @@ function BusinessView({ onLogout, onUpdateFinance }) {
                         <div><label className="b-label">Amount</label><input className="b-input" type="number" placeholder="₹0" value={transForm.amount} onChange={e => setTransForm({...transForm, amount: e.target.value})} /></div>
                         <div>
                             <label className="b-label">Transaction Type</label>
-                            <div style={{display:'flex', gap:'10px', marginBottom:'10px'}}><button onClick={() => setTransForm({...transForm, type: 'Credit'})} className="b-btn" style={{flex:1, background: transForm.type === 'Credit' ? '#10b981' : '#f3f4f6', color: transForm.type === 'Credit' ? 'white' : 'black'}}>INCOME (+)</button><button onClick={() => setTransForm({...transForm, type: 'Debit'})} className="b-btn" style={{flex:1, background: transForm.type === 'Debit' ? '#ef4444' : '#f3f4f6', color: transForm.type === 'Debit' ? 'white' : 'black'}}>EXPENSE (-)</button></div>
+                            <div style={{display:'flex', gap:'10px', marginBottom:'10px'}}><button onClick={() => setTransForm({...transForm, type: 'Credit'})} className="b-btn" style={{flex:1, background: transForm.type === 'Credit' ? 'var(--accent)' : '#f3f4f6', color: transForm.type === 'Credit' ? 'white' : 'black'}}>INCOME (+)</button><button onClick={() => setTransForm({...transForm, type: 'Debit'})} className="b-btn" style={{flex:1, background: transForm.type === 'Debit' ? '#ef4444' : '#f3f4f6', color: transForm.type === 'Debit' ? 'white' : 'black'}}>EXPENSE (-)</button></div>
                             {transForm.type === 'Credit' && (<div><label className="b-label">Select Source</label><select className="b-input" value={transForm.source} onChange={(e) => setTransForm({...transForm, source: e.target.value})}><option value="direct">{UI.rev1}</option><option value="services">{UI.rev2}</option><option value="investments">{UI.rev3}</option></select></div>)}
                         </div>
                         <button onClick={handleManualTransaction} className="b-btn b-btn-primary" style={{marginTop:'10px'}}>SAVE</button>

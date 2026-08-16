@@ -63,20 +63,20 @@ function VibeCheckCard({ transactions }) {
     <div className="vibe-glass-card">
       <div className="vibe-header">
         <div>
-          <div style={{ color: '#94a3b8', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '2px' }}>
+          <div style={{ color: 'var(--border-strong)', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '2px' }}>
             Emotional Spend Analysis
           </div>
           <div className={`vibe-verdict ${verdictClass}`}>
             {verdict}
           </div>
-          <div style={{ color: '#cbd5e1', fontSize: '0.9rem', marginTop: '4px' }}>
+          <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginTop: '4px' }}>
             {message}
           </div>
         </div>
         
         {/* Regret Stat Highlight */}
         <div style={{ textAlign: 'right' }}>
-           <div style={{ fontSize: '2rem', fontWeight: 'bold', color: stats.pRegret > 0 ? '#f43f5e' : '#94a3b8' }}>
+           <div style={{ fontSize: '2rem', fontWeight: 'bold', color: stats.pRegret > 0 ? '#f43f5e' : 'var(--border-strong)' }}>
              {Math.round(stats.pRegret)}%
            </div>
            <div style={{ fontSize: '0.7rem', color: '#64748b' }}>Regret Rate</div>

@@ -13,6 +13,7 @@ function AddAssetModal({ isOpen, onClose }) {
   const [currentValue, setCurrentValue] = useState('');
   
   const [loading, setLoading] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
 
   if (!isOpen) return null;
 
@@ -26,21 +27,26 @@ function AddAssetModal({ isOpen, onClose }) {
         await addDoc(collection(db, "users", user.uid, "assets"), {
           name: name,
           type: type,
-          // 🟢 Saving both values to Firestore
-          invested: parseFloat(investedValue),
-          value: parseFloat(currentValue),
-          date: serverTimestamp()
-        });
-        
+        // 🟢 Saving both values to Firestore
+        invested: parseFloat(investedValue),
+        value: parseFloat(currentValue),
+        date: serverTimestamp()
+      });
+      
+      setLoading(false);
+      setIsSuccess(true);
+      
+      setTimeout(() => {
         // Reset form
         setName('');
         setInvestedValue('');
         setCurrentValue('');
         setType('Stock');
-        setLoading(false);
+        setIsSuccess(false);
         onClose();
-      }
-    } catch (error) {
+      }, 1500);
+    }
+  } catch (error) {
       console.error("Error adding asset:", error);
       setLoading(false);
     }
@@ -112,23 +118,37 @@ function AddAssetModal({ isOpen, onClose }) {
               />
             </div>
 
-            <div className="input-group">
-              <label>Current Value (₹)</label>
-              <input 
-                type="number" 
-                className="money-input" 
-                placeholder="5500" 
-                value={currentValue}
-                onChange={(e) => setCurrentValue(e.target.value)}
-                required
-              />
-            </div>
+          <div className="input-group">
+            <label>Current Value (₹)</label>
+            <input 
+              type="number" 
+              className="money-input" 
+              placeholder="0.00" 
+              value={currentValue}
+              onChange={(e) => setCurrentValue(e.target.value)}
+              required
+            />
           </div>
+        </div>
 
           <button type="submit" className="save-btn" disabled={loading}>
-            {loading ? 'Adding...' : 'Add to Portfolio'}
+            {loading ? 'Saving...' : 'Save Asset'}
           </button>
         </form>
+        
+        {isSuccess && (
+          <div className="success-overlay" style={{
+            position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
+            background: 'rgba(6, 182, 212, 0.9)', backdropFilter: 'blur(8px)',
+            display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center',
+            borderRadius: 'inherit', color: 'white', zIndex: 10, animation: 'fadeIn 0.3s forwards'
+          }}>
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{animation: 'scaleIn 0.5s var(--ease-spring)'}}>
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+            </svg>
+            <h2 style={{marginTop: '15px', textShadow: '0 2px 10px rgba(0,0,0,0.5)'}}>Asset Added!</h2>
+          </div>
+        )}
       </div>
     </div>
   );

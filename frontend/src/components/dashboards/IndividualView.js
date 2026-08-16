@@ -20,6 +20,7 @@ function IndividualView({ userData }) {
   const [isLoanModalOpen, setIsLoanModalOpen] = useState(false);
   const [isHealthModalOpen, setIsHealthModalOpen] = useState(false);
   const [totalPortfolioValue, setTotalPortfolioValue] = useState(0);
+  const [isDataLoaded, setIsDataLoaded] = useState(false);
 
   useEffect(() => {
     const user = auth.currentUser;
@@ -29,6 +30,7 @@ function IndividualView({ userData }) {
         const assetsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         setAssets(assetsData);
         setTotalPortfolioValue(assetsData.reduce((acc, curr) => acc + (parseFloat(curr.value) || 0), 0));
+        setIsDataLoaded(true);
       });
       return () => unsubscribe();
     }
@@ -85,8 +87,14 @@ function IndividualView({ userData }) {
             <button className="pro-btn-small" onClick={() => setIsAssetModalOpen(true)}>+ ADD POSITION</button>
           </div>
           <div className="pro-table-container">
-            {assets.length === 0 ? (
-              <div style={{padding:'30px', textAlign:'center', color:'#444', fontSize:'0.8rem'}}>NO POSITIONS OPEN</div>
+            {!isDataLoaded ? (
+              <div style={{padding:'30px'}}>
+                <div className="skeleton skeleton-text"></div>
+                <div className="skeleton skeleton-text"></div>
+                <div className="skeleton skeleton-text"></div>
+              </div>
+            ) : assets.length === 0 ? (
+              <div style={{padding:'30px', textAlign:'center', color:'var(--text-tertiary)', fontSize:'0.8rem'}}>NO POSITIONS OPEN</div>
             ) : (
               <table className="pro-table">
                 <thead><tr><th>ASSET</th><th style={{textAlign:'right'}}>INVESTED</th><th style={{textAlign:'right'}}>CURRENT</th><th style={{textAlign:'right'}}>P&L</th></tr></thead>

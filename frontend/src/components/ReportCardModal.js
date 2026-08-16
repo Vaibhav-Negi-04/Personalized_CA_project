@@ -20,7 +20,7 @@ function ReportCardModal({ transactions, onClose }) {
 
   if (savingsRate >= 0) { grade = "C"; gradeColor = "#f59e0b"; remark = "You survived."; }
   if (savingsRate >= 10) { grade = "B"; gradeColor = "#3b82f6"; remark = "Decent savings."; }
-  if (savingsRate >= 30) { grade = "A"; gradeColor = "#10b981"; remark = "Excellent!"; }
+  if (savingsRate >= 30) { grade = "A"; gradeColor = "var(--accent)"; remark = "Excellent!"; }
   if (savingsRate >= 50) { grade = "S"; gradeColor = "#facc15"; remark = "LEGENDARY."; }
 
   const monthName = now.toLocaleString('default', { month: 'long' });
@@ -54,7 +54,7 @@ function ReportCardModal({ transactions, onClose }) {
           <div className="r-divider"></div>
           <div className="r-stat-row total-row">
             <span>Net Savings</span>
-            <span style={{ color: savings >= 0 ? '#10b981' : '#ef4444' }}>
+            <span style={{ color: savings >= 0 ? 'var(--accent)' : '#ef4444' }}>
               {savings >= 0 ? '+' : ''}₹{savings}
             </span>
           </div>

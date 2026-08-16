@@ -119,12 +119,12 @@ function SquadTabs() {
       
       {/* HEADER & BUTTONS */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-        <h3 style={{ margin: 0, color: '#e2e8f0', display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <h3 style={{ margin: 0, color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '10px' }}>
           🍕 Squad Tabs
         </h3>
         <div style={{ display: 'flex', gap: '10px' }}>
           {/* ⚙️ Profile Gear to set your own UPI */}
-          <button onClick={handleSetMyUpi} className="add-btn-small" style={{background: 'transparent', border: '1px solid #475569', color: '#94a3b8', padding: '6px 10px'}} title="Set My UPI ID">
+          <button onClick={handleSetMyUpi} className="add-btn-small" style={{background: 'transparent', border: '1px solid #475569', color: 'var(--border-strong)', padding: '6px 10px'}} title="Set My UPI ID">
             ⚙️ {myUpi ? 'Edit UPI' : 'Set UPI'}
           </button>
           {!showForm && (
@@ -157,14 +157,14 @@ function SquadTabs() {
 
       {/* --- NEW TAB FORM --- */}
       {showForm && (
-        <form onSubmit={handleAdd} style={{ marginBottom: '25px', background: 'rgba(0,0,0,0.3)', padding: '20px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
+        <form onSubmit={handleAdd} style={{ marginBottom: '25px', background: 'var(--overlay-dark)', padding: '20px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '15px' }}>
             <input className="glass-input" placeholder="Who?" value={newTab.person} onChange={e => setNewTab({...newTab, person: e.target.value})} required />
             <input className="glass-input" type="number" placeholder="₹ Amount" value={newTab.amount} onChange={e => setNewTab({...newTab, amount: e.target.value})} required />
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr 1.5fr', gap: '15px', marginBottom: '15px' }}>
              <input className="glass-input" placeholder="For what?" value={newTab.desc} onChange={e => setNewTab({...newTab, desc: e.target.value})} />
-             <select className="glass-input" value={newTab.type} onChange={e => setNewTab({...newTab, type: e.target.value})} style={{ background: '#1e293b' }}>
+             <select className="glass-input" value={newTab.type} onChange={e => setNewTab({...newTab, type: e.target.value})} style={{ background: 'var(--surface-muted)' }}>
               <option value="owe">I Owe</option>
               <option value="owed">Owes Me</option>
             </select>
@@ -172,8 +172,8 @@ function SquadTabs() {
             <input className="glass-input" placeholder="Friend's UPI (Opt)" value={newTab.friendUpi} onChange={e => setNewTab({...newTab, friendUpi: e.target.value})} />
           </div>
           <div style={{ display: 'flex', gap: '10px' }}>
-            <button type="submit" style={{ flex: 1, background: 'linear-gradient(135deg, #8b5cf6, #6366f1)', border: 'none', color: 'white', padding: '12px', borderRadius: '12px', fontWeight: 'bold', cursor: 'pointer', boxShadow: '0 4px 15px rgba(139, 92, 246, 0.4)' }}>Create</button>
-            <button type="button" onClick={() => setShowForm(false)} style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', color: '#94a3b8', padding: '12px 20px', borderRadius: '12px', cursor: 'pointer' }}>Cancel</button>
+            <button type="submit" style={{ flex: 1, background: 'linear-gradient(135deg, #8b5cf6, var(--secondary))', border: 'none', color: 'white', padding: '12px', borderRadius: '12px', fontWeight: 'bold', cursor: 'pointer', boxShadow: '0 4px 15px rgba(139, 92, 246, 0.4)' }}>Create</button>
+            <button type="button" onClick={() => setShowForm(false)} style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', color: 'var(--border-strong)', padding: '12px 20px', borderRadius: '12px', cursor: 'pointer' }}>Cancel</button>
           </div>
         </form>
       )}
@@ -227,7 +227,7 @@ function SquadTabs() {
           <h3 style={{ margin: '0 0 10px 0', color: 'white', textAlign: 'center' }}>
             {settleTab.type === 'owed' ? `Request from ${settleTab.person}` : `Pay ${settleTab.person}`}
           </h3>
-          <div style={{ fontSize: '2rem', fontWeight: 'bold', color: settleTab.type === 'owed' ? '#10b981' : '#f43f5e', marginBottom: '20px' }}>
+          <div style={{ fontSize: '2rem', fontWeight: 'bold', color: settleTab.type === 'owed' ? 'var(--accent)' : '#f43f5e', marginBottom: '20px' }}>
             ₹{settleTab.amount}
           </div>
 
@@ -253,7 +253,7 @@ function SquadTabs() {
             <button 
               onClick={() => confirmSettle(settleTab.id)}
               style={{
-                background: '#10b981', border: 'none', color: 'white', padding: '12px', 
+                background: 'var(--accent)', border: 'none', color: 'white', padding: '12px', 
                 borderRadius: '12px', fontWeight: 'bold', cursor: 'pointer'
               }}
             >
@@ -263,7 +263,7 @@ function SquadTabs() {
             <button 
               onClick={() => setSettleTab(null)}
               style={{
-                background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', color: '#94a3b8', 
+                background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', color: 'var(--border-strong)', 
                 padding: '10px', borderRadius: '12px', cursor: 'pointer', marginTop: '5px'
               }}
             >

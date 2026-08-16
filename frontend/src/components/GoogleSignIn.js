@@ -56,7 +56,7 @@ function GoogleSignIn() {
 
   return (
     <div style={{ textAlign: 'center', marginTop: '20px', paddingTop: '20px', borderTop: '1px solid #334155' }}>
-      <h4 style={{ color: '#94a3b8', marginBottom: '10px', fontSize: '0.9rem' }}>Or continue with</h4>
+      <h4 style={{ color: 'var(--border-strong)', marginBottom: '10px', fontSize: '0.9rem' }}>Or continue with</h4>
       
       <div style={{ marginBottom: '10px' }}>
         <label style={{ color: '#fff', marginRight: '8px', fontSize: '0.9rem' }}>I am a:</label>

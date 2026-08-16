@@ -29,7 +29,7 @@ function ExpenseHeatmap({ transactions }) {
 
   return (
     <div className="section-card" style={{ marginTop: '20px' }}>
-      <h3 style={{ margin: '0 0 15px 0', color: '#e2e8f0', fontSize:'1rem' }}>📅 Spending Activity</h3>
+      <h3 style={{ margin: '0 0 15px 0', color: 'var(--text-main)', fontSize:'1rem' }}>📅 Spending Activity</h3>
       <div style={{ 
         display: 'grid', 
         gridTemplateColumns: 'repeat(auto-fit, minmax(10px, 1fr))', 

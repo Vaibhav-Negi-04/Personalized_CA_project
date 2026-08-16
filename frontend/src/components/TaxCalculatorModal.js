@@ -243,8 +243,8 @@ function TaxCalculatorModal({ isOpen, onClose }) {
             <button key={tab} onClick={() => setActiveTab(tab)}
               style={{
                 flex: 1, padding: '10px', borderRadius: '8px', border: 'none',
-                background: activeTab === tab ? '#10b981' : 'rgba(0,0,0,0.3)',
-                color: activeTab === tab ? 'white' : '#94a3b8',
+                background: activeTab === tab ? 'var(--accent)' : 'var(--overlay-dark)',
+                color: activeTab === tab ? 'white' : 'var(--border-strong)',
                 fontWeight: 'bold', cursor: 'pointer', textTransform: 'capitalize'
               }}
             >
@@ -256,7 +256,7 @@ function TaxCalculatorModal({ isOpen, onClose }) {
         {/* INPUT TABS */}
         {activeTab === 'income' && (
           <div className="fade-in">
-            <h4 style={{color:'#fbbf24', marginBottom:'15px'}}>Step 1: Annual Income</h4>
+            <h4 style={{color:'var(--status-warning)', marginBottom:'15px'}}>Step 1: Annual Income</h4>
             <div className="input-group"><label>Salary (Basic + Allowances)</label><input type="number" className="money-input" value={income.salary} onChange={e => setIncome({...income, salary: e.target.value})} placeholder="e.g. 1200000" /></div>
             <div className="input-group"><label>Business / Freelance</label><input type="number" className="money-input" value={income.business} onChange={e => setIncome({...income, business: e.target.value})} placeholder="e.g. 50000" /></div>
             <div className="input-group"><label>Other Sources</label><input type="number" className="money-input" value={income.other} onChange={e => setIncome({...income, other: e.target.value})} placeholder="e.g. 20000" /></div>
@@ -266,7 +266,7 @@ function TaxCalculatorModal({ isOpen, onClose }) {
 
         {activeTab === 'deductions' && (
           <div className="fade-in">
-            <div style={{background:'rgba(251, 191, 36, 0.1)', padding:'10px', borderRadius:'8px', marginBottom:'15px', color:'#fbbf24', fontSize:'0.85rem'}}>
+            <div style={{background:'var(--status-warning-bg)', padding:'10px', borderRadius:'8px', marginBottom:'15px', color:'var(--status-warning)', fontSize:'0.85rem'}}>
               ℹ️ Deductions (80C, 80D, HRA) are only valid for the <b>Old Regime</b>.
             </div>
             <div className="input-group"><label>80C (LIC, PF, ELSS) - Max 1.5L</label><input type="number" className="money-input" value={deductions.section80C} onChange={e => setDeductions({...deductions, section80C: e.target.value})} /></div>
@@ -281,16 +281,16 @@ function TaxCalculatorModal({ isOpen, onClose }) {
           <div className="fade-in">
             
             {/* 1. WHY BOX */}
-            <div style={{background: 'rgba(59, 130, 246, 0.15)', padding:'15px', borderRadius:'10px', borderLeft:'4px solid #3b82f6', marginBottom:'20px'}}>
-              <h4 style={{margin:'0 0 5px 0', color:'#60a5fa'}}>💡 Why {calculation.better}?</h4>
-              <p style={{margin:0, fontSize:'0.9rem', color:'#bfdbfe'}}>{calculation.reason}</p>
+            <div style={{background: 'var(--primary-transparent)', padding:'15px', borderRadius:'10px', marginBottom:'20px'}}>
+              <h4 style={{margin:'0 0 5px 0', color:'var(--primary)'}}>💡 Why {calculation.better}?</h4>
+              <p style={{margin:0, fontSize:'0.9rem', color:'var(--text-muted)'}}>{calculation.reason}</p>
             </div>
 
             {/* 2. SUGGESTIONS (Screen: With Emojis) */}
             <div style={{marginBottom:'20px'}}>
-               <h4 style={{color:'#fbbf24', marginBottom:'10px', borderBottom:'1px solid rgba(255,255,255,0.1)', paddingBottom:'5px'}}>🚀 Tax Saving Suggestions</h4>
+               <h4 style={{color:'var(--status-warning)', marginBottom:'10px', borderBottom:'1px solid rgba(255,255,255,0.1)', paddingBottom:'5px'}}>🚀 Tax Saving Suggestions</h4>
                {calculation.suggestions.map((tip, index) => (
-                   <div key={index} style={{fontSize:'0.9rem', color:'#e2e8f0', marginBottom:'8px', display:'flex', gap:'8px'}}>
+                   <div key={index} style={{fontSize:'0.9rem', color:'var(--text-main)', marginBottom:'8px', display:'flex', gap:'8px'}}>
                        <span>➤</span> <span>{tip}</span>
                    </div>
                ))}
@@ -298,10 +298,10 @@ function TaxCalculatorModal({ isOpen, onClose }) {
 
             {/* 3. COMPARISON TABLE */}
             <div style={{marginBottom:'20px', overflowX:'auto'}}>
-              <h4 style={{color:'#e2e8f0', borderBottom:'1px solid rgba(255,255,255,0.1)', paddingBottom:'8px'}}>Regime Comparison</h4>
-              <table style={{width:'100%', borderCollapse:'collapse', fontSize:'0.85rem', color:'#cbd5e1'}}>
+              <h4 style={{color:'var(--text-main)', borderBottom:'1px solid rgba(255,255,255,0.1)', paddingBottom:'8px'}}>Regime Comparison</h4>
+              <table style={{width:'100%', borderCollapse:'collapse', fontSize:'0.85rem', color:'var(--text-muted)'}}>
                 <thead>
-                  <tr style={{textAlign:'left', color:'#94a3b8', borderBottom:'1px solid #475569'}}>
+                  <tr style={{textAlign:'left', color:'var(--border-strong)', borderBottom:'1px solid #475569'}}>
                     <th style={{padding:'8px'}}>Feature</th>
                     <th style={{padding:'8px'}}>Old Regime</th>
                     <th style={{padding:'8px'}}>New Regime</th>
@@ -325,19 +325,19 @@ function TaxCalculatorModal({ isOpen, onClose }) {
             </div>
 
             {/* 4. VISUAL PIE CHART */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '20px', background: 'rgba(0,0,0,0.2)', padding: '15px', borderRadius: '15px', marginBottom: '20px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '20px', background: 'var(--overlay-dark)', padding: '15px', borderRadius: '15px', marginBottom: '20px' }}>
               <div style={{
                 width: '80px', height: '80px', borderRadius: '50%',
-                background: `conic-gradient(#f43f5e ${calculation.taxPercent}%, #10b981 0)`,
+                background: `conic-gradient(#f43f5e ${calculation.taxPercent}%, var(--accent) 0)`,
                 flexShrink: 0
               }}></div>
               <div>
-                <div style={{fontSize:'0.9rem', color:'#a7f3d0'}}>🟢 Take Home: {calculation.incomePercent.toFixed(1)}%</div>
-                <div style={{fontSize:'0.9rem', color:'#fda4af'}}>🔴 Tax Paid: {calculation.taxPercent.toFixed(1)}%</div>
+                <div style={{fontSize:'0.9rem', color:'var(--accent)'}}>🟢 Take Home: {calculation.incomePercent.toFixed(1)}%</div>
+                <div style={{fontSize:'0.9rem', color:'var(--status-danger)'}}>🔴 Tax Paid: {calculation.taxPercent.toFixed(1)}%</div>
               </div>
             </div>
 
-            <button className="save-btn" onClick={downloadPDF} style={{width:'100%', background:'linear-gradient(135deg, #3b82f6, #2563eb)'}}>
+            <button className="save-btn" onClick={downloadPDF} style={{width:'100%', background:'linear-gradient(135deg, #3b82f6, var(--primary))'}}>
               📄 Download Detailed PDF Report
             </button>
             <button className="add-btn-small" onClick={() => setActiveTab('income')} style={{width:'100%', marginTop:'10px', background:'transparent', border:'1px solid #64748b'}}>

@@ -256,7 +256,7 @@ function LoanCalculatorModal({ isOpen, onClose }) {
 
         <div style={{ display: 'flex', gap: '10px', margin: '20px 0' }}>
           {['calculate', 'compare', 'amortization'].map(tab => (
-            <button key={tab} onClick={() => setActiveTab(tab)} style={{flex: 1, padding: '12px', borderRadius: '8px', background: activeTab === tab ? '#10b981' : 'rgba(255,255,255,0.05)', color: 'white', fontWeight: 'bold', border:'none', cursor:'pointer'}}>{tab.toUpperCase()}</button>
+            <button key={tab} onClick={() => setActiveTab(tab)} style={{flex: 1, padding: '12px', borderRadius: '8px', background: activeTab === tab ? 'var(--accent)' : 'rgba(255,255,255,0.05)', color: 'white', fontWeight: 'bold', border:'none', cursor:'pointer'}}>{tab.toUpperCase()}</button>
           ))}
         </div>
 
@@ -273,14 +273,14 @@ function LoanCalculatorModal({ isOpen, onClose }) {
 
              {result && strategies && (
                <div style={{marginTop:'25px'}}>
-                  <h4 style={{color:'#e2e8f0', borderBottom:'1px solid rgba(255,255,255,0.1)', paddingBottom:'5px'}}>🧬 Loan DNA Analysis</h4>
+                  <h4 style={{color:'var(--text-main)', borderBottom:'1px solid rgba(255,255,255,0.1)', paddingBottom:'5px'}}>🧬 Loan DNA Analysis</h4>
                   <div style={{display:'grid', gridTemplateColumns:'repeat(3, 1fr)', gap:'10px', marginBottom:'20px'}}>
                      <div className="stat-box"><span>Monthly EMI</span><h3>₹{Math.round(result.emi).toLocaleString()}</h3></div>
-                     <div className="stat-box"><span>Total Interest</span><h3 style={{color:'#fda4af'}}>₹{Math.round(result.totalInterest).toLocaleString()}</h3></div>
-                     <div className="stat-box"><span>Rate Verdict</span><h3 style={{fontSize:'0.9rem', color:'#34d399'}}>{strategies.verdict}</h3></div>
+                     <div className="stat-box"><span>Total Interest</span><h3 style={{color:'var(--status-danger)'}}>₹{Math.round(result.totalInterest).toLocaleString()}</h3></div>
+                     <div className="stat-box"><span>Rate Verdict</span><h3 style={{fontSize:'0.9rem', color:'var(--status-success)'}}>{strategies.verdict}</h3></div>
                   </div>
 
-                  <h4 style={{color:'#e2e8f0', marginTop:'20px'}}>⚔️ Strategy Battle</h4>
+                  <h4 style={{color:'var(--text-main)', marginTop:'20px'}}>⚔️ Strategy Battle</h4>
                   <div style={{display:'grid', gridTemplateColumns:'repeat(3, 1fr)', gap:'15px'}}>
                      <div className="strategy-card">
                         <h5>1 Extra EMI/Yr</h5>
@@ -310,13 +310,13 @@ function LoanCalculatorModal({ isOpen, onClose }) {
           <div className="fade-in">
              <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:'20px', marginBottom:'20px'}}>
                 <div style={{background:'rgba(255,255,255,0.05)', padding:'15px', borderRadius:'15px'}}>
-                   <h4 style={{textAlign:'center', color:'#34d399'}}>Loan A</h4>
+                   <h4 style={{textAlign:'center', color:'var(--status-success)'}}>Loan A</h4>
                    <input className="money-input" placeholder="Amount" onChange={e=>setCompareA({...compareA, amount:e.target.value})} style={{marginBottom:'5px'}}/>
                    <input className="money-input" placeholder="Rate" onChange={e=>setCompareA({...compareA, rate:e.target.value})} style={{marginBottom:'5px'}}/>
                    <input className="money-input" placeholder="Years" onChange={e=>setCompareA({...compareA, tenure:e.target.value})} />
                 </div>
                 <div style={{background:'rgba(255,255,255,0.05)', padding:'15px', borderRadius:'15px'}}>
-                   <h4 style={{textAlign:'center', color:'#f472b6'}}>Loan B</h4>
+                   <h4 style={{textAlign:'center', color:'var(--secondary)'}}>Loan B</h4>
                    <input className="money-input" placeholder="Amount" onChange={e=>setCompareB({...compareB, amount:e.target.value})} style={{marginBottom:'5px'}}/>
                    <input className="money-input" placeholder="Rate" onChange={e=>setCompareB({...compareB, rate:e.target.value})} style={{marginBottom:'5px'}}/>
                    <input className="money-input" placeholder="Years" onChange={e=>setCompareB({...compareB, tenure:e.target.value})} />
@@ -326,9 +326,9 @@ function LoanCalculatorModal({ isOpen, onClose }) {
 
              {compareResult && (
                 <div className="fade-in">
-                   <div style={{background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', padding:'20px', borderRadius:'15px', textAlign:'center', marginBottom:'20px'}}>
+                   <div style={{background: 'linear-gradient(135deg, var(--accent) 0%, var(--status-success) 100%)', padding:'20px', borderRadius:'15px', textAlign:'center', marginBottom:'20px'}}>
                       <h2 style={{margin:0, color:'white', fontSize:'1.5rem'}}>🏆 {compareResult.winner} Wins!</h2>
-                      <p style={{color:'#ecfdf5', margin:'5px 0 0 0'}}>Savings: <span style={{fontWeight:'bold'}}>₹{Math.round(compareResult.savings).toLocaleString()}</span></p>
+                      <p style={{color:'var(--status-success-bg)', margin:'5px 0 0 0'}}>Savings: <span style={{fontWeight:'bold'}}>₹{Math.round(compareResult.savings).toLocaleString()}</span></p>
                    </div>
                    <div style={{display:'grid', gridTemplateColumns:'repeat(3, 1fr)', gap:'15px'}}>
                       <div className="stat-box"><span>EMI Diff</span><h3>₹{Math.round(compareResult.emiDiff).toLocaleString()}</h3></div>
@@ -348,14 +348,14 @@ function LoanCalculatorModal({ isOpen, onClose }) {
            <div className="fade-in">
               {!result ? <p style={{color:'white', textAlign:'center', padding:'20px'}}>Calculate first.</p> : (
                  <div style={{maxHeight:'400px', overflowY:'auto'}}>
-                    <table style={{width:'100%', color:'#cbd5e1', borderCollapse:'collapse'}}>
-                       <thead style={{background:'#1e293b', position:'sticky', top:0}}><tr><th>Year</th><th>Principal</th><th>Interest</th><th>Balance</th></tr></thead>
+                    <table style={{width:'100%', color:'var(--text-muted)', borderCollapse:'collapse'}}>
+                       <thead style={{background:'var(--surface-muted)', position:'sticky', top:0}}><tr><th>Year</th><th>Principal</th><th>Interest</th><th>Balance</th></tr></thead>
                        <tbody>
                           {amortization.map(row => (
                              <tr key={row.year} style={{borderBottom:'1px solid rgba(255,255,255,0.05)', textAlign:'center'}}>
                                 <td style={{padding:'10px'}}>{row.year}</td>
-                                <td style={{color:'#a7f3d0'}}>₹{Math.round(row.paidPrincipal).toLocaleString()}</td>
-                                <td style={{color:'#fda4af'}}>₹{Math.round(row.paidInterest).toLocaleString()}</td>
+                                <td style={{color:'var(--accent)'}}>₹{Math.round(row.paidPrincipal).toLocaleString()}</td>
+                                <td style={{color:'var(--status-danger)'}}>₹{Math.round(row.paidInterest).toLocaleString()}</td>
                                 <td>₹{Math.round(row.balance).toLocaleString()}</td>
                              </tr>
                           ))}
@@ -371,7 +371,7 @@ function LoanCalculatorModal({ isOpen, onClose }) {
         .mini-btn:hover { background: #3b82f6; border-color: #3b82f6; }
         .stat-box { background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; text-align: center; }
         .strategy-card { background: rgba(59, 130, 246, 0.1); padding: 15px; border-radius: 10px; border: 1px solid rgba(59, 130, 246, 0.3); text-align: center; }
-        .save-tag { color: #34d399; font-weight: bold; margin: 0; font-size: 0.9rem; }
+        .save-tag { color: var(--status-success); font-weight: bold; margin: 0; font-size: 0.9rem; }
       `}</style>
     </div>
   );

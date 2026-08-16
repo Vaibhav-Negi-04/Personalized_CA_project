@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import './AIReceiptScanner.css';
 
 function AIReceiptScanner({ onScanSuccess }) {
     const [isScanning, setIsScanning] = useState(false);
@@ -44,12 +45,14 @@ function AIReceiptScanner({ onScanSuccess }) {
     };
 
     return (
-        <div style={{ marginBottom: '15px', background: '#f8fafc', padding: '15px', borderRadius: '8px', border: '2px dashed #cbd5e1', textAlign: 'center', transition: 'all 0.3s' }}>
-            <label style={{ cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
-                <span style={{ fontSize: '2rem' }}>{isScanning ? '⏳' : '📸'}</span>
-                <span style={{ fontWeight: 'bold', color: '#3b82f6', fontSize: '0.95rem' }}>
+        <div className="ai-receipt-scanner-container">
+            <div className="ai-receipt-scanner-bg"></div>
+            <label className="ai-receipt-scanner-content">
+                <span className="ai-receipt-scanner-icon">{isScanning ? '⏳' : '📸'}</span>
+                <span className="ai-receipt-scanner-text">
                     {isScanning ? 'AI is reading receipt...' : 'Auto-Fill with AI (Upload Bill)'}
                 </span>
+                <span className="ai-receipt-scanner-subtext">Supports PNG, JPG, PDF</span>
                 <input 
                     type="file" 
                     accept="image/*" 

@@ -3,15 +3,15 @@ import { getFirestore } from "firebase/firestore";
 import { initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
 
-// Your Web App's Firebase Configuration
+// Your Web App's Firebase Configuration (Loaded securely from .env)
 const firebaseConfig = {
-  apiKey: "AIzaSyCPyyhiN46grG3g0--2j_e3uEOKPyPTeKI", // Your Key
-  authDomain: "personalized-ca.firebaseapp.com",
-  projectId: "personalized-ca",
-  storageBucket: "personalized-ca.firebasestorage.app",
-  messagingSenderId: "375795182944",
-  appId: "1:375795182944:web:e285a6b5765f6923398205",
-  measurementId: "G-K5FZ8S1FDN"
+  apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
+  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.REACT_APP_FIREBASE_APP_ID,
+  measurementId: process.env.REACT_APP_FIREBASE_MEASUREMENT_ID
 };
 
 // Initialize Firebase

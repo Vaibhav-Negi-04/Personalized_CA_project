@@ -42,18 +42,19 @@ function AIInsightBox({ balance, transactions }) {
 
     return (
         <div style={{
-            background: 'linear-gradient(145deg, rgba(15, 23, 42, 0.7), rgba(15, 23, 42, 0.4))',
-            backdropFilter: 'blur(12px)',
-            borderLeft: '4px solid #8b5cf6', /* Purple accent */
-            borderTop: '1px solid rgba(255,255,255,0.05)',
-            borderRight: '1px solid rgba(255,255,255,0.05)',
-            borderBottom: '1px solid rgba(255,255,255,0.05)',
+            background: 'rgba(255, 255, 255, 0.05)', /* Frosty glass */
+            backdropFilter: 'blur(20px)',
+            borderLeft: '4px solid #06b6d4', /* Electric Cyan accent */
+            borderTop: '1px solid rgba(255,255,255,0.1)',
+            borderRight: '1px solid rgba(255,255,255,0.1)',
+            borderBottom: '1px solid rgba(255,255,255,0.1)',
             padding: '24px',
             borderRadius: '16px',
-            boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
+            boxShadow: '0 8px 32px var(--overlay-dark)', /* Card Glow */
             position: 'relative',
-            overflow: 'hidden'
-        }}>
+            overflow: 'hidden',
+            transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
+        }} className="ai-insight-box">
             {/* The Title */}
             <div style={{ 
                 display: 'flex', 
@@ -77,7 +78,7 @@ function AIInsightBox({ balance, transactions }) {
             {/* The Italicized Prediction */}
             <p style={{
                 margin: 0,
-                color: '#e2e8f0',
+                color: 'var(--text-main)',
                 fontStyle: 'italic',
                 fontFamily: "'Georgia', serif", /* Classic serif font for that elegant look */
                 fontSize: '1.1rem',

@@ -338,23 +338,23 @@ function FinancialHealthModal({ isOpen, onClose }) {
             </div>
         </div>
 
-        <button className="save-btn" onClick={runDiagnostics} style={{width:'100%', marginTop:'20px', padding:'15px', fontSize:'1.1rem', background:'linear-gradient(135deg, #2563eb, #1d4ed8)'}}>
+        <button className="save-btn" onClick={runDiagnostics} style={{width:'100%', marginTop:'20px', padding:'15px', fontSize:'1.1rem', background:'linear-gradient(135deg, var(--primary), #1d4ed8)'}}>
             🏥 Run Full Diagnostics
         </button>
 
         {analysis && (
            <div className="fade-in" style={{marginTop:'30px', borderTop:'1px dashed #334155', paddingTop:'20px'}}>
               <div style={{textAlign:'center', marginBottom:'30px'}}>
-                 <div className="score-circle" style={{background: `conic-gradient(${analysis.score>75?'#10b981':analysis.score>50?'#fbbf24':'#f43f5e'} ${analysis.score}%, #1e293b 0)`}}>
+                 <div className="score-circle" style={{background: `conic-gradient(${analysis.score>75?'var(--accent)':analysis.score>50?'var(--status-warning)':'#f43f5e'} ${analysis.score}%, var(--surface-muted) 0)`}}>
                     <div className="score-inner">
                        <span style={{fontSize:'3.5rem', fontWeight:'bold', color:'white'}}>{analysis.score}</span>
-                       <span style={{fontSize:'0.9rem', color: '#94a3b8'}}>HEALTH SCORE</span>
+                       <span style={{fontSize:'0.9rem', color: 'var(--border-strong)'}}>HEALTH SCORE</span>
                     </div>
                  </div>
-                 <div style={{fontSize:'1.2rem', fontWeight:'bold', marginTop:'10px', color: analysis.score>75?'#4ade80':analysis.score>50?'#fcd34d':'#fda4af'}}>Verdict: {analysis.verdict}</div>
+                 <div style={{fontSize:'1.2rem', fontWeight:'bold', marginTop:'10px', color: analysis.score>75?'#4ade80':analysis.score>50?'#fcd34d':'var(--status-danger)'}}>Verdict: {analysis.verdict}</div>
               </div>
 
-              <h4 style={{color:'#e2e8f0', marginBottom:'15px'}}>📊 Vital Signs</h4>
+              <h4 style={{color:'var(--text-main)', marginBottom:'15px'}}>📊 Vital Signs</h4>
               <div className="vitals-grid">
                  <div className="vital-card">
                     <span className="v-label">Net Worth</span>
@@ -366,22 +366,22 @@ function FinancialHealthModal({ isOpen, onClose }) {
                  </div>
                  <div className="vital-card">
                     <span className="v-label">Runway</span>
-                    <div className="v-value" style={{color: analysis.metrics.runway<6?'#fbbf24':'#34d399'}}>{analysis.metrics.runway.toFixed(1)} Mo</div>
+                    <div className="v-value" style={{color: analysis.metrics.runway<6?'var(--status-warning)':'#34d399'}}>{analysis.metrics.runway.toFixed(1)} Mo</div>
                  </div>
                  <div className="vital-card">
                     <span className="v-label">Freedom Year</span>
-                    <div className="v-value" style={{color: '#60a5fa'}}>{analysis.fire.yearsToFreedom < 60 ? analysis.fire.yearsToFreedom : '99+'} Yrs</div>
+                    <div className="v-value" style={{color: 'var(--primary)'}}>{analysis.fire.yearsToFreedom < 60 ? analysis.fire.yearsToFreedom : '99+'} Yrs</div>
                  </div>
               </div>
 
-              <h4 style={{color:'#e2e8f0', marginTop:'25px'}}>💰 Budget Allocation (50/30/20 Rule)</h4>
+              <h4 style={{color:'var(--text-main)', marginTop:'25px'}}>💰 Budget Allocation (50/30/20 Rule)</h4>
               <div style={{height:'30px', width:'100%', background:'#334155', borderRadius:'15px', overflow:'hidden', display:'flex', marginTop:'10px'}}>
                  <div style={{width: `${Math.min(100, (analysis.inputs.exp/analysis.inputs.inc)*100)}%`, background:'#f472b6', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'0.75rem', color:'white'}}>Needs</div>
                  <div style={{width: `${Math.min(100, (analysis.metrics.monthlySavings/analysis.inputs.inc)*100)}%`, background:'#34d399', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'0.75rem', color:'white'}}>Savings</div>
-                 <div style={{flex:1, background:'#60a5fa', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'0.75rem', color:'white'}}>Debt/Wants</div>
+                 <div style={{flex:1, background:'var(--primary)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'0.75rem', color:'white'}}>Debt/Wants</div>
               </div>
 
-              <button className="save-btn" onClick={downloadReport} style={{width:'100%', marginTop:'30px', padding:'15px', fontSize:'1.1rem', background:'linear-gradient(135deg, #10b981, #059669)'}}>
+              <button className="save-btn" onClick={downloadReport} style={{width:'100%', marginTop:'30px', padding:'15px', fontSize:'1.1rem', background:'linear-gradient(135deg, var(--accent), #059669)'}}>
                  📄 Download 5-Page Expert Report
               </button>
            </div>
@@ -390,11 +390,11 @@ function FinancialHealthModal({ isOpen, onClose }) {
       <style>{`
         .health-input-container { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; }
         .input-column { background: rgba(255,255,255,0.03); padding: 20px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.05); }
-        .score-circle { width: 180px; height: 180px; borderRadius: 50%; margin: 0 auto; display: flex; align-items: center; justify-content: center; position: relative; box-shadow: 0 0 30px rgba(0,0,0,0.3); }
+        .score-circle { width: 180px; height: 180px; borderRadius: 50%; margin: 0 auto; display: flex; align-items: center; justify-content: center; position: relative; box-shadow: 0 0 30px var(--overlay-dark); }
         .score-inner { width: 150px; height: 150px; background: #0f172a; borderRadius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         .vitals-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 15px; }
         .vital-card { background: rgba(15, 23, 42, 0.8); padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); text-align: center; }
-        .v-label { color: #94a3b8; font-size: 0.8rem; display: block; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .v-label { color: var(--border-strong); font-size: 0.8rem; display: block; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px; }
         .v-value { font-size: 1.4rem; font-weight: 800; color: white; }
         @media (max-width: 650px) { .health-input-container { grid-template-columns: 1fr; } }
       `}</style>

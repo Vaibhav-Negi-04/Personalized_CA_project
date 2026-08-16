@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import StudentView from './dashboards/StudentView';
 import IndividualView from './dashboards/IndividualView';
 import BusinessView from './dashboards/BusinessView';
+import MobileMenu from './MobileMenu';
 import AddTransactionModal from './AddTransactionModal'; 
 import OmniCommand from './OmniCommand'; 
 import AIChatBot from './AIChatBot'; // 👈 1. IMPORT THE BOT
@@ -18,6 +19,7 @@ function Dashboard() {
   const { currentUser } = useAuth();
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   
   // --- STATES ---
@@ -49,18 +51,23 @@ function Dashboard() {
     });
   }, []);
 
-  const fetchUserData = useCallback(async () => {
+  const fetchUserData = useCallback(async (silent = false) => {
     if (currentUser) {
+      if (silent !== true) setLoading(true);
+      setError(null);
       try {
         const docRef = doc(db, "users", currentUser.uid);
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
           setUserData(docSnap.data());
+        } else {
+          setError("User profile not found. Please log in again.");
         }
-      } catch (error) {
-        console.error("Error fetching data:", error);
+      } catch (err) {
+        console.error("Error fetching data:", err);
+        setError("Failed to load financial data. Please check your connection.");
       } finally {
-        setLoading(false);
+        if (silent !== true) setLoading(false);
       }
     }
   }, [currentUser]);
@@ -106,19 +113,37 @@ function Dashboard() {
   }, [isGhostMode]); 
 
 
+  // --- ERROR SCREEN ---
+  if (error) {
+    return (
+      <div className="error-screen">
+        <h2>Connection Error</h2>
+        <p>{error}</p>
+        <button className="retry-btn" onClick={fetchUserData}>
+          Retry Connection
+        </button>
+      </div>
+    );
+  }
+
   // --- LOADING SCREEN ---
   if (loading) {
     return (
       <div className="loading-screen">
         <div className="loading-spinner"></div>
-        <div className="loading-text">Loading System...</div>
+        <div className="loading-text">Loading your dashboard...</div>
       </div>
     );
   }
 
   return (
-    <div className="dashboard-container">
+    <div className="dashboard-container" id="main-content" tabIndex="-1">
       
+      {/* Global Mobile Menu */}
+      <div style={{ position: 'fixed', top: '15px', right: '15px', zIndex: 9000 }}>
+        <MobileMenu />
+      </div>
+
       {/* OmniCommand (Always accessible) */}
       <OmniCommand 
         isOpen={isOmniOpen} 
@@ -126,14 +151,6 @@ function Dashboard() {
         onToggleGhost={toggleGhostMode}
       />
 
-      {/* --- 👻 GHOST TOGGLE BUTTON --- */}
-      <button 
-        className={`ghost-toggle-btn ${isGhostMode ? 'active' : ''}`}
-        onClick={toggleGhostMode}
-        title="Toggle Ghost Mode (Shift + P)"
-      >
-        {isGhostMode ? '👻' : '👁️'}
-      </button>
 
       {/* View Switcher based on User Type */}
       {/* 👇 4. PASS THE 'updateFinancials' PROP TO ALL VIEWS */}
@@ -142,6 +159,7 @@ function Dashboard() {
         <StudentView 
           userData={userData} 
           onUpdateFinance={updateFinancials} 
+          onOpenAddTransaction={() => setIsModalOpen(true)}
         />
       )}
       
@@ -160,22 +178,6 @@ function Dashboard() {
   />
 )}
 
-      {/* Floating Action Button (Global) */}
-      <button 
-        className="fab-btn"
-        onClick={() => setIsModalOpen(true)}
-        style={{
-          position: 'fixed', bottom: '30px', right: '30px',
-          backgroundColor: '#3b82f6', color: 'white',
-          border: 'none', borderRadius: '50%', width: '60px', height: '60px',
-          fontSize: '30px', cursor: 'pointer', boxShadow: '0 10px 20px rgba(59,130,246,0.5)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          zIndex: 999 
-        }}
-      >
-        +
-      </button>
-
       {/* 🤖 5. THE AI BOT (Connected to the Live Data) */}
       <AIChatBot 
          dashboardBalance={financialStats.balance}
@@ -187,7 +189,7 @@ function Dashboard() {
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)}
         userType={userData?.userType}
-        refreshData={fetchUserData} 
+        refreshData={() => fetchUserData(true)} 
       />
 
     </div>

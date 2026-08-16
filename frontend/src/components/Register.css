@@ -1,129 +1,218 @@
-/* frontend/src/components/Register.css */
+﻿/* frontend/src/components/Register.css */
 
-/* Remove default backgrounds to let Galaxy shine through */
+/* Main Container: Asymmetrical Layout */
 .register-page {
   min-height: 100vh;
   display: flex;
   align-items: center;
-  justify-content: center;
-  padding: 20px;
+  justify-content: flex-start; /* Asymmetrical float to the left */
+  padding: 5% 10%;
   position: relative;
-  /* No background-color here, handled by canvas */
 }
 
-/* Glass Card - Updated for better transparency */
+/* Glass Card */
 .register-card {
-  /* Using a very transparent dark violet to match your screenshot */
-  background: rgba(20, 10, 40, 0.5); 
-  backdrop-filter: blur(12px); /* Blur the galaxy slightly for readability */
-  -webkit-backdrop-filter: blur(12px);
-  padding: 2.5rem;
+  background: var(--overlay-dark); 
+  backdrop-filter: blur(24px); 
+  -webkit-backdrop-filter: blur(24px);
+  padding: 3.5rem;
   border-radius: 24px;
-  border: 1px solid rgba(255, 255, 255, 0.15); /* Slightly brighter border */
+  border: 1px solid rgba(255, 255, 255, 0.08); 
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 20px 50px rgba(139, 92, 246, 0.15); /* Tinted purple shadow */
   width: 100%;
-  max-width: 450px;
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
-  
-  opacity: 0;
-  transform: translateY(20px);
-  animation: fadeInUp 0.8s ease-out forwards;
+  max-width: 460px;
+  text-align: left; /* Break symmetry */
+  z-index: 5;
+  animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
+
+/* Back Link */
+.back-home-link {
+  position: absolute;
+  top: 40px;
+  left: 5%;
+  color: var(--border-strong);
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.9rem;
+  letter-spacing: 0.5px;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1), color 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.back-home-link:hover { 
+  color: var(--text-main); 
+  transform: translateX(-4px); 
+}
+
 
 /* Typography */
 .register-card h2 {
-  font-size: 2.2rem;
+  font-family: var(--font-primary);
+  font-size: 2.4rem;
   margin-bottom: 0.5rem;
   font-weight: 800;
-  color: white; /* Clean white looks best on galaxy */
-  text-shadow: 0 0 10px rgba(139, 92, 246, 0.5);
-  text-align: center;
+  color: white; 
+  letter-spacing: -1px;
 }
 
 .register-subtitle {
-  color: rgba(255, 255, 255, 0.7);
-  margin-bottom: 2rem;
+  color: var(--border-strong);
+  margin-bottom: 2.5rem;
   font-size: 0.95rem;
-  text-align: center;
+  letter-spacing: 0.2px;
 }
 
 /* Form Elements */
 .form-group {
-  margin-bottom: 1.2rem;
+  margin-bottom: 1.5rem;
+  animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
+.form-group:nth-child(1) { animation-delay: 0.1s; }
+.form-group:nth-child(2) { animation-delay: 0.2s; }
+.form-group:nth-child(3) { animation-delay: 0.3s; }
+.form-group:nth-child(4) { animation-delay: 0.4s; }
 
 .form-group label {
-  color: rgba(255, 255, 255, 0.8);
-  margin-bottom: 0.5rem;
-  font-size: 0.9rem;
-  font-weight: 500;
+  display: block; 
+  color: var(--text-muted); 
+  margin-bottom: 0.6rem; 
+  font-size: 0.85rem; 
+  font-weight: 600; 
+  letter-spacing: 0.5px;
 }
 
-/* Inputs - Make them semi-transparent too */
+/* Input with Icon Wrapper */
+.input-wrapper { position: relative; display: flex; align-items: center; }
+.input-icon {
+  position: absolute;
+  left: 16px;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  transition: color 0.3s ease;
+}
+
+.form-input.with-icon, .form-select.with-icon {
+  padding-left: 48px;
+}
+
+/* Inputs */
 .form-input, .form-select {
   width: 100%;
-  padding: 12px 16px;
-  background: rgba(0, 0, 0, 0.4); /* Dark see-through */
+  padding: 16px 16px;
+  background: rgba(255, 255, 255, 0.03); 
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 12px;
   color: white;
   font-size: 1rem;
-  transition: all 0.3s ease;
+  box-shadow: inset 0 2px 4px var(--overlay-dark);
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1), color 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   box-sizing: border-box;
 }
 
 .form-input:focus, .form-select:focus {
   outline: none;
-  border-color: #8b5cf6; /* Purple focus */
-  background: rgba(0, 0, 0, 0.6);
-  box-shadow: 0 0 15px rgba(139, 92, 246, 0.3);
+  border-color: #8b5cf6; 
+  box-shadow: inset 0 2px 4px var(--overlay-dark), 0 0 0 3px rgba(139, 92, 246, 0.15);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.input-wrapper:focus-within .input-icon {
+  color: #8b5cf6;
+}
+
+/* Select Box specific fixes */
+.form-select option {
+  background: #0f172a;
+  color: white;
 }
 
 /* Button - Neon Gradient */
 .btn-register {
   width: 100%;
-  padding: 14px;
-  background: linear-gradient(90deg, #06b6d4, #8b5cf6);
-  border: none;
+  padding: 16px;
+  background: linear-gradient(135deg, #06b6d4, #8b5cf6);
+  border: 1px solid rgba(255,255,255,0.1);
   border-radius: 12px;
   color: white;
-  font-size: 1rem;
-  font-weight: bold;
+  font-size: 1.05rem;
+  font-weight: 700;
   cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
-  margin-top: 1rem;
-  box-shadow: 0 0 20px rgba(139, 92, 246, 0.4); /* Glow */
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1), color 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  margin-top: 1.5rem;
+  box-shadow: 0 8px 20px rgba(139, 92, 246, 0.25);
+  animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) both 0.5s;
 }
 
-.btn-register:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 0 30px rgba(6, 182, 212, 0.6);
+@media (hover: hover) and (pointer: fine) {
+  .btn-register:hover {
+    box-shadow: 0 12px 25px rgba(139, 92, 246, 0.4);
+    background: linear-gradient(135deg, var(--secondary), var(--primary));
+  }
+}
+
+.btn-register:active {
+  transform: translateY(1px) scale(0.97);
 }
 
 /* Status Messages & Footer */
-.status-msg {
-  padding: 12px;
-  border-radius: 8px;
-  margin-top: 15px;
+.status-msg, .error-msg, .success-msg {
+  padding: 14px;
+  border-radius: 12px;
+  margin-top: 20px;
   font-size: 0.9rem;
-  text-align: center;
 }
+.error-msg { background: rgba(244, 63, 94, 0.1); color: #f43f5e; border: 1px solid rgba(244, 63, 94, 0.2); }
+.success-msg { background: rgba(16, 185, 129, 0.1); color: var(--accent); border: 1px solid rgba(16, 185, 129, 0.2); }
+
 .auth-footer {
-  margin-top: 1.5rem;
-  color: rgba(255, 255, 255, 0.6);
-  font-size: 0.9rem;
+  margin-top: 2rem;
+  color: var(--border-strong);
+  font-size: 0.95rem;
   text-align: center;
+  animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) both 0.7s;
 }
 .auth-footer a {
-  color: #8b5cf6;
+  color: var(--text-main);
   text-decoration: none;
-  font-weight: 600;
+  font-weight: 700;
+  transition: color 0.3s;
 }
-.auth-footer a:hover { color: #06b6d4; }
+.auth-footer a:hover { color: #8b5cf6; }
 
-/* Keep your password strength styles, just ensure text is readable */
-.strength-text { color: rgba(255,255,255,0.8); }
+/* Password Strength Adjustments */
+.password-strength-group {
+  margin-top: 12px;
+}
+.strength-bar-container {
+  height: 4px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+.strength-bar {
+  height: 100%;
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), background 0.3s ease;
+}
+.strength-bar.weak { width: 33%; background: #f43f5e; box-shadow: 0 0 10px #f43f5e; }
+.strength-bar.medium { width: 66%; background: #f59e0b; box-shadow: 0 0 10px #f59e0b; }
+.strength-bar.strong { width: 100%; background: var(--accent); box-shadow: 0 0 10px var(--accent); }
+
+.strength-text { 
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-align: right;
+  letter-spacing: 0.5px;
+}
+.strength-text.weak { color: #f43f5e; }
+.strength-text.medium { color: #f59e0b; }
+.strength-text.strong { color: var(--accent); }
 
 /* Animation Keyframes */
 @keyframes fadeInUp {
-  to { opacity: 1; transform: translateY(0); }
+  to { opacity: 1; }
 }

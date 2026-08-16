@@ -13,31 +13,68 @@
   --accent: #10b981;     /* Neon Green */
   --danger: #f43f5e;     /* Rose Red */
   
+  /* Borders & Surfaces */
+  --border-subtle: #475569; 
+  --border-strong: #94a3b8; 
+  --surface-muted: #334155; 
+  --surface-dark: var(--surface-dark);
+  --bg-black: var(--bg-black);
+  
   /* Text */
-  --text-main: #ffffff;  /* Pure White */
-  --text-muted: #c7d2fe; /* Soft Lavender */
+  --text-main: #ffffff;  
+  --text-muted: #c7d2fe; 
+  --text-tertiary: #64748b; 
+  
+  /* Status Colors */
+  --status-warning: #f59e0b; 
+  --status-danger: #ef4444;
+  --status-success: #34d399;
+  --status-success-bg: rgba(52, 211, 153, 0.1);
+  --status-danger-bg: rgba(239, 68, 68, 0.1);
 
   /* Glows */
   --glow-primary: 0 0 20px rgba(6, 182, 212, 0.5);
   --glow-card: 0 8px 32px rgba(0, 0, 0, 0.3);
+
+  /* Overlays & Utility */
+  --overlay-dark: rgba(0, 0, 0, 0.3);
+  --overlay-heavy: var(--overlay-heavy);
+  --overlay-light: rgba(255, 255, 255, 0.1);
+  --status-warning-bg: rgba(251, 191, 36, 0.1);
+  --primary-transparent: rgba(59, 130, 246, 0.15);
+
+  /* Typography */
+  --font-primary: 'Outfit', 'Jost', sans-serif;
+
+  /* Animations & Easings (Emil Kowalski tokens) */
+  --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-out-strong: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out-strong: cubic-bezier(0.77, 0, 0.175, 1);
 }
+
+@import url('https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600;700&display=swap');
 
 body {
   margin: 0;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: var(--font-primary);
   -webkit-font-smoothing: antialiased;
-  color:black;
+  color: var(--text-main);
+  overflow-x: hidden;
   
   /* Apply the Galaxy Background Globally */
   background: var(--bg-galaxy);
   background-attachment: fixed; /* Keeps bg still while scrolling */
-  color: var(--text-main);
   min-height: 100vh;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-primary);
+  letter-spacing: 0.5px;
 }
 
 /* Smooth Scrollbar */
 ::-webkit-scrollbar { width: 8px; }
-::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
+::-webkit-scrollbar-track { background: var(--overlay-dark); }
 ::-webkit-scrollbar-thumb { background: var(--secondary); border-radius: 4px; }
 
 /* Global Animations */
@@ -45,3 +82,52 @@ body {
   from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+/* Reduced Motion Safeguard */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+    transform: none !important;
+  }
+}.skip-to-content {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: var(--primary);
+  color: white;
+  padding: 8px;
+  z-index: 10000;
+  transition: top 0.2s ease;
+}
+.skip-to-content:focus { top: 0; }
+
+
+/* -------------------------------------
+   Skeleton Loading Animation
+   ------------------------------------- */
+@keyframes shimmer {
+  0% { background-position: -1000px 0; }
+  100% { background-position: 1000px 0; }
+}
+
+.skeleton {
+  background: var(--surface);
+  background-image: linear-gradient(
+    90deg, 
+    rgba(255, 255, 255, 0.0) 0%, 
+    rgba(255, 255, 255, 0.05) 50%, 
+    rgba(255, 255, 255, 0.0) 100%
+  );
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite linear;
+  border-radius: 8px;
+  min-height: 20px;
+}
+
+.skeleton-text { width: 100%; height: 16px; margin-bottom: 8px; }
+.skeleton-title { width: 60%; height: 24px; margin-bottom: 12px; }
+.skeleton-circle { width: 40px; height: 40px; border-radius: 50%; }
+.skeleton-card { height: 120px; width: 100%; }

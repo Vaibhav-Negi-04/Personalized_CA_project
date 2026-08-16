@@ -118,7 +118,7 @@ function BusinessPredictionCard({ ledger }) {
           <div style={{ fontSize: '0.75rem', color: '#6b7280', textTransform: 'uppercase', fontWeight: 'bold' }}>
             {chartData.isCurrentMonth ? 'Projected Revenue' : 'Total Revenue'}
           </div>
-          <div style={{ fontSize: '1.8rem', fontWeight: '800', color: '#10b981' }}>
+          <div style={{ fontSize: '1.8rem', fontWeight: '800', color: 'var(--accent)' }}>
             ₹{chartData.projected.toLocaleString('en-IN')}
           </div>
         </div>
@@ -130,8 +130,8 @@ function BusinessPredictionCard({ ledger }) {
           <AreaChart data={chartData.data} margin={{ top: 10, right: 10, left: 15, bottom: 0 }}>
             <defs>
               <linearGradient id="colorRevActual" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#10b981" stopOpacity={0.4}/>
-                <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                <stop offset="5%" stopColor="var(--accent)" stopOpacity={0.4}/>
+                <stop offset="95%" stopColor="var(--accent)" stopOpacity={0}/>
               </linearGradient>
               <linearGradient id="colorRevPredicted" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
@@ -156,13 +156,13 @@ function BusinessPredictionCard({ ledger }) {
             )}
 
             <Area type="monotone" dataKey="predicted" stroke="#3b82f6" strokeWidth={2} strokeDasharray="5 5" fillOpacity={1} fill="url(#colorRevPredicted)" />
-            <Area type="monotone" dataKey="actual" stroke="#10b981" strokeWidth={3} fillOpacity={1} fill="url(#colorRevActual)" connectNulls={false} />
+            <Area type="monotone" dataKey="actual" stroke="var(--accent)" strokeWidth={3} fillOpacity={1} fill="url(#colorRevActual)" connectNulls={false} />
           </AreaChart>
         </ResponsiveContainer>
       </div>
       
       <div style={{ marginTop: '20px', fontSize: '0.85rem', color: '#6b7280', display: 'flex', gap: '20px', justifyContent: 'center', fontWeight: '600' }}>
-        <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><div style={{width: '12px', height: '12px', background: '#10b981', borderRadius: '3px'}}></div> Actual Revenue</span>
+        <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><div style={{width: '12px', height: '12px', background: 'var(--accent)', borderRadius: '3px'}}></div> Actual Revenue</span>
         {chartData.isCurrentMonth && (
           <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><div style={{width: '12px', height: '12px', background: '#3b82f6', borderRadius: '3px'}}></div> Forecasted</span>
         )}

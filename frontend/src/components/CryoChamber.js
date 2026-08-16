@@ -91,7 +91,7 @@ function CryoChamber() {
     <div className="cryo-container" style={{ marginBottom: '40px' }}>
       <div className="cryo-section-header">
         <h3 style={{ color: '#67e8f9', fontSize: '1rem', textTransform: 'uppercase', letterSpacing: '2px', display:'flex', alignItems:'center', gap:'10px', margin: 0 }}>
-          ❄️ Cryo-Chamber <span style={{fontSize:'0.7rem', color:'#94a3b8'}}>(Impulse Control)</span>
+          ❄️ Cryo-Chamber <span style={{fontSize:'0.7rem', color:'var(--border-strong)'}}>(Impulse Control)</span>
         </h3>
         {!isAdding && (
           <button className="add-btn-small" onClick={() => setIsAdding(true)}>

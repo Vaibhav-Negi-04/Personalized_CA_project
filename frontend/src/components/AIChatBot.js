@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './AIChatBot.css'; 
+import botLogo from '../assets/bot_logo.jpg';
 import { db, auth } from '../firebaseConfig'; 
 import { collection, query, orderBy, getDocs, doc, getDoc } from 'firebase/firestore'; 
 
@@ -148,7 +149,7 @@ function AIChatBot({ dashboardBalance, dashboardIncome, dashboardExpense }) {
     <div className="ai-chatbot-container">
       {!isOpen && (
         <div className="ai-fab-container" onClick={() => setIsOpen(true)}>
-          <div className="loader"></div>
+          <img src={botLogo} alt="AI Bot" className="bot-logo-img" />
         </div>
       )}
 

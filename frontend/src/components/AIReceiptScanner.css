@@ -1,0 +1,75 @@
+.ai-receipt-scanner-container {
+    position: relative;
+    margin-bottom: 15px;
+    border-radius: 12px;
+    overflow: hidden;
+    transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1), box-shadow 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 15px var(--overlay-dark);
+}
+
+.ai-receipt-scanner-container:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(6, 182, 212, 0.15);
+    border: 1px solid rgba(6, 182, 212, 0.4);
+}
+
+.ai-receipt-scanner-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('./receipt_bg.jpg');
+    background-size: cover;
+    background-position: center;
+    opacity: 0.35;
+    z-index: 0;
+    transition: opacity 0.3s ease, filter 0.3s ease;
+    filter: blur(2px) grayscale(50%);
+}
+
+.ai-receipt-scanner-container:hover .ai-receipt-scanner-bg {
+    opacity: 0.7;
+    filter: blur(0px) grayscale(0%);
+}
+
+.ai-receipt-scanner-content {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 30px 20px;
+    cursor: pointer;
+    background: linear-gradient(180deg, rgba(15, 23, 42, 0.6) 0%, rgba(15, 23, 42, 0.85) 100%);
+}
+
+.ai-receipt-scanner-icon {
+    font-size: 2.5rem;
+    margin-bottom: 12px;
+    filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.2));
+    transition: transform 0.3s ease;
+}
+
+.ai-receipt-scanner-container:hover .ai-receipt-scanner-icon {
+    transform: scale(1.1);
+}
+
+.ai-receipt-scanner-text {
+    font-weight: 800;
+    font-size: 1.15rem;
+    letter-spacing: 0.5px;
+    text-shadow: 0 2px 4px var(--overlay-dark);
+    background: linear-gradient(90deg, #06b6d4, #8b5cf6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.ai-receipt-scanner-subtext {
+    font-size: 0.85rem;
+    color: var(--border-strong);
+    margin-top: 6px;
+    font-weight: 500;
+}

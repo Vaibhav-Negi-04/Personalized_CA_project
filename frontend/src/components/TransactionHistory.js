@@ -27,7 +27,7 @@ const downloadCSV = (data) => {
   document.body.removeChild(link);
 };
 
-const COLORS = ['#06b6d4', '#8b5cf6', '#10b981', '#f43f5e', '#f59e0b', '#6366f1'];
+const COLORS = ['#06b6d4', '#8b5cf6', 'var(--accent)', '#f43f5e', '#f59e0b', 'var(--secondary)'];
 
 function TransactionHistory({ compactMode = false, theme = 'student' }) {
   const { transactions, loading } = useTransactions();
@@ -107,7 +107,7 @@ function TransactionHistory({ compactMode = false, theme = 'student' }) {
     setSelectedDay('all');
   };
 
-  if (loading) return <p style={{color: '#94a3b8'}}>Loading history...</p>;
+  if (loading) return <p style={{color: 'var(--border-strong)'}}>Loading history...</p>;
 
   // 🆕 DYNAMIC CLASS ASSIGNMENT based on theme prop
   const containerClass = compactMode ? "history-compact-container" : "history-grid-container";
@@ -196,7 +196,7 @@ function TransactionHistory({ compactMode = false, theme = 'student' }) {
                     {chartData.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
                   </Pie>
                   <Tooltip 
-                    contentStyle={{ backgroundColor: 'rgba(15, 23, 42, 0.9)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', boxShadow: '0 4px 20px rgba(0,0,0,0.5)' }} 
+                    contentStyle={{ backgroundColor: 'rgba(15, 23, 42, 0.9)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', boxShadow: '0 4px 20px var(--overlay-dark)' }} 
                     itemStyle={{color: 'white'}} 
                   />
                   <Legend iconType="circle" />

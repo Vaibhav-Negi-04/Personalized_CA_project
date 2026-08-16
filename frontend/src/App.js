@@ -13,6 +13,7 @@ function App() {
   return (
     <Router>
       <div className="App">
+        <a href="#main-content" className="skip-to-content">Skip to main content</a>
         <Routes>
           {/* The Home Route is now the Landing Page */}
           <Route path="/" element={<LandingPage />} />
