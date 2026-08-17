@@ -50,3 +50,29 @@
 2. **CSS Files (All):** Ran Python scripts to globally replace 'Inter' with 'var(--font-primary)' and ad-hoc hex codes with variables.
 3. **Dashboard Views:** Locked overflow-x on 'Dashboard2.css' and 'Dashboard3.css' containers to fix mobile spillage.
 
+
+### IndividualView Redesign Flow Update
+1. Dashboard.js -> Renders IndividualView if active.
+2. IndividualView.js -> 
+    - Fetches ssets and calculates 
+etWorth & P&L.
+    - Mounts AssetAllocation (passing ssets and 
+etWorth).
+    - Mounts Command Center with setIsTransactionModalOpen(true) and setIsTaxModalOpen(true).
+    - Mounts TransactionHistory in compactMode={true}.
+3. AssetAllocation.js (NEW) -> Aggregates asset types and renders a Recharts Donut chart.
+
+### IndividualView Depth Expansion Flow Update
+1. IndividualView.js -> Mounts MarketTicker at the very top of the .theme-pro-mono container.
+2. IndividualView.js computes 	axLossOpportunities by reducing the ssets array.
+3. IndividualView.js mounts .pro-secondary-layout displaying the Tax, Macro, and Yield cards.
+4. IndividualView.js -> Mounts FIREChart at the bottom, passing currentWealth and monthlyBurn.
+5. MarketTicker.js -> Uses setInterval every 3s to mutate MOCK_TICKERS prices, triggering CSS flash animations.
+
+### Live Market Data Flow Update
+1. MarketTicker.js -> Uses useEffect to poll http://localhost:5000/api/market/ticker every 10 seconds.
+2. server.js -> Receives GET request on /api/market/ticker.
+3. server.js -> Checks if cache is < 10s old. If yes, returns cache.
+4. server.js -> If cache miss, uses yahooFinance.quote() to fetch live data for major indices and tickers.
+5. server.js -> Maps response to frontend format, updates cache, and returns JSON.
+6. MarketTicker.js -> Receives JSON. Compares new prices with prevTickers to calculate _tick direction ('up'/'down') and updates state to trigger CSS animations.

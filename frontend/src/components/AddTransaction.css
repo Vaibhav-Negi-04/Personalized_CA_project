@@ -162,73 +162,68 @@
    EXECUTIVE THEME OVERRIDES (INDIVIDUAL VIEW) 
    ========================================================= */
 .modal-content.modal-theme-wealth {
-  background: #0a0a0a !important; /* Pure Black */
-  border: 1px solid #333 !important;
-  border-radius: 0 !important; /* Sharp professional corners */
-  box-shadow: 0 15px 40px rgba(0,0,0,0.9) !important;
+  background: #131E3A !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 15px 40px rgba(0,0,0,0.5) !important;
 }
 
 .modal-theme-wealth .modal-header h2 {
-  font-family: 'JetBrains Mono', monospace;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
-
-.modal-theme-wealth .type-toggle {
-  background: #000 !important;
-  border: 1px solid #222 !important;
-  border-radius: 0 !important;
+  background: #131E3A !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 15px 40px rgba(0,0,0,0.5) !important;
 }
 
 .modal-theme-wealth .toggle-btn {
-  border-radius: 0 !important;
-}
-
-/* Make active Income/Expense toggles stark white and black */
-.modal-theme-wealth .toggle-btn.active.income,
-.modal-theme-wealth .toggle-btn.active.expense {
-  background: #fff !important;
-  color: #000 !important;
+  background: #131E3A !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 15px 40px rgba(0,0,0,0.5) !important;
 }
 
 .modal-theme-wealth .money-input {
-  border-bottom: 2px solid var(--text-tertiary) !important;
-  font-family: 'JetBrains Mono', monospace;
-}
-
-.modal-theme-wealth .text-input {
-  background: #000 !important;
-  border: 1px solid #333 !important;
-  border-radius: 0 !important;
+  background: #131E3A !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 15px 40px rgba(0,0,0,0.5) !important;
 }
 
 .modal-theme-wealth .chip {
-  background: #000 !important;
-  border: 1px solid #333 !important;
-  border-radius: 0 !important;
+  background: #131E3A !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 15px 40px rgba(0,0,0,0.5) !important;
 }
 
 .modal-theme-wealth .chip:hover {
-  border-color: #fff !important;
-}
-
-/* Active chips become solid white */
-.modal-theme-wealth .chip.active {
-  background: #fff !important;
-  color: #000 !important;
-  border-color: #fff !important;
-  font-weight: 800 !important;
+  background: #131E3A !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 15px 40px rgba(0,0,0,0.5) !important;
 }
 
 /* Remove gradient, make Save button solid white */
 .modal-theme-wealth .save-btn {
-  background: #fff !important;
-  color: #000 !important;
-  border-radius: 0 !important;
+  background: #10B981 !important;
+  color: #fff !important;
+  border-radius: 8px !important;
   text-transform: uppercase;
   letter-spacing: 2px;
+  font-weight: 700 !important;
 }
 
 .modal-theme-wealth .save-btn:hover {
-  background: #ccc !important;
+  background: #10B981 !important;
+  color: #fff !important;
+  border-radius: 8px !important;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-weight: 700 !important;
+}
+
+/* Fix select dropdown options visibility */
+select.text-input option {
+  background: var(--bg-black, #000);
+  color: white;
 }

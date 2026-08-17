@@ -137,7 +137,7 @@ function Dashboard() {
   }
 
   return (
-    <div className="dashboard-container" id="main-content" tabIndex="-1">
+    <div className={`dashboard-container ${userData?.userType === 'Individual' ? 'no-padding' : ''}`} id="main-content" tabIndex="-1">
       
       {/* Global Mobile Menu */}
       <div style={{ position: 'fixed', top: '15px', right: '15px', zIndex: 9000 }}>

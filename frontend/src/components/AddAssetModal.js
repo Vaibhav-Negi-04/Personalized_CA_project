@@ -1,10 +1,21 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { db, auth } from '../firebaseConfig';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import './AddTransaction.css'; // We reuse the styles
 import AIReceiptScanner from './AIReceiptScanner'; // Adjust path if needed (e.g., '../AIReceiptScanner')
+import gsap from 'gsap';
 
 function AddAssetModal({ isOpen, onClose }) {
+  const contentRef = useRef(null);
+
+  useEffect(() => {
+    if (isOpen && contentRef.current) {
+      gsap.fromTo(contentRef.current, 
+        { scale: 0.95, opacity: 0 }, 
+        { scale: 1, opacity: 1, duration: 0.4, ease: 'back.out(1.5)' }
+      );
+    }
+  }, [isOpen]);
   const [name, setName] = useState('');
   const [type, setType] = useState('Stock');
   
@@ -55,7 +66,7 @@ function AddAssetModal({ isOpen, onClose }) {
   return (
     <div className="modal-overlay" onClick={onClose}>
       {/* Added 'modal-theme-wealth' to force Green Theme */}
-      <div className="modal-content modal-theme-wealth" onClick={(e) => e.stopPropagation()}>
+      <div ref={contentRef} className="modal-content modal-theme-wealth" onClick={(e) => e.stopPropagation()}>
         
         <div className="modal-header">
           <h2>+ Add Asset</h2>

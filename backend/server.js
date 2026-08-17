@@ -9,6 +9,8 @@ const fs = require('fs');
 const helmet = require('helmet'); // Security headers
 const xss = require('xss'); // Input sanitization
 const { z } = require('zod'); // Schema validation
+const YahooFinance = require('yahoo-finance2').default;
+const yahooFinance = new YahooFinance({ suppressNotices: ['yahooSurvey'] });
 
 // --- SETUP ---
 
@@ -80,6 +82,71 @@ const upload = multer({
 });
 
 // --- ROUTES ---
+
+// --- LIVE MARKET DATA CACHING ---
+let marketCache = {
+  data: null,
+  lastFetch: 0
+};
+
+/**
+ * API Endpoint for Live Market Ticker
+ */
+app.get('/api/market/ticker', async (req, res) => {
+  const SYMBOLS = [
+    '^NSEI', // NIFTY 50
+    '^BSESN', // SENSEX
+    'BTC-USD', 
+    'GC=F', // GOLD
+    'INR=X', // USD/INR
+    'RELIANCE.NS',
+    'HDFCBANK.NS',
+    'TCS.NS'
+  ];
+
+  // Map to frontend expected names
+  const DISPLAY_MAP = {
+    '^NSEI': 'NIFTY50',
+    '^BSESN': 'SENSEX',
+    'BTC-USD': 'BTC/USD',
+    'GC=F': 'GOLD',
+    'INR=X': 'USD/INR',
+    'RELIANCE.NS': 'RELIANCE',
+    'HDFCBANK.NS': 'HDFCBANK',
+    'TCS.NS': 'TCS'
+  };
+
+  const now = Date.now();
+  // Basic 10-second cache to prevent rate-limiting from multiple clients
+  if (marketCache.data && (now - marketCache.lastFetch) < 10000) {
+    return res.json(marketCache.data);
+  }
+
+  try {
+    const quotes = await yahooFinance.quote(SYMBOLS);
+    
+    const formattedData = quotes.map(q => ({
+      symbol: DISPLAY_MAP[q.symbol] || q.symbol,
+      price: q.regularMarketPrice,
+      change: q.regularMarketChangePercent
+    }));
+
+    marketCache = {
+      data: formattedData,
+      lastFetch: now
+    };
+
+    res.json(formattedData);
+  } catch (error) {
+    console.error('Error fetching Yahoo Finance data:', error);
+    // If rate-limited or error, serve cache if available
+    if (marketCache.data) {
+      return res.json(marketCache.data);
+    }
+    res.status(500).json({ error: 'Failed to fetch market data' });
+  }
+});
+
 
 // Test route
 app.get('/', (req, res) => {

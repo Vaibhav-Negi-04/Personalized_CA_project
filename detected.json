@@ -1,0 +1,177 @@
+[
+  {
+    "antipattern": "overused-font",
+    "name": "Overused font",
+    "description": "Inter, Roboto, Fraunces, Geist, Plus Jakarta Sans, and Space Grotesk are used on so many sites they no longer feel distinctive. Each new wave of AI-generated UIs converges on the same handful of faces. Choose a face that gives your interface personality.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "C:\\Users\\visha\\Desktop\\Documents\\PCA\\frontend\\src\\components\\dashboards\\Dashboard2.css",
+    "line": 3,
+    "snippet": "Google Fonts: inter"
+  },
+  {
+    "antipattern": "design-system-font",
+    "name": "Font outside DESIGN.md",
+    "description": "A font is used that is not declared in DESIGN.md typography. Use the documented type system or update DESIGN.md if this is an intentional brand addition.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "C:\\Users\\visha\\Desktop\\Documents\\PCA\\frontend\\src\\components\\dashboards\\Dashboard2.css",
+    "line": 3,
+    "snippet": "Google Fonts: JetBrains Mono is not declared in DESIGN.md typography",
+    "ignoreValue": "JetBrains Mono"
+  },
+  {
+    "antipattern": "design-system-font",
+    "name": "Font outside DESIGN.md",
+    "description": "A font is used that is not declared in DESIGN.md typography. Use the documented type system or update DESIGN.md if this is an intentional brand addition.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "C:\\Users\\visha\\Desktop\\Documents\\PCA\\frontend\\src\\components\\dashboards\\Dashboard2.css",
+    "line": 40,
+    "snippet": "font-family: \\'Inter\\ is not declared in DESIGN.md typography",
+    "ignoreValue": "\\'Inter\\"
+  },
+  {
+    "antipattern": "design-system-font",
+    "name": "Font outside DESIGN.md",
+    "description": "A font is used that is not declared in DESIGN.md typography. Use the documented type system or update DESIGN.md if this is an intentional brand addition.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "C:\\Users\\visha\\Desktop\\Documents\\PCA\\frontend\\src\\components\\dashboards\\Dashboard2.css",
+    "line": 76,
+    "snippet": "font-family: \\'Jetbrains Mono\\ is not declared in DESIGN.md typography",
+    "ignoreValue": "\\'Jetbrains Mono\\"
+  },
+  {
+    "antipattern": "design-system-color",
+    "name": "Color outside DESIGN.md",
+    "description": "A literal color is outside the DESIGN.md palette and sidecar tonal ramps. This may be legitimate, but it should be an intentional design-system addition rather than drift.",
+    "severity": "advisory",
+    "category": "quality",
+    "file": "C:\\Users\\visha\\Desktop\\Documents\\PCA\\frontend\\src\\components\\dashboards\\Dashboard2.css",
+    "line": 94,
+    "snippet": "Undocumented color rgba(0,0,0,0.2) is outside DESIGN.md colors",
+    "ignoreValue": "rgba(0,0,0,0.2)"
+  },
+  {
+    "antipattern": "design-system-font",
+    "name": "Font outside DESIGN.md",
+    "description": "A font is used that is not declared in DESIGN.md typography. Use the documented type system or update DESIGN.md if this is an intentional brand addition.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "C:\\Users\\visha\\Desktop\\Documents\\PCA\\frontend\\src\\components\\dashboards\\Dashboard2.css",
+    "line": 111,
+    "snippet": "font-family: \\'Jetbrains Mono\\ is not declared in DESIGN.md typography",
+    "ignoreValue": "\\'Jetbrains Mono\\"
+  },
+  {
+    "antipattern": "design-system-color",
+    "name": "Color outside DESIGN.md",
+    "description": "A literal color is outside the DESIGN.md palette and sidecar tonal ramps. This may be legitimate, but it should be an intentional design-system addition rather than drift.",
+    "severity": "advisory",
+    "category": "quality",
+    "file": "C:\\Users\\visha\\Desktop\\Documents\\PCA\\frontend\\src\\components\\dashboards\\Dashboard2.css",
+    "line": 128,
+    "snippet": "Undocumented color rgba(19, 30, 58, 0.3) is outside DESIGN.md colors",
+    "ignoreValue": "rgba(19, 30, 58, 0.3)"
+  },
+  {
+    "antipattern": "design-system-color",
+    "name": "Color outside DESIGN.md",
+    "description": "A literal color is outside the DESIGN.md palette and sidecar tonal ramps. This may be legitimate, but it should be an intentional design-system addition rather than drift.",
+    "severity": "advisory",
+    "category": "quality",
+    "file": "C:\\Users\\visha\\Desktop\\Documents\\PCA\\frontend\\src\\components\\dashboards\\Dashboard2.css",
+    "line": 156,
+    "snippet": "Undocumented color rgba(0,0,0,0.1) is outside DESIGN.md colors",
+    "ignoreValue": "rgba(0,0,0,0.1)"
+  },
+  {
+    "antipattern": "design-system-color",
+    "name": "Color outside DESIGN.md",
+    "description": "A literal color is outside the DESIGN.md palette and sidecar tonal ramps. This may be legitimate, but it should be an intentional design-system addition rather than drift.",
+    "severity": "advisory",
+    "category": "quality",
+    "file": "C:\\Users\\visha\\Desktop\\Documents\\PCA\\frontend\\src\\components\\dashboards\\Dashboard2.css",
+    "line": 186,
+    "snippet": "Undocumented color rgba(0,0,0,0.3) is outside DESIGN.md colors",
+    "ignoreValue": "rgba(0,0,0,0.3)"
+  },
+  {
+    "antipattern": "design-system-color",
+    "name": "Color outside DESIGN.md",
+    "description": "A literal color is outside the DESIGN.md palette and sidecar tonal ramps. This may be legitimate, but it should be an intentional design-system addition rather than drift.",
+    "severity": "advisory",
+    "category": "quality",
+    "file": "C:\\Users\\visha\\Desktop\\Documents\\PCA\\frontend\\src\\components\\dashboards\\Dashboard2.css",
+    "line": 194,
+    "snippet": "Undocumented color rgba(0,0,0,0.2) is outside DESIGN.md colors",
+    "ignoreValue": "rgba(0,0,0,0.2)"
+  },
+  {
+    "antipattern": "design-system-font",
+    "name": "Font outside DESIGN.md",
+    "description": "A font is used that is not declared in DESIGN.md typography. Use the documented type system or update DESIGN.md if this is an intentional brand addition.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "C:\\Users\\visha\\Desktop\\Documents\\PCA\\frontend\\src\\components\\dashboards\\Dashboard2.css",
+    "line": 244,
+    "snippet": "font-family: \\'Jetbrains Mono\\ is not declared in DESIGN.md typography",
+    "ignoreValue": "\\'Jetbrains Mono\\"
+  },
+  {
+    "antipattern": "design-system-font",
+    "name": "Font outside DESIGN.md",
+    "description": "A font is used that is not declared in DESIGN.md typography. Use the documented type system or update DESIGN.md if this is an intentional brand addition.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "C:\\Users\\visha\\Desktop\\Documents\\PCA\\frontend\\src\\components\\dashboards\\Dashboard2.css",
+    "line": 256,
+    "snippet": "font-family: \\'Inter\\ is not declared in DESIGN.md typography",
+    "ignoreValue": "\\'Inter\\"
+  },
+  {
+    "antipattern": "design-system-color",
+    "name": "Color outside DESIGN.md",
+    "description": "A literal color is outside the DESIGN.md palette and sidecar tonal ramps. This may be legitimate, but it should be an intentional design-system addition rather than drift.",
+    "severity": "advisory",
+    "category": "quality",
+    "file": "C:\\Users\\visha\\Desktop\\Documents\\PCA\\frontend\\src\\components\\dashboards\\Dashboard2.css",
+    "line": 278,
+    "snippet": "Undocumented color rgba(0,0,0,0.3) is outside DESIGN.md colors",
+    "ignoreValue": "rgba(0,0,0,0.3)"
+  },
+  {
+    "antipattern": "design-system-color",
+    "name": "Color outside DESIGN.md",
+    "description": "A literal color is outside the DESIGN.md palette and sidecar tonal ramps. This may be legitimate, but it should be an intentional design-system addition rather than drift.",
+    "severity": "advisory",
+    "category": "quality",
+    "file": "C:\\Users\\visha\\Desktop\\Documents\\PCA\\frontend\\src\\components\\dashboards\\Dashboard2.css",
+    "line": 283,
+    "snippet": "Undocumented color rgba(0,0,0,0.2) is outside DESIGN.md colors",
+    "ignoreValue": "rgba(0,0,0,0.2)"
+  },
+  {
+    "antipattern": "design-system-color",
+    "name": "Color outside DESIGN.md",
+    "description": "A literal color is outside the DESIGN.md palette and sidecar tonal ramps. This may be legitimate, but it should be an intentional design-system addition rather than drift.",
+    "severity": "advisory",
+    "category": "quality",
+    "file": "C:\\Users\\visha\\Desktop\\Documents\\PCA\\frontend\\src\\components\\dashboards\\Dashboard2.css",
+    "line": 288,
+    "snippet": "Undocumented color rgba(0,0,0,0.3) is outside DESIGN.md colors",
+    "ignoreValue": "rgba(0,0,0,0.3)"
+  },
+  {
+    "antipattern": "design-system-font",
+    "name": "Font outside DESIGN.md",
+    "description": "A font is used that is not declared in DESIGN.md typography. Use the documented type system or update DESIGN.md if this is an intentional brand addition.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "C:\\Users\\visha\\Desktop\\Documents\\PCA\\frontend\\src\\components\\dashboards\\Dashboard2.css",
+    "line": 299,
+    "snippet": "font-family: \\'Jetbrains Mono\\ is not declared in DESIGN.md typography",
+    "ignoreValue": "\\'Jetbrains Mono\\"
+  }
+]
