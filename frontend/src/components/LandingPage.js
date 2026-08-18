@@ -34,6 +34,19 @@ function LandingPage() {
           }
         });
         
+        // Dynamic Savings Counter
+        let savingsObj = { val: 0 };
+        gsap.to(savingsObj, {
+          val: 15000,
+          duration: 2.5,
+          ease: "power3.out",
+          delay: 0.5,
+          onUpdate: () => {
+            const el = document.querySelector('.savings-val');
+            if (el) el.innerHTML = "+ ₹" + Math.floor(savingsObj.val).toLocaleString('en-IN');
+          }
+        });
+        
         tl.to('.card-1', { opacity: 1, y: 0, duration: 1 })
           .to('.card-1', { opacity: 0, y: -50, duration: 1, delay: 0.5 })
           .to('.card-2', { opacity: 1, y: 0, duration: 1 })
@@ -120,7 +133,7 @@ function LandingPage() {
             </div>
             <div className="floating-card">
               <span>Savings</span>
-              <h4>+ ₹5,000</h4>
+              <h4 className="savings-val">+ ₹0</h4>
             </div>
           </div>
         </div>

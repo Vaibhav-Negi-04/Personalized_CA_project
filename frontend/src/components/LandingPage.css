@@ -2,6 +2,12 @@
 
 .landing-container {
   display: block;
+  padding-top: 1px; /* Prevents margin collapse without breaking GSAP pin */
+  background: radial-gradient(circle at top right, var(--primary-transparent), transparent 50%),
+              radial-gradient(circle at bottom left, var(--overlay-dark), transparent 50%),
+              var(--bg-black); /* Slate 950 base */
+  color: var(--text-main);
+  min-height: 100vh;
 }
 
 /* Navbar */
@@ -13,15 +19,15 @@
   justify-content: center;
   align-items: center;
   padding: 1rem 2rem;
-  background: var(--neutral-card);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background: var(--surface-muted);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
   border-radius: 40px;
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.05), 0 20px 40px -10px var(--overlay-dark), inset 0 1px 0 rgba(255, 255, 255, 0.1);
   margin: 1.5rem auto;
   max-width: max-content;
   min-width: 200px;
-  box-shadow: 0 15px 35px rgba(15, 23, 42, 0.9), inset 0 0 15px rgba(255,255,255,0.05);
   animation: dynamicIsland 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   position: relative;
   z-index: 100;
@@ -72,6 +78,8 @@
   line-height: 1.1;
   margin-bottom: 1.5rem;
   font-weight: 800;
+  letter-spacing: -0.04em;
+  color: var(--text-main);
 }
 
 .highlight-inline {
@@ -86,16 +94,17 @@
 }
 
 .cta-button {
-  background: linear-gradient(90deg, var(--primary), var(--secondary));
+  background: linear-gradient(180deg, var(--primary), var(--secondary));
   color: white;
-  border: none;
+  border: 1px solid rgba(255, 255, 255, 0.2);
   padding: 1.2rem 3.5rem;
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   border-radius: 50px;
   cursor: pointer;
-  font-weight: bold;
-  box-shadow: 0 0 20px rgba(6, 182, 212, 0.5);
-  transition: transform 0.2s;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  box-shadow: 0 0 0 1px rgba(6, 182, 212, 0.5), 0 10px 20px -5px rgba(6, 182, 212, 0.4), inset 0 1px 0 rgba(255,255,255,0.4);
+  transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
 .cta-button:hover {
@@ -114,18 +123,16 @@
 
 .glass-mockup {
   width: 100%;
-  max-width: 340px; /* Fix fixed width */
+  max-width: 340px;
   height: 240px;
-  background: rgba(15, 23, 42, 0.7); /* Increased opacity for solid feel */ 
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 20px;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background: linear-gradient(135deg, var(--surface-muted), var(--bg-black));
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 24px;
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
   padding: 20px;
   position: relative;
-  box-shadow: 
-    0 20px 50px rgba(15, 23, 42, 0.9),
-    inset 0 0 20px rgba(255, 255, 255, 0.05);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.05), 0 30px 60px -15px var(--overlay-dark), inset 0 1px 0 rgba(255, 255, 255, 0.1);
   animation: float 6s ease-in-out infinite;
   transform: rotateY(-10deg) rotateX(5deg);
 }
@@ -267,16 +274,15 @@
   position: absolute;
   width: 100%;
   max-width: 400px;
-  opacity: 0; /* Hidden initially */
+  opacity: 0;
   transform: translateY(50px);
-  
-  background: var(--neutral-card);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  background: var(--surface-muted);
+  backdrop-filter: blur(32px);
+  -webkit-backdrop-filter: blur(32px);
   padding: 3rem 2.5rem;
-  border-radius: 24px;
+  border-radius: 28px;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 15px 40px rgba(15, 23, 42, 0.9);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.05), 0 30px 60px -15px var(--overlay-dark), inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 .scroll-card .icon {
@@ -316,29 +322,33 @@
 .bento-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr); 
-  grid-auto-rows: minmax(280px, auto);
-  gap: 25px;
+  grid-auto-rows: minmax(180px, auto);
+  gap: 20px;
   margin-top: 3rem;
 }
 
 .bento-tile {
-  background: var(--neutral-card);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: var(--bg-card);
+  border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 24px;
   padding: 2.5rem;
   position: relative;
   overflow: hidden;
-  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   text-align: center;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02), 0 10px 30px -10px var(--overlay-dark);
 }
 .bento-tile:hover {
-  transform: translateY(-5px);
-  border-color: var(--primary);
-  background: rgba(255, 255, 255, 0.08);
+  transform: translateY(-8px) scale(1.01);
+  border-color: rgba(6, 182, 212, 0.4);
+  background: rgba(255, 255, 255, 0.03);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 25px 50px -12px rgba(6, 182, 212, 0.15);
 }
 .bento-tile h3 { color: white; font-size: 1.5rem; margin-bottom: 10px; }
 .bento-tile p { color: var(--slate-400); font-size: 1rem; line-height: 1.6; margin:0;}
@@ -350,13 +360,13 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  opacity: 0.25;
+  opacity: 0.15;
   z-index: 0;
   transition: opacity 0.5s ease, transform 0.8s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
 .bento-tile:hover .bento-image {
-  opacity: 0.5;
+  opacity: 0.3;
   transform: scale(1.05);
 }
 
@@ -415,9 +425,29 @@
 
 /* Impeccable Motion Safeties */
 @media (prefers-reduced-motion: reduce) {
-  .glass-mockup { animation: none; transform: none; }
+  .glass-mockup {
+  width: 100%;
+  max-width: 340px;
+  height: 240px;
+  background: linear-gradient(135deg, var(--surface-muted), var(--bg-black));
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 24px;
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+  padding: 20px;
+  position: relative;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.05), 0 30px 60px -15px var(--overlay-dark), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  animation: float 6s ease-in-out infinite;
+  transform: rotateY(-10deg) rotateX(5deg);
+}
   .floating-card { animation: none; }
   .bar { animation: none; height: 70%; }
   .pie-placeholder { animation: none; }
   .marquee-content { animation: none; }
+}
+
+.cta-button:focus-visible, .nav-btn:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 4px;
+  box-shadow: 0 0 0 4px var(--primary-transparent);
 }

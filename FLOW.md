@@ -109,3 +109,25 @@ etWorth).
 
 ## Scroll Context Fix
 - Updated GSAP in StudentView.js to listen to \.sv-root\ instead of the window for scroll events, fixing invisible cards.
+
+## Landing Page Aesthetics Update
+- Ran a python script to rewrite LandingPage.css, enhancing shadows, blurs, and typography gradients without altering any JSX in LandingPage.js.
+
+## Margin Collapse Fix
+- Updated LandingPage.css .landing-container to use flexbox to prevent margin collapse at the top of the viewport.
+
+## Scroll Pinning Fix
+- Updated LandingPage.css .landing-container to revert to display: block to restore GSAP's pinning layout, using padding-top: 1px to stop margin collapse.
+
+## Bento Grid Proportion Fix
+- Updated LandingPage.css to scale down bento grid cell heights and reduce image background opacity.
+
+## Impeccable Audit Resolution
+- Ran a script to replace all hardcoded arbitrary colors in LandingPage.css with global design system tokens, and removed gradient text to pass the Impeccable detector.
+
+## Landing Page Polish
+- Updated LandingPage.css with :focus-visible rules.
+- Updated LandingPage.js GSAP useLayoutEffect to animate the floating savings card up to ₹15,000 dynamically.
+
+## IndividualView /taste Upgrade
+- Executed python script on Dashboard2.css to strip opaque body background overrides and introduce high-end glassmorphism across all panels.
