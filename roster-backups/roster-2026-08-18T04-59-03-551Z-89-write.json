@@ -1,0 +1,96 @@
+{
+  "version": 1,
+  "savedAt": "2026-08-18T04:58:42.413Z",
+  "agents": [
+    {
+      "id": "god",
+      "name": "Michael",
+      "character": "michael",
+      "accent": "lemon",
+      "description": "edit",
+      "project": "hive",
+      "tmuxTarget": "",
+      "cwd": "C:\\Users\\visha\\Desktop\\Documents\\PCA",
+      "status": "working",
+      "action": "edit",
+      "progress": 0,
+      "currentStation": "shelf",
+      "ptyId": "pty-god",
+      "command": "agy --model \"Gemini 3.1 Pro (High)\" --dangerously-skip-permissions",
+      "provider": "antigravity",
+      "model": "Gemini 3.1 Pro (High)",
+      "isGod": true,
+      "carrying": "Edit",
+      "lastPrompt": "i need ai cash flow forecasting chart addded to businessview dashboard"
+    },
+    {
+      "id": "jim-msy659bv",
+      "name": "Jim",
+      "character": "jim",
+      "accent": "sky",
+      "description": "create",
+      "project": "C:\\Users\\visha\\Desktop\\Documents\\PCA",
+      "tmuxTarget": "",
+      "cwd": "C:\\Users\\visha\\Desktop\\Documents\\PCA",
+      "status": "working",
+      "action": "create",
+      "progress": 0,
+      "currentStation": "desk",
+      "ptyId": "pty-jim-msy659bv",
+      "command": "agy --model \"Gemini 3.1 Pro (High)\" --dangerously-skip-permissions",
+      "provider": "antigravity",
+      "model": "Gemini 3.1 Pro (High)",
+      "lastPrompt": "i want you to test my project , search for errors bugs and everthing that can cause app failure"
+    },
+    {
+      "id": "ryan-msy6yijo",
+      "name": "Ryan",
+      "character": "ryan",
+      "accent": "lemon",
+      "description": "edit",
+      "project": "C:\\Users\\visha\\Desktop\\Documents\\PCA",
+      "tmuxTarget": "",
+      "cwd": "C:\\Users\\visha\\Desktop\\Documents\\PCA",
+      "status": "working",
+      "action": "edit",
+      "progress": 0,
+      "currentStation": "shelf",
+      "ptyId": "pty-ryan-msy6yijo",
+      "command": "agy --model \"Gemini 3.1 Pro (High)\" --dangerously-skip-permissions",
+      "provider": "antigravity",
+      "model": "Gemini 3.1 Pro (High)",
+      "carrying": "Edit"
+    }
+  ],
+  "archived": [
+    {
+      "id": "jim-msy5gm2l",
+      "name": "Jim",
+      "character": "jim",
+      "accent": "sky",
+      "description": "on standby",
+      "project": "C:\\Users\\visha\\Desktop\\Documents\\PCA",
+      "tmuxTarget": "",
+      "cwd": "C:\\Users\\visha\\Desktop\\Documents\\PCA",
+      "goal": "Research the questions you are given across multiple sources, verify the key claims, and return a concise, cited summary.",
+      "status": "idle",
+      "action": "archived",
+      "progress": 0,
+      "command": "agy --model \"Gemini 3.1 Pro (High)\" --dangerously-skip-permissions",
+      "provider": "antigravity",
+      "model": "Gemini 3.1 Pro (High)",
+      "archived": true
+    }
+  ],
+  "restorable": [],
+  "queues": {
+    "god": [
+      {
+        "id": "q-1787029107881-4",
+        "text": "You have new hive inbox message(s) — read your inbox, act on them now, and move handled ones to inbox/.done/. Act autonomously; only message god if you genuinely need a decision.",
+        "ts": 1787029107881
+      }
+    ]
+  },
+  "selectedId": "ryan-msy6yijo"
+}

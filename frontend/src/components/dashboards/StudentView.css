@@ -5,14 +5,24 @@
    =================================================== */
 
 .sv-root {
-  width: 100%;
-  max-width: 100vw;
+  background: radial-gradient(circle at 15% 50%, rgba(99, 102, 241, 0.12), transparent 40%), 
+              radial-gradient(circle at 85% 30%, rgba(16, 185, 129, 0.12), transparent 40%), 
+              radial-gradient(circle at 50% 80%, rgba(244, 63, 94, 0.12), transparent 40%),
+              #09090b;
+
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
   overflow-x: hidden;
-  padding-top: 20px;
+  overflow-y: auto;
+  padding-top: 40px;
   padding-bottom: 80px;
   display: flex;
   flex-direction: column;
   gap: 2rem;
+  z-index: 9999;
 }
 
 /* ---- COMPACT HEADER ---- */
@@ -52,7 +62,9 @@
 
 
 .sv-balance-chip {
-  background: rgba(255,255,255,0.04);
+  background: rgba(255,255,255,0.02);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
   border: 1px solid rgba(255,255,255,0.08);
   border-radius: 16px;
   padding: 1.25rem 1.5rem;
@@ -110,9 +122,13 @@
 
 
 .sv-bento-card {
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.07);
-  border-radius: 20px;
+  background: rgba(255,255,255,0.02);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255,255,255,0.05);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+
+  border-radius: 24px;
   padding: 1.75rem;
   position: relative;
   overflow: hidden;
@@ -121,8 +137,9 @@
 
 @media (hover: hover) and (pointer: fine) {
   .sv-bento-card:hover {
-    border-color: rgba(6, 182, 212, 0.3);
-    box-shadow: 0 0 30px rgba(6,182,212,0.08);
+    border-color: rgba(99, 102, 241, 0.5);
+  transform: translateY(-4px);
+    box-shadow: 0 20px 40px -10px rgba(99, 102, 241, 0.2);
   }
 }
 
@@ -186,6 +203,8 @@
 }
 
 .sv-progress-fill {
+  box-shadow: 0 0 10px rgba(99,102,241,0.5);
+
   height: 100%;
   background: linear-gradient(90deg, var(--primary), var(--secondary));
   border-radius: 4px;
@@ -193,11 +212,11 @@
 }
 
 /* Tile specific tints */
-.sv-tile-spending { background: rgba(6,182,212,0.06); }
-.sv-tile-income   { background: rgba(16,185,129,0.06); }
-.sv-tile-expenses { background: rgba(244,63,94,0.06); }
-.sv-tile-goals    { background: rgba(139,92,246,0.06); }
-.sv-tile-balance  { background: linear-gradient(135deg, rgba(6,182,212,0.1), rgba(139,92,246,0.08)); border-color: rgba(6,182,212,0.2); }
+.sv-tile-spending { background: rgba(99,102,241,0.08); }
+.sv-tile-income   { background: rgba(16,185,129,0.08); }
+.sv-tile-expenses { background: rgba(244,63,94,0.08); }
+.sv-tile-goals    { background: rgba(139,92,246,0.08); }
+.sv-tile-balance  { background: linear-gradient(135deg, rgba(99,102,241,0.15), rgba(16,185,129,0.1)); border-color: rgba(99,102,241,0.3); }
 
 /* ---- SECTIONS ---- */
 .sv-section {
@@ -288,7 +307,9 @@
   margin-bottom: 1rem;
   padding: 1.5rem;
   background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.05);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+
   border-radius: 16px;
 }
 
@@ -310,7 +331,9 @@
 
 /* ---- BUTTONS ---- */
 .sv-btn-primary {
-  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+
+  background: linear-gradient(135deg, #6366f1, #10b981);
   color: #fff;
   border: none;
   border-radius: 10px;
@@ -424,5 +447,10 @@
     grid-row: auto !important;
   }
 
-  .sv-root { gap: 4rem; }
+  .sv-root {
+  background: radial-gradient(circle at 15% 50%, rgba(99, 102, 241, 0.12), transparent 40%), 
+              radial-gradient(circle at 85% 30%, rgba(16, 185, 129, 0.12), transparent 40%), 
+              radial-gradient(circle at 50% 80%, rgba(244, 63, 94, 0.12), transparent 40%),
+              #09090b;
+ gap: 4rem; }
 }

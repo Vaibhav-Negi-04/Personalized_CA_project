@@ -1,0 +1,67 @@
+{
+  "version": 1,
+  "savedAt": "2026-08-18T04:44:27.788Z",
+  "agents": [
+    {
+      "id": "god",
+      "name": "Michael",
+      "character": "michael",
+      "accent": "lemon",
+      "description": "on standby",
+      "project": "hive",
+      "tmuxTarget": "",
+      "cwd": "C:\\Users\\visha\\Desktop\\Documents\\PCA",
+      "status": "idle",
+      "action": "awaiting",
+      "progress": 0,
+      "currentStation": "desk",
+      "ptyId": "pty-god",
+      "command": "agy --model \"Gemini 3.1 Pro (High)\" --dangerously-skip-permissions",
+      "provider": "antigravity",
+      "model": "Gemini 3.1 Pro (High)",
+      "isGod": true
+    },
+    {
+      "id": "jim-msy659bv",
+      "name": "Jim",
+      "character": "jim",
+      "accent": "sky",
+      "description": "search",
+      "project": "C:\\Users\\visha\\Desktop\\Documents\\PCA",
+      "tmuxTarget": "",
+      "cwd": "C:\\Users\\visha\\Desktop\\Documents\\PCA",
+      "status": "working",
+      "action": "search",
+      "progress": 0,
+      "currentStation": "desk",
+      "ptyId": "pty-jim-msy659bv",
+      "command": "agy --model \"Gemini 3.1 Pro (High)\" --dangerously-skip-permissions",
+      "provider": "antigravity",
+      "model": "Gemini 3.1 Pro (High)",
+      "lastPrompt": "look at my code and project and seawrch for features that can be added and worked on\\"
+    }
+  ],
+  "archived": [
+    {
+      "id": "jim-msy5gm2l",
+      "name": "Jim",
+      "character": "jim",
+      "accent": "sky",
+      "description": "on standby",
+      "project": "C:\\Users\\visha\\Desktop\\Documents\\PCA",
+      "tmuxTarget": "",
+      "cwd": "C:\\Users\\visha\\Desktop\\Documents\\PCA",
+      "goal": "Research the questions you are given across multiple sources, verify the key claims, and return a concise, cited summary.",
+      "status": "idle",
+      "action": "archived",
+      "progress": 0,
+      "command": "agy --model \"Gemini 3.1 Pro (High)\" --dangerously-skip-permissions",
+      "provider": "antigravity",
+      "model": "Gemini 3.1 Pro (High)",
+      "archived": true
+    }
+  ],
+  "restorable": [],
+  "queues": {},
+  "selectedId": "jim-msy659bv"
+}

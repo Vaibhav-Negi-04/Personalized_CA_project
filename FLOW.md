@@ -76,3 +76,36 @@ etWorth).
 4. server.js -> If cache miss, uses yahooFinance.quote() to fetch live data for major indices and tickers.
 5. server.js -> Maps response to frontend format, updates cache, and returns JSON.
 6. MarketTicker.js -> Receives JSON. Compares new prices with prevTickers to calculate _tick direction ('up'/'down') and updates state to trigger CSS animations.
+
+## Business View Flow Updates
+- ctiveTab state manages render of POS vs Overview vs Operations.
+- pinPrompt state conditionally renders secure PIN modal.
+- confirmDelete state catches destruct actions before execution.
+
+## BusinessView.js Max Score Refactor
+- Replaced inline color hex codes (#3b82f6, #ef4444, etc.) with proper CSS design tokens (ar(--accent-blue), ar(--status-danger), etc.) to improve implementation integrity.
+- Wrapped rendering calculations in useMemo hooks for performance.
+- Added ARIA roles and labels to the pos-tabs in BusinessView.js for perfect accessibility scoring.
+- Injected media queries in Dashboard2.css to gracefully fold grid structures on mobile.
+
+
+## 2026-08-17T19:06:10.405Z
+- Modified BusinessView.js: Refactored main component render block to include a Global Context Filter (globalBranch state) positioned above the primary tabs. Swapped out old tabs (Overview/POS/Ops) for the new focused architecture (Dashboard/Ops/CRM).
+- Modified Dashboard2.css: Applied the new .theme-business-sapphire variables to BusinessView.js to ensure the light SaaS theme takes over.
+
+## 2026-08-18T03:37:43.106Z
+- Modified BusinessView.js: Migrated all legacy pos tab components into their appropriate structural homes (dashboard and ops). Added customerLTV useMemo to parse ledger strings (Bill: [Name]) to calculate lifetime value. Rendered the new CRM Leaderboard and Khata summary in the crm tab.
+## Business Dashboard Refactor
+- Execution flows through BusinessView.js, but now delegates CRM logic to OpsTab.js and CRMTab.js components, ensuring isolated states and leaner render cycles. The Dashboard layout relies on AICashFlowForecastingChart and SimpleBarChart wrapped in a strict CSS grid.
+
+## BusinessView Aesthetics Upgrade
+- Applied premium styling logic to BusinessView.js, OpsTab.js, and CRMTab.js. Replaced generic tabs with segmented controls and enhanced Quick Stats with glassmorphic cards.
+
+## Dashboard Tiered Layout Update
+- Altered the flex/grid behavior of BusinessView.js -> dashboard tab to flow sequentially in three horizontal rows instead of a squished 2-column layout.
+
+## StudentView Aesthetics Upgrade
+- Wrote a python script to overhaul StudentView.css with radial-gradient backgrounds and heavy backdrop-filter blurs. Manually updated inline colors in StudentView.js to align with the new indigo/emerald brand.
+
+## Scroll Context Fix
+- Updated GSAP in StudentView.js to listen to \.sv-root\ instead of the window for scroll events, fixing invisible cards.

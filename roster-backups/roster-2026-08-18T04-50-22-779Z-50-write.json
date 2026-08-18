@@ -1,0 +1,68 @@
+{
+  "version": 1,
+  "savedAt": "2026-08-18T04:50:02.799Z",
+  "agents": [
+    {
+      "id": "god",
+      "name": "Michael",
+      "character": "michael",
+      "accent": "lemon",
+      "description": "listdir",
+      "project": "hive",
+      "tmuxTarget": "",
+      "cwd": "C:\\Users\\visha\\Desktop\\Documents\\PCA",
+      "status": "working",
+      "action": "listdir",
+      "progress": 0,
+      "currentStation": "desk",
+      "ptyId": "pty-god",
+      "command": "agy --model \"Gemini 3.1 Pro (High)\" --dangerously-skip-permissions",
+      "provider": "antigravity",
+      "model": "Gemini 3.1 Pro (High)",
+      "isGod": true,
+      "lastPrompt": "i need ai cash flow forecasting chart addded to businessview dashboard"
+    },
+    {
+      "id": "jim-msy659bv",
+      "name": "Jim",
+      "character": "jim",
+      "accent": "sky",
+      "description": "on standby",
+      "project": "C:\\Users\\visha\\Desktop\\Documents\\PCA",
+      "tmuxTarget": "",
+      "cwd": "C:\\Users\\visha\\Desktop\\Documents\\PCA",
+      "status": "idle",
+      "action": "awaiting",
+      "progress": 0,
+      "currentStation": "desk",
+      "ptyId": "pty-jim-msy659bv",
+      "command": "agy --model \"Gemini 3.1 Pro (High)\" --dangerously-skip-permissions",
+      "provider": "antigravity",
+      "model": "Gemini 3.1 Pro (High)",
+      "lastPrompt": "i want you to test my project , search for errors bugs and everthing that can cause app failure"
+    }
+  ],
+  "archived": [
+    {
+      "id": "jim-msy5gm2l",
+      "name": "Jim",
+      "character": "jim",
+      "accent": "sky",
+      "description": "on standby",
+      "project": "C:\\Users\\visha\\Desktop\\Documents\\PCA",
+      "tmuxTarget": "",
+      "cwd": "C:\\Users\\visha\\Desktop\\Documents\\PCA",
+      "goal": "Research the questions you are given across multiple sources, verify the key claims, and return a concise, cited summary.",
+      "status": "idle",
+      "action": "archived",
+      "progress": 0,
+      "command": "agy --model \"Gemini 3.1 Pro (High)\" --dangerously-skip-permissions",
+      "provider": "antigravity",
+      "model": "Gemini 3.1 Pro (High)",
+      "archived": true
+    }
+  ],
+  "restorable": [],
+  "queues": {},
+  "selectedId": "god"
+}

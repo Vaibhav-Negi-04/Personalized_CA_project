@@ -7,92 +7,17 @@ import autoTable from 'jspdf-autotable';
 import '../../components/Dashboard3.css'; 
 import AIReceiptScanner from '../AIReceiptScanner'; 
 import AIInsightBox from '../AIInsightBox';
-import BusinessPredictionCard from '../BusinessPredictionCard'; 
+import { SimplePieChart, SimpleBarChart, AICashFlowForecastingChart } from './business/BusinessCharts';
+import { FinancialModal } from './business/BusinessModals';
+import BusinessPredictionCard from '../BusinessPredictionCard';
+import CRMTab from './business/CRMTab';
+import OpsTab from './business/OpsTab';
+ 
 
 // --- HELPER FUNCTIONS ---
 const formatCurrency = (val) => {
     if (!val && val !== 0) return '₹0';
     return `₹${Number(val).toLocaleString('en-IN')}`;
-};
-
-// --- CHART COMPONENTS ---
-const SimplePieChart = ({ data, size = 200, hollow = false }) => {
-    const [hoveredIndex, setHoveredIndex] = useState(null);
-    const total = data.reduce((acc, item) => acc + item.value, 0);
-
-    if (total === 0) return <div style={{width: size, height: size, borderRadius: '50%', border: '4px solid #f3f4f6', display:'flex', alignItems:'center', justifyContent:'center', fontSize: '0.7rem', color: '#9ca3af', fontWeight:'bold'}}>NO DATA</div>;
-    
-    const centerLabel = hoveredIndex !== null ? data[hoveredIndex].label : "TOTAL";
-    const centerValue = hoveredIndex !== null ? data[hoveredIndex].value : total;
-    const centerColor = hoveredIndex !== null ? data[hoveredIndex].color : '#111827';
-
-    return (
-        <div style={{ position: 'relative', width: size, height: size }}>
-            <svg viewBox="-1 -1 2 2" style={{ transform: 'rotate(-90deg)', width: '100%', height: '100%' }}>
-                {data.map((slice, index) => {
-                    if (slice.value === 0) return null;
-                    const previousTotal = data.slice(0, index).reduce((acc, item) => acc + item.value, 0);
-                    const startPercent = previousTotal / total;
-                    const slicePercent = slice.value / total;
-                    const startRad = startPercent * 2 * Math.PI;
-                    const endRad = (startPercent + slicePercent) * 2 * Math.PI;
-                    const x1 = Math.cos(startRad);
-                    const y1 = Math.sin(startRad);
-                    const x2 = Math.cos(endRad);
-                    const y2 = Math.sin(endRad);
-                    const largeArcFlag = slicePercent > 0.5 ? 1 : 0;
-                    const pathData = slice.value === total ? `M 1 0 A 1 1 0 1 1 -1 0 A 1 1 0 1 1 1 0` : `M 0 0 L ${x1} ${y1} A 1 1 0 ${largeArcFlag} 1 ${x2} ${y2} Z`;
-
-                    return (
-                        <path 
-                            key={index} d={pathData} fill={slice.color} stroke="white" strokeWidth="0.08"
-                            onMouseEnter={() => setHoveredIndex(index)} onMouseLeave={() => setHoveredIndex(null)}
-                            style={{ cursor: 'pointer', transition: 'opacity 0.2s ease', opacity: hoveredIndex === null || hoveredIndex === index ? 1 : 0.3 }}
-                        />
-                    );
-                })}
-                {hollow && <circle cx="0" cy="0" r="0.6" fill="white" />}
-            </svg>
-            {hollow && (
-                <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', textAlign: 'center', pointerEvents: 'none' }}>
-                    <span style={{ fontSize: '0.7rem', color: '#9ca3af', display:'block', fontWeight: 'bold', textTransform: 'uppercase' }}>{centerLabel}</span>
-                    <span style={{ fontWeight: '800', color: centerColor, fontSize:'1.2rem' }}>{(centerValue/1000).toFixed(1)}k</span>
-                </div>
-            )}
-        </div>
-    );
-};
-
-const SimpleBarChart = ({ ledger }) => {
-    const chartData = useMemo(() => {
-        const days = Array.from({length: 7}, (_, i) => {
-            const d = new Date();
-            d.setDate(d.getDate() - (6 - i));
-            return { dateStr: d.toLocaleDateString(), label: d.toLocaleDateString('en-US', {weekday: 'short'}), amount: 0 };
-        });
-
-        ledger.forEach(entry => {
-            if(entry.type === 'Credit') {
-                const dayMatch = days.find(d => d.dateStr === entry.date);
-                if(dayMatch) dayMatch.amount += Number(entry.amount);
-            }
-        });
-        return days;
-    }, [ledger]);
-
-    const maxVal = Math.max(...chartData.map(d => d.amount), 1);
-
-    return (
-        <div style={{ display: 'flex', alignItems: 'flex-end', gap: '8px', height: '140px', width: '100%', padding: '10px 0', borderBottom: '1px solid #e5e7eb' }}>
-            {chartData.map((d, i) => (
-                <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end', height: '100%', group: 'hover' }}>
-                    <span style={{fontSize:'0.6rem', color:'#3b82f6', fontWeight:'bold', marginBottom:'4px', opacity: d.amount > 0 ? 1 : 0}}>{(d.amount/1000).toFixed(1)}k</span>
-                    <div style={{ width: '100%', background: '#3b82f6', borderRadius: '4px 4px 0 0', height: `${(d.amount / maxVal) * 100}%`, minHeight: '4px', transition: 'height 0.5s ease' }}></div>
-                    <span style={{ fontSize: '0.65rem', color: '#6b7280', marginTop: '6px', fontWeight: '600' }}>{d.label}</span>
-                </div>
-            ))}
-        </div>
-    );
 };
 
 const INVOICE_THEMES = {
@@ -140,8 +65,46 @@ function BusinessView({ onLogout, onUpdateFinance }) {
     const [transForm, setTransForm] = useState({ desc: '', amount: '', type: 'Debit', category: 'Misc', source: 'direct' });
     const [showFinancials, setShowFinancials] = useState(false);
     const [deleteId, setDeleteId] = useState(null);
+    const [confirmDelete, setConfirmDelete] = useState(null);
+    const [pinPrompt, setPinPrompt] = useState(false);
+    const [pinInput, setPinInput] = useState('');
     
     const [searchTerm, setSearchTerm] = useState("");
+    const customerLTV = useMemo(() => {
+        const ltvMap = {};
+        
+        ledger.forEach(entry => {
+            if (entry.desc && entry.desc.startsWith('Bill: ') && entry.type === 'Credit') {
+                let name = entry.desc.replace('Bill: ', '').replace(' (Auto)', '').trim();
+                if (name.toLowerCase() !== 'walk-in' && name !== '') {
+                    if (!ltvMap[name]) ltvMap[name] = { name, totalPaid: 0, totalDebt: 0 };
+                    ltvMap[name].totalPaid += Number(entry.amount);
+                }
+            }
+        });
+
+        khata.forEach(entry => {
+            let name = entry.name.trim();
+            if (name.toLowerCase() !== 'unknown' && name !== '') {
+                if (!ltvMap[name]) ltvMap[name] = { name, totalPaid: 0, totalDebt: 0 };
+                ltvMap[name].totalDebt += Number(entry.amount);
+            }
+        });
+
+        return Object.values(ltvMap).sort((a, b) => b.totalPaid - a.totalPaid);
+    }, [ledger, khata]);
+
+    const [globalBranch, setGlobalBranch] = useState('all');
+    const [activeTab, setActiveTab] = useState('dashboard');
+
+    const [toast, setToast] = useState(null);
+    const [confirmAction, setConfirmAction] = useState(null);
+
+    const toastMessage = (msg, type = 'info') => {
+        setToast({ msg, type });
+        setTimeout(() => setToast(null), 3000);
+    };
+
     const [ledgerDate, setLedgerDate] = useState(""); 
 
     const [invForm, setInvForm] = useState({ name: '', variant: '', price: '', stockQty: '', barcode: '' }); 
@@ -218,11 +181,11 @@ function BusinessView({ onLogout, onUpdateFinance }) {
         };
     }, [ledger]);
 
-    const totalRevenue = revenue.direct + revenue.services + revenue.investments;
+    const totalRevenue = useMemo(() => revenue.direct + revenue.services + revenue.investments, [revenue]);
     const payrollExpenses = employees.reduce((s, e) => s + Number(e.salary), 0);
     const operationalExpenses = Number(expenses);
     const ledgerExpenses = ledger.filter(l => l.type === 'Debit').reduce((sum, item) => sum + Number(item.amount), 0);
-    const totalExpenses = operationalExpenses + payrollExpenses + ledgerExpenses;
+    const totalExpenses = useMemo(() => operationalExpenses + payrollExpenses + ledgerExpenses, [operationalExpenses, payrollExpenses, ledgerExpenses]);
     const takeHome = (Number(openingBalance) + totalRevenue) - totalExpenses;
     
     const totalAssetValue = assets.reduce((sum, a) => sum + Number(a.cost), 0);
@@ -289,8 +252,7 @@ function BusinessView({ onLogout, onUpdateFinance }) {
     const addToLedger = (desc, amount, type, category, source) => { const newEntry = { id: Date.now(), date: new Date().toLocaleDateString(), desc, amount, category, type, source }; const newLedger = [newEntry, ...ledger]; setLedger(newLedger); return newLedger; };
     const confirmDeleteTransaction = () => { if (!deleteId) return; const newLedger = ledger.filter(l => l.id !== deleteId); setLedger(newLedger); saveData({ ledger: newLedger }); setDeleteId(null); };
     const handleManualTransaction = () => { if (!transForm.desc || !transForm.amount) return; const amount = Number(transForm.amount); const updatedLedger = addToLedger(transForm.desc, amount, transForm.type, transForm.category, transForm.source); saveData({ ledger: updatedLedger }); setTransForm({ desc: '', amount: '', type: 'Debit', category: 'Misc', source: 'direct' }); setShowTransModal(false); };
-    const handleExpenseChange = (value) => { const val = Number(value.replace(/[^0-9]/g, '')); setExpenses(val); saveData({ expenses: val }); };
-    const handleHire = () => { if(!empInput.name || !empInput.salary) return; const salary = Number(empInput.salary); const newEmps = [...employees, { ...empInput, id: Date.now(), salary }]; const updatedLedger = addToLedger(`Hired: ${empInput.name}`, salary, 'Debit', 'Payroll', null); setEmployees(newEmps); setEmpInput({ name: '', salary: '', designation: '' }); saveData({ employees: newEmps, ledger: updatedLedger }); };
+        const handleHire = () => { if(!empInput.name || !empInput.salary) return; const salary = Number(empInput.salary); const newEmps = [...employees, { ...empInput, id: Date.now(), salary }]; const updatedLedger = addToLedger(`Hired: ${empInput.name}`, salary, 'Debit', 'Payroll', null); setEmployees(newEmps); setEmpInput({ name: '', salary: '', designation: '' }); saveData({ employees: newEmps, ledger: updatedLedger }); };
     const handleFire = (id) => { const newEmps = employees.filter(e => e.id !== id); setEmployees(newEmps); saveData({ employees: newEmps }); };
     const handleQuickTag = (tag) => { setTransForm({ ...transForm, desc: tag }); };
 
@@ -309,11 +271,15 @@ function BusinessView({ onLogout, onUpdateFinance }) {
     };
 
     const handleRemoveAsset = (id) => {
-        if(window.confirm("Are you sure you want to remove this asset from your portfolio?")) {
-            const updatedAssets = assets.filter(a => a.id !== id);
-            setAssets(updatedAssets);
-            saveData({ assets: updatedAssets });
-        }
+        setConfirmAction({
+            message: "Are you sure you want to remove this asset from your portfolio?",
+            onConfirm: () => {
+                const updatedAssets = assets.filter(a => a.id !== id);
+                setAssets(updatedAssets);
+                saveData({ assets: updatedAssets });
+                setConfirmAction(null);
+            }
+        });
     };
 
     const handleSettleKhata = (k) => {
@@ -340,7 +306,7 @@ function BusinessView({ onLogout, onUpdateFinance }) {
                     let cleanName = fallbackData.items[0].title.split(',')[0]; 
                     setInvForm(prev => ({ ...prev, name: cleanName }));
                 } else {
-                    alert("Product not found in global databases. You can type the name manually!");
+                    toastMessage("Product not found in global databases. You can type the name manually!", "error");
                 }
             }
         } catch (error) {
@@ -383,7 +349,7 @@ function BusinessView({ onLogout, onUpdateFinance }) {
                 setBillItems(updatedItems);
                 setScannedCode(''); 
             } else {
-                alert("Barcode not found in inventory!");
+                toastMessage("Barcode not found in inventory!", "error");
                 setScannedCode('');
             }
         }
@@ -396,7 +362,7 @@ function BusinessView({ onLogout, onUpdateFinance }) {
                  billItemsRef.current[billItems.length - 1].focus();
             }
         }
-    }, [billItems.length, showBilling]);
+    }, [billItems, billItems.length, showBilling]);
 
     const handleItemInput = (id, value, index) => {
         const newItems = billItems.map(item => item.id === id ? { ...item, item: value } : item); 
@@ -523,7 +489,7 @@ function BusinessView({ onLogout, onUpdateFinance }) {
         doc.save(`${companyName.replace(/ /g, "_")}_Invoice_${Date.now()}.pdf`);
 
         if (shareWhatsapp) {
-            if (!billCustomer.phone) alert("Saved successfully, but cannot send WhatsApp without a phone number!");
+            if (!billCustomer.phone) toastMessage("Saved successfully, but cannot send WhatsApp without a phone number!", "error");
             else {
                 let msg = `*${companyName.toUpperCase()}*\nHello ${billCustomer.name || "Customer"},\n\nHere is the summary of your bill:\n`;
                 billItems.forEach(item => { if(item.item) msg += `▪ ${item.qty}x ${item.item} - Rs.${item.qty * item.price}\n`; });
@@ -570,15 +536,31 @@ function BusinessView({ onLogout, onUpdateFinance }) {
 
     const handleSeedBusinessDatabase = async () => {
         if (!currentUser) return;
-        if (!seedMonth) return alert("Please select a month and year first.");
+        if (!seedMonth) return toastMessage("Please select a month and year first.", "error");
 
         const [yearStr, monthStr] = seedMonth.split('-');
         const year = parseInt(yearStr);
         const month = parseInt(monthStr) - 1; 
         const countToInject = parseInt(seedCount) || 25;
 
-        const confirm = window.confirm(`Inject ${countToInject} dummy business transactions into ${seedMonth}?`);
-        if (!confirm) return;
+        setConfirmAction({
+            message: `Inject ${countToInject} dummy business transactions into ${seedMonth}?`,
+            onConfirm: () => {
+                setConfirmAction(null);
+                const baseLedger = ledger.filter(l => !l.date.startsWith(seedMonth));
+                const newEntries = [];
+                for(let i = 0; i < countToInject; i++) {
+                    const desc = ['Sale', 'Bulk Order', 'Wholesale', 'Service', 'Repair'][Math.floor(Math.random() * 5)];
+                    const amt = Math.floor(Math.random() * 5000) + 100;
+                    newEntries.push({ id: Date.now() + i, date: `${seedMonth}/${Math.floor(Math.random()*28)+1}/2023`, desc, amount: amt, type: 'Credit', category: 'Sales', source: 'direct' });
+                }
+                const updated = [...newEntries, ...baseLedger];
+                setLedger(updated);
+                saveData({ ledger: updated });
+                toastMessage(`Injected ${countToInject} entries!`);
+            }
+        });
+        return;
 
         const creditDescs = ["Walk-in Sale", "Bulk Order Payment", "Consulting Fee", "Online Marketplace Sale", "Udhaar Recovery"];
         const debitDescs = ["Wholesale Restock", "Electricity Bill", "Staff Lunch", "Packaging Material", "Shop Rent", "Marketing Ads"];
@@ -625,12 +607,12 @@ function BusinessView({ onLogout, onUpdateFinance }) {
         const updatedLedger = [...newEntries, ...ledger];
         setLedger(updatedLedger);
         await saveData({ ledger: updatedLedger });
-        alert(`✅ Successfully injected ${countToInject} business transactions into ${seedMonth}!`);
+        toastMessage(`✅ Successfully injected ${countToInject} business transactions into ${seedMonth}!`, "error");
     };
 
     const handleClearBusinessMonth = async () => {
         if (!currentUser) return;
-        if (!seedMonth) return alert("Select a month first.");
+        if (!seedMonth) return toastMessage("Select a month first.", "error");
 
         const confirm = window.confirm(`⚠️ WARNING: Delete ALL business ledger entries in ${seedMonth}?`);
         if (!confirm) return;
@@ -648,11 +630,11 @@ function BusinessView({ onLogout, onUpdateFinance }) {
         });
 
         const deletedCount = ledger.length - updatedLedger.length;
-        if (deletedCount === 0) return alert(`No transactions found in ${seedMonth}.`);
+        if (deletedCount === 0) return toastMessage(`No transactions found in ${seedMonth}.`, "error");
 
         setLedger(updatedLedger);
         await saveData({ ledger: updatedLedger });
-        alert(`🗑️ Deleted ${deletedCount} business transactions from ${seedMonth}.`);
+        toastMessage(`🗑️ Deleted ${deletedCount} business transactions from ${seedMonth}.`, "error");
     };
 
     const handleNukeBusinessDatabase = async () => {
@@ -660,33 +642,47 @@ function BusinessView({ onLogout, onUpdateFinance }) {
         const confirm1 = window.confirm(`☢️ DANGER: You are about to wipe EVERY entry in your business ledger. Proceed?`);
         if (!confirm1) return;
         const confirm2 = window.prompt('Type "NUKE" to confirm complete deletion of the ledger.');
-        if (confirm2 !== "NUKE") return alert("Database nuke aborted.");
+        if (confirm2 !== "NUKE") return toastMessage("Database nuke aborted.", "error");
 
         setLedger([]);
         await saveData({ ledger: [] });
-        alert(`☢️ Clean Slate. Entire business ledger wiped.`);
+        toastMessage(`☢️ Clean Slate. Entire business ledger wiped.`, "error");
     };
 
     // =========================================
 
-    const profitData = [{ label: 'Ops', value: totalExpenses, color: '#ef4444' }, { label: 'Revenue', value: totalRevenue, color: 'var(--accent)' }];
+    const profitData = [{ label: 'Ops', value: totalExpenses, color: 'var(--danger)' }, { label: 'Revenue', value: totalRevenue, color: 'var(--accent)' }];
 
     if (loading) return <div className="b-view" style={{display:'flex', justifyContent:'center', alignItems:'center'}}>Loading...</div>;
 
     return (
-        <div className="b-view">
+        <div className="b-view theme-business-sapphire">
+            {/* GLOBAL CONTEXT SWITCHER */}
+            {!isCashierMode && (
+                <div style={{ background: 'var(--primary)', color: '#fff', padding: '10px 20px', borderRadius: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', boxShadow: '0 4px 15px rgba(37, 99, 235, 0.2)' }}>
+                    <div style={{ fontWeight: '600', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        🌐 Global Context Filter
+                    </div>
+                    <select value={globalBranch} onChange={(e) => setGlobalBranch(e.target.value)} style={{ background: 'rgba(255,255,255,0.2)', color: '#fff', border: '1px solid rgba(255,255,255,0.4)', padding: '5px 10px', borderRadius: '8px', fontWeight: 'bold' }}>
+                        <option value="all" style={{color: 'var(--text-main)'}}>All Branches (Consolidated)</option>
+                        <option value="store_a" style={{color: 'var(--text-main)'}}>Store A (HQ)</option>
+                        <option value="ecommerce" style={{color: 'var(--text-main)'}}>E-Commerce Channel</option>
+                    </select>
+                </div>
+            )}
+
             {/* HEADER AREA */}
             <div className="b-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px' }}>
                 <div style={{display:'flex', gap:'15px', alignItems:'center'}}>
-                    <div style={{background:'black', color:'white', width:'50px', height:'50px', borderRadius:'15px', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'1.5rem', textTransform:'uppercase'}}>{companyName.charAt(0)}</div>
+                    <div style={{background:'var(--accent-blue)', color:'#fff', width:'50px', height:'50px', borderRadius:'15px', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'1.5rem', textTransform:'uppercase', fontWeight: 'bold'}}>{companyName.charAt(0)}</div>
                     <div>
                         <div style={{display:'flex', alignItems:'center', gap:'10px'}}>
                             {isEditingName && !isCashierMode ? (
-                                <input autoFocus className="b-title" style={{background:'transparent', border:'none', borderBottom:'2px solid #3b82f6', outline:'none', color:'#111827', width:'250px'}} value={companyName} onChange={(e) => setCompanyName(e.target.value)} onBlur={handleNameChange} onKeyDown={(e) => e.key === 'Enter' && handleNameChange()} />
+                                <input autoFocus className="b-title" style={{background:'transparent', border:'none', borderBottom:'2px solid var(--accent-blue)', outline:'none', color:'var(--text-main)', width:'250px'}} value={companyName} onChange={(e) => setCompanyName(e.target.value)} onBlur={handleNameChange} onKeyDown={(e) => e.key === 'Enter' && handleNameChange()} />
                             ) : (
-                                <h1 className="b-title" onClick={() => !isCashierMode && setIsEditingName(true)} style={{cursor: isCashierMode ? 'default' : 'pointer', borderBottom:'1px dashed transparent', wordBreak: 'break-word'}}>{companyName} {!isCashierMode && <span style={{fontSize:'0.8rem', color:'#9ca3af', verticalAlign:'middle'}}>✎</span>}</h1>
+                                <h1 className="b-title" onClick={() => !isCashierMode && setIsEditingName(true)} style={{cursor: isCashierMode ? 'default' : 'pointer', borderBottom:'1px dashed transparent', wordBreak: 'break-word'}}>{companyName} {!isCashierMode && <span style={{fontSize:'0.8rem', color:'var(--text-muted)', verticalAlign:'middle'}}>✎</span>}</h1>
                             )}
-                            {!isCashierMode && <button onClick={() => setIsSettingsOpen(true)} style={{background:'none', border:'none', color:'#9ca3af', cursor:'pointer', fontSize:'1.2rem', padding:'5px'}}>⚙️</button>}
+                            {!isCashierMode && <button onClick={() => setIsSettingsOpen(true)} style={{background:'none', border:'none', color:'var(--text-muted)', cursor:'pointer', fontSize:'1.2rem', padding:'5px'}}>⚙️</button>}
                         </div>
                         <div className="b-subtitle" style={{display:'flex', alignItems:'center', gap:'10px'}}>
                             <span>{isCashierMode ? "Cashier Shift" : `${UI.role.toUpperCase()} • ${currentRank.toUpperCase()}`}</span>
@@ -694,21 +690,20 @@ function BusinessView({ onLogout, onUpdateFinance }) {
                         </div>
                     </div>
                 </div>
-                <div className="b-header-actions" style={{display:'flex', gap:'10px'}}>
-                    {businessType === 'shop' && <button onClick={() => setShowInventoryModal(true)} className="b-btn" style={{background:'#f3f4f6', color:'#111827', border:'1px solid #d1d5db'}}>📦 Inventory</button>}
-                    {businessType === 'shop' && <button onClick={() => setShowBilling(true)} className="b-btn" style={{background:'#111827', color:'white', border:'1px solid #374151'}}>🧾 New Bill</button>}
+                <div className="b-header-actions" style={{display:'flex', gap:'10px', alignItems: 'center'}}>
+                    {businessType === 'shop' && <button onClick={() => setShowInventoryModal(true)} className="b-btn" style={{background:'var(--card-bg)', color:'var(--text-main)', border:'1px solid rgba(0,0,0,0.08)', borderRadius: '12px', padding: '10px 20px', fontWeight: '600', boxShadow: '0 2px 8px rgba(0,0,0,0.04)'}}>📦 Inventory</button>}
+                    {businessType === 'shop' && <button onClick={() => setShowBilling(true)} aria-label="Open POS" className="b-btn" style={{background:'var(--accent-blue)', color:'#fff', border:'none', borderRadius: '12px', padding: '10px 24px', fontWeight: '700', boxShadow: '0 4px 15px rgba(59, 130, 246, 0.3)'}}>🧾 New Bill</button>}
                     
                     {!isCashierMode ? (
                         <>
-                            <button onClick={() => setShowFinancials(true)} className="b-btn" style={{background:'#e0f2fe', color:'#0369a1'}}>VIEW REPORT</button>
-                            <button onClick={onLogout} className="b-btn b-btn-danger" style={{borderRadius:'12px'}}>LOGOUT</button>
+                            <div style={{width: '1px', height: '30px', background: 'rgba(0,0,0,0.1)', margin: '0 5px'}}></div>
+                            <button onClick={() => setShowFinancials(true)} className="b-btn" style={{background:'var(--primary)', color:'#fff', border:'none', borderRadius: '12px', padding: '10px 20px', fontWeight: '700'}}>VIEW REPORT</button>
+                            <button onClick={onLogout} className="b-btn" style={{background: 'rgba(239, 68, 68, 0.1)', color: 'var(--danger)', border: 'none', borderRadius:'12px', padding: '10px 20px', fontWeight: '700'}}>LOGOUT</button>
                         </>
                     ) : (
                         <button onClick={() => {
-                            const pin = window.prompt("Enter Owner PIN to exit Cashier Mode:");
-                            if(pin === "1234") setIsCashierMode(false);
-                            else if (pin) alert("Incorrect PIN!");
-                        }} className="b-btn" style={{background:'#ef4444', color:'white'}}>🔒 EXIT CASHIER MODE</button>
+                            setPinPrompt(true);
+                        }} className="b-btn" style={{background:'var(--danger)', color:'#fff', border: 'none', borderRadius: '12px', padding: '10px 20px', fontWeight: 'bold', boxShadow: '0 4px 15px rgba(239, 68, 68, 0.3)'}}>🔒 EXIT CASHIER MODE</button>
                     )}
                 </div>
             </div>
@@ -717,43 +712,146 @@ function BusinessView({ onLogout, onUpdateFinance }) {
             {isCashierMode ? (
                 <div style={{ textAlign: 'center', padding: '100px 20px' }}>
                     <div style={{ fontSize: '4rem', marginBottom: '20px' }}>🏪</div>
-                    <h2 style={{ fontSize: '2rem', color: '#111827', marginBottom: '10px' }}>Register is Open</h2>
-                    <p style={{ color: '#6b7280', marginBottom: '30px' }}>Cashier Mode active. Financial data and reports are hidden.</p>
+                    <h2 style={{ fontSize: '2rem', color: 'var(--text-main)', marginBottom: '10px' }}>Register is Open</h2>
+                    <p style={{ color: 'var(--text-muted)', marginBottom: '30px' }}>Cashier Mode active. Financial data and reports are hidden.</p>
                     <button onClick={() => setShowBilling(true)} className="b-btn b-btn-primary" style={{ padding: '20px 40px', fontSize: '1.2rem', borderRadius: '15px' }}>🧾 START NEW BILL</button>
                 </div>
             ) : (
                 <>
-                    {/* Quick Stats Grid */}
-                    <div className="b-grid-3" style={{ marginBottom: '30px' }}>
-                        <div className="b-card"><span className="b-label" style={{color:'#3b82f6'}}>{UI.metricRev}</span><div style={{ fontSize: '2.2rem', fontWeight: '800' }}>{formatCurrency(totalRevenue)}</div></div>
-                        <div className="b-card"><span className="b-label" style={{color:'#6b7280'}}>Opening Balance</span><div style={{ fontSize: '2.2rem', fontWeight: '800', color: '#6b7280' }}>{formatCurrency(openingBalance)}</div></div>
-                        <div className="b-card" style={{background:'#111827', border:'none'}}><span className="b-label" style={{color:'var(--accent)'}}>{UI.metricNet}</span><div style={{ fontSize: '2.2rem', fontWeight: '800', color: '#ffffff' }}>{formatCurrency(takeHome)}</div></div>
+
+                    {/* PREMIUM TAB MENU */}
+                    <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '40px' }}>
+                        <div role="tablist" style={{ display: 'inline-flex', background: 'rgba(0,0,0,0.03)', padding: '6px', borderRadius: '20px', gap: '4px' }}>
+                            <button role="tab" aria-selected={activeTab === 'dashboard'} onClick={() => setActiveTab('dashboard')} style={{ background: activeTab === 'dashboard' ? '#fff' : 'transparent', color: activeTab === 'dashboard' ? 'var(--text-main)' : 'var(--text-muted)', border: 'none', borderRadius: '14px', padding: '10px 24px', fontWeight: '700', cursor: 'pointer', transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)', boxShadow: activeTab === 'dashboard' ? '0 4px 12px rgba(0,0,0,0.05)' : 'none' }}>Dashboard</button>
+                            <button role="tab" aria-selected={activeTab === 'ops'} onClick={() => setActiveTab('ops')} style={{ background: activeTab === 'ops' ? '#fff' : 'transparent', color: activeTab === 'ops' ? 'var(--text-main)' : 'var(--text-muted)', border: 'none', borderRadius: '14px', padding: '10px 24px', fontWeight: '700', cursor: 'pointer', transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)', boxShadow: activeTab === 'ops' ? '0 4px 12px rgba(0,0,0,0.05)' : 'none' }}>Operations</button>
+                            <button role="tab" aria-selected={activeTab === 'crm'} onClick={() => setActiveTab('crm')} style={{ background: activeTab === 'crm' ? '#fff' : 'transparent', color: activeTab === 'crm' ? 'var(--text-main)' : 'var(--text-muted)', border: 'none', borderRadius: '14px', padding: '10px 24px', fontWeight: '700', cursor: 'pointer', transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)', boxShadow: activeTab === 'crm' ? '0 4px 12px rgba(0,0,0,0.05)' : 'none' }}>Customers (CRM)</button>
+                        </div>
                     </div>
 
-                    {/* Main Layout Area */}
-                    <div className="b-main-layout" style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '30px' }}>
-                        <div>
-                            <div className="b-card">
-                                <div style={{display:'flex', alignItems:'center', gap:'10px', marginBottom: '20px'}}>
-                                    <h3 className="b-title" style={{ fontSize: '1.2rem' }}>⚡ {UI.revTitle}</h3>
-                                    <span className={`info-icon ${showHelp ? 'active' : ''}`} onClick={() => setShowHelp(!showHelp)} onMouseEnter={() => setShowHelp(true)} onMouseLeave={() => setShowHelp(false)}>?<span className="info-tooltip">These numbers update automatically when you add transactions via the + button.</span></span>
+                    <div key={globalBranch + activeTab} className="anim-context-shift">
+                    {activeTab === 'dashboard' && (<>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
+                        
+                        {/* TOP ROW: Quick Stats */}
+                        <div className="b-grid-3">
+                            <div className="b-card" style={{ background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 10px 30px -10px rgba(59,130,246,0.15)', borderRadius: '24px' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                                    <span className="b-label" style={{ color: 'var(--accent-blue)', margin: 0, letterSpacing: '1px' }}>{UI.metricRev}</span>
+                                    <span style={{ padding: '8px', background: 'rgba(59,130,246,0.1)', borderRadius: '12px', color: 'var(--accent-blue)' }}>📈</span>
                                 </div>
-                                <div className="b-grid-3" style={{marginBottom:'20px'}}>
-                                    <div><label className="b-label">{UI.rev1}</label><div className="b-input" style={{background:'#f3f4f6', color:'#6b7280', border:'1px solid #e5e7eb'}}>{formatCurrency(revenue.direct)}</div></div>
-                                    <div><label className="b-label">{UI.rev2}</label><div className="b-input" style={{background:'#f3f4f6', color:'#6b7280', border:'1px solid #e5e7eb'}}>{formatCurrency(revenue.services)}</div></div>
-                                    <div><label className="b-label">{UI.rev3}</label><div className="b-input" style={{background:'#f3f4f6', color:'#6b7280', border:'1px solid #e5e7eb'}}>{formatCurrency(revenue.investments)}</div></div>
+                                <div style={{ fontSize: '2.8rem', fontWeight: '800', color: 'var(--text-main)', letterSpacing: '-1.5px' }}>{formatCurrency(totalRevenue)}</div>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px', marginTop: '20px', padding: '15px', background: '#f8fafc', borderRadius: '16px', border: '1px solid rgba(0,0,0,0.03)' }}>
+                                    <div><div style={{fontSize:'0.7rem', color:'var(--text-muted)', textTransform:'uppercase', fontWeight:'700', marginBottom:'4px'}}>{UI.rev1}</div><div style={{fontWeight:'700', color:'var(--text-main)'}}>{formatCurrency(revenue.direct)}</div></div>
+                                    <div><div style={{fontSize:'0.7rem', color:'var(--text-muted)', textTransform:'uppercase', fontWeight:'700', marginBottom:'4px'}}>{UI.rev2}</div><div style={{fontWeight:'700', color:'var(--text-main)'}}>{formatCurrency(revenue.services)}</div></div>
+                                    <div><div style={{fontSize:'0.7rem', color:'var(--text-muted)', textTransform:'uppercase', fontWeight:'700', marginBottom:'4px'}}>{UI.rev3}</div><div style={{fontWeight:'700', color:'var(--text-main)'}}>{formatCurrency(revenue.investments)}</div></div>
                                 </div>
-                                
+                            </div>
+                            <div className="b-card" style={{ background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 10px 30px -10px rgba(0,0,0,0.05)', borderRadius: '24px' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                                    <span className="b-label" style={{ color: 'var(--text-muted)', margin: 0, letterSpacing: '1px' }}>Opening Balance</span>
+                                    <span style={{ padding: '8px', background: 'rgba(0,0,0,0.04)', borderRadius: '12px', color: 'var(--text-muted)' }}>🏦</span>
+                                </div>
+                                <div style={{ fontSize: '2.8rem', fontWeight: '800', color: 'var(--text-main)', opacity: 0.9, letterSpacing: '-1.5px' }}>{formatCurrency(openingBalance)}</div>
                                 <div style={{marginTop: '20px'}}>
-                                    <h4 className="b-label" style={{marginBottom: '10px', color: '#111827'}}>7-Day Income Trend</h4>
+                                    <AIInsightBox balance={takeHome} transactions={ledger.map(l => ({...l, type: l.type === 'Debit' ? 'expense' : 'income'}))} />
+                                </div>
+                            </div>
+                            <div className="b-card" style={{ background: 'linear-gradient(135deg, var(--primary) 0%, #1e293b 100%)', border: 'none', boxShadow: '0 15px 35px -10px rgba(15,23,42,0.4)', position: 'relative', overflow: 'hidden', borderRadius: '24px' }}>
+                                <div style={{ position: 'absolute', top: '-20px', right: '-20px', width: '150px', height: '150px', background: 'rgba(255,255,255,0.05)', borderRadius: '50%', filter: 'blur(30px)' }}></div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px', position: 'relative' }}>
+                                    <span className="b-label" style={{ color: 'rgba(255,255,255,0.7)', margin: 0, letterSpacing: '1px' }}>{UI.metricNet}</span>
+                                    <span style={{ padding: '8px', background: 'rgba(255,255,255,0.1)', borderRadius: '12px', color: '#fff' }}>✨</span>
+                                </div>
+                                <div style={{ fontSize: '3rem', fontWeight: '800', color: '#ffffff', letterSpacing: '-1.5px', position: 'relative' }}>{formatCurrency(takeHome)}</div>
+                                <div style={{ position: 'relative', marginTop: '20px' }}>
+                                    <h4 style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '10px' }}>Money Flow</h4>
+                                    <div style={{ background: 'rgba(255,255,255,0.05)', padding: '15px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.1)', backdropFilter: 'blur(10px)' }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                                            <span style={{ color: '#fff', fontWeight: '600', fontSize: '0.9rem' }}>Revenue</span>
+                                            <span style={{ color: 'var(--accent)', fontWeight: '700' }}>{formatCurrency(totalRevenue)}</span>
+                                        </div>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                            <span style={{ color: 'rgba(255,255,255,0.7)', fontWeight: '600', fontSize: '0.9rem' }}>Expenses</span>
+                                            <span style={{ color: 'var(--danger)', fontWeight: '700' }}>{formatCurrency(totalExpenses)}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        {/* MIDDLE ROW: Charts */}
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px' }}>
+                            <div className="b-card" style={{ padding: '25px', borderRadius: '24px' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                                    <h4 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '700', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '8px' }}><span style={{ padding: '6px', background: 'rgba(0,0,0,0.04)', borderRadius: '8px' }}>📊</span> 7-Day Income Trend</h4>
+                                </div>
+                                <div style={{ height: '300px' }}>
                                     <SimpleBarChart ledger={ledger} />
                                 </div>
+                            </div>
+                            <div className="b-card" style={{ padding: '25px', background: 'rgba(59, 130, 246, 0.03)', border: '1px solid rgba(59, 130, 246, 0.2)', borderRadius: '24px' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                                    <h4 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '700', color: 'var(--accent-blue)', display: 'flex', alignItems: 'center', gap: '8px' }}><span style={{ padding: '6px', background: 'rgba(59, 130, 246, 0.1)', borderRadius: '8px' }}>🔮</span> AI Cash Flow Forecast</h4>
+                                    <span style={{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--accent-blue)', background: 'rgba(59, 130, 246, 0.1)', padding: '4px 10px', borderRadius: '20px' }}>PREDICTIVE</span>
+                                </div>
+                                <div style={{ height: '300px' }}>
+                                    <AICashFlowForecastingChart ledger={ledger} />
+                                </div>
+                            </div>
+                        </div>
 
-                                <div style={{marginTop: '30px'}}>
-                                    <BusinessPredictionCard ledger={ledger} />
+                        {/* BOTTOM ROW: Ledger & Insights */}
+                        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '30px' }}>
+                            <div className="b-card" style={{ borderRadius: '24px', padding: '25px' }}>
+                                <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom: '20px'}}>
+                                    <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px' }}><span style={{ padding: '6px', background: 'rgba(0,0,0,0.04)', borderRadius: '8px' }}>📖</span> Daily Ledger</h3>
+                                    <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                                        <input type="date" style={{ background: '#f8fafc', border: '1px solid rgba(0,0,0,0.05)', borderRadius: '10px', padding: '8px 12px', color: 'var(--text-main)', fontWeight: '600', outline: 'none' }} value={ledgerDate} onChange={(e) => setLedgerDate(e.target.value)} />
+                                        {ledgerDate && <button onClick={() => setLedgerDate('')} style={{ padding: '8px 12px', background: 'rgba(0, 0, 0, 0.05)', color: 'var(--text-muted)', border: 'none', borderRadius: '10px', fontWeight: '600', cursor: 'pointer' }}>Clear</button>}
+                                        <span style={{fontSize:'0.75rem', fontWeight: '700', background:'rgba(59, 130, 246, 0.1)', padding:'6px 12px', borderRadius:'10px', color:'var(--accent-blue)'}}>{filteredLedger.length} entries</span>
+                                    </div>
+                                </div>
+                                <div style={{ maxHeight: '400px', overflowY: 'auto', paddingRight: '10px' }}>
+                                    {filteredLedger.length === 0 && <div style={{padding:'40px', textAlign:'center', color:'var(--text-muted)', background: '#f8fafc', borderRadius: '16px', fontWeight: '600'}}>No transactions for this date.</div>}
+                                    {filteredLedger.map((entry, i) => (
+                                        <div key={i} style={{ padding:'16px', background: '#f8fafc', borderRadius: '16px', marginBottom: '10px', border: '1px solid rgba(0,0,0,0.02)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                            <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
+                                                <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: entry.type === 'Credit' ? 'rgba(34, 197, 94, 0.1)' : 'rgba(239, 68, 68, 0.1)', color: entry.type === 'Credit' ? 'var(--accent)' : 'var(--danger)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem', fontWeight: 'bold' }}>
+                                                    {entry.type === 'Credit' ? '↓' : '↑'}
+                                                </div>
+                                                <div>
+                                                    <div style={{fontWeight:'700', fontSize:'1rem', color: 'var(--text-main)', marginBottom: '4px'}}>{entry.desc}</div>
+                                                    <div style={{fontSize:'0.75rem', color:'var(--text-muted)', fontWeight: '600', textTransform: 'uppercase'}}>{entry.date} • {entry.source ? entry.source : entry.category}</div>
+                                                </div>
+                                            </div>
+                                            <div style={{display:'flex', alignItems:'center', gap:'15px'}}>
+                                                <span style={{fontWeight:'800', fontSize: '1.1rem', color: entry.type === 'Credit' ? 'var(--text-main)' : 'var(--text-main)'}}>{entry.type === 'Credit' ? '+' : '-'}{formatCurrency(entry.amount)}</span>
+                                                <button onClick={() => setDeleteId(entry.id)} style={{background:'rgba(239, 68, 68, 0.1)', border:'none', color:'var(--danger)', borderRadius: '8px', width: '30px', height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor:'pointer', fontWeight: 'bold'}}>×</button>
+                                            </div>
+                                        </div>
+                                    ))}
                                 </div>
                             </div>
 
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
+                                <div className="b-card" style={{ borderRadius: '24px', padding: '25px', background: 'linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%)', border: '1px solid #fde68a' }}>
+                                    <h3 style={{ margin: '0 0 15px 0', fontSize: '1.1rem', fontWeight: '700', color: '#b45309', display: 'flex', alignItems: 'center', gap: '8px' }}><span style={{ padding: '6px', background: 'rgba(245, 158, 11, 0.2)', borderRadius: '8px' }}>💡</span> {UI.role} Analysis</h3>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                        {smartInsights.map((alert, i) => <div key={i} style={{ padding: '12px 16px', background: 'rgba(255,255,255,0.6)', borderRadius: '12px', border: '1px solid rgba(245, 158, 11, 0.3)', color: '#92400e', fontWeight: '600', fontSize: '0.9rem', boxShadow: '0 4px 12px rgba(245, 158, 11, 0.05)' }}>{alert.text}</div>)}
+                                    </div>
+                                </div>
+                                
+                                <div className="b-card" style={{ borderRadius: '24px', padding: '25px' }}>
+                                    <BusinessPredictionCard ledger={ledger} />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    </>)}
+
+                    {activeTab === 'ops' && (<>
+                    <div className="b-main-layout" style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '30px' }}>
+                        <div>
                             <div className="b-card">
                                 <h3 className="b-title" style={{ fontSize: '1.2rem', marginBottom: '20px' }}>👥 {UI.staffTitle}</h3>
                                 <div style={{ borderBottom: '2px dashed #f3f4f6', paddingBottom: '20px', marginBottom: '20px' }}>
@@ -767,143 +865,107 @@ function BusinessView({ onLogout, onUpdateFinance }) {
                                 </div>
                                 <div style={{ maxHeight: '200px', overflowY: 'auto' }}>
                                     {employees.map(emp => (
-                                        <div key={emp.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems:'center', padding: '12px', background:'#f9fafb', borderRadius:'12px', marginBottom:'8px' }}>
-                                            <div style={{display:'flex', gap:'10px', alignItems:'center'}}><div style={{width:'30px', height:'30px', background:'#e0f2fe', borderRadius:'50%', color:'#3b82f6', display:'flex', alignItems:'center', justifyContent:'center', fontWeight:'bold'}}>{emp.name.charAt(0)}</div><div><div style={{fontSize:'0.9rem', fontWeight:'700'}}>{emp.name}</div><div style={{fontSize:'0.7rem', color:'#9ca3af', textTransform:'uppercase'}}>{emp.designation}</div></div></div>
-                                            <div style={{display:'flex', gap:'15px', alignItems:'center'}}><span style={{fontSize:'0.9rem', fontWeight:'600'}}>{formatCurrency(emp.salary)}</span><button onClick={() => handleFire(emp.id)} style={{background:'transparent', border:'none', color:'#ef4444', fontWeight:'bold', cursor:'pointer'}}>Remove</button></div>
+                                        <div key={emp.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems:'center', padding: '12px', background:'var(--card-bg)', borderRadius:'12px', marginBottom:'8px' }}>
+                                            <div style={{display:'flex', gap:'10px', alignItems:'center'}}><div style={{width:'30px', height:'30px', background:'var(--accent-blue-light)', borderRadius:'50%', color:'var(--accent-blue)', display:'flex', alignItems:'center', justifyContent:'center', fontWeight:'bold'}}>{emp.name.charAt(0)}</div><div><div style={{fontSize:'0.9rem', fontWeight:'700'}}>{emp.name}</div><div style={{fontSize:'0.7rem', color:'var(--text-muted)', textTransform:'uppercase'}}>{emp.designation}</div></div></div>
+                                            <div style={{display:'flex', gap:'15px', alignItems:'center'}}><span style={{fontSize:'0.9rem', fontWeight:'600'}}>{formatCurrency(emp.salary)}</span><button onClick={() => handleFire(emp.id)} style={{background:'transparent', border:'none', color:'var(--danger)', fontWeight:'bold', cursor:'pointer'}}>Remove</button></div>
                                         </div>
                                     ))}
                                 </div>
                             </div>
-
-                            {businessType === 'shop' && (
-                                <div className="b-card">
-                                    <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom: '15px'}}>
-                                        <h3 className="b-title" style={{ fontSize: '1.2rem' }}>📒 Pending Udhaar (Khata)</h3>
-                                        <span style={{fontSize:'0.7rem', background:'#fef3c7', color:'#d97706', padding:'4px 8px', borderRadius:'6px', fontWeight:'bold'}}>{khata.length} Unpaid</span>
-                                    </div>
-                                    <div style={{ maxHeight: '200px', overflowY: 'auto' }}>
-                                        {khata.length === 0 ? <p style={{color:'#9ca3af', fontSize:'0.9rem'}}>No pending payments.</p> : khata.map(k => (
-                                            <div key={k.id} style={{display:'flex', justifyContent:'space-between', padding:'10px 0', borderBottom:'1px dashed #e5e7eb'}}>
-                                                <div>
-                                                    <strong style={{color:'#111827'}}>{k.name}</strong><br/>
-                                                    <span style={{fontSize:'0.75rem', color:'#6b7280'}}>{k.date} • {k.phone || 'No phone'}</span>
-                                                </div>
-                                                <div style={{textAlign:'right'}}>
-                                                    <span style={{color:'#ef4444', fontWeight:'bold', display:'block', marginBottom:'4px'}}>{formatCurrency(k.amount)}</span>
-                                                    <button onClick={() => handleSettleKhata(k)} style={{background:'var(--accent)', color:'white', border:'none', borderRadius:'4px', padding:'4px 8px', fontSize:'0.75rem', cursor:'pointer', fontWeight:'bold'}}>SETTLE</button>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-
                             <div className="b-card">
                                 <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom: '20px'}}>
                                     <h3 className="b-title" style={{ fontSize: '1.2rem' }}>🚀 {UI.assetTitle}</h3>
-                                    <span style={{fontSize:'0.7rem', background:'#fef3c7', color:'#d97706', padding:'4px 8px', borderRadius:'6px', fontWeight:'bold'}}>
-                                        TOTAL VALUE: {formatCurrency(totalAssetValue)}
-                                    </span>
+                                    <span style={{fontSize:'0.7rem', background:'rgba(245, 158, 11, 0.1)', color:'#f59e0b', padding:'4px 8px', borderRadius:'6px', fontWeight:'bold'}}>TOTAL VALUE: {formatCurrency(totalAssetValue)}</span>
                                 </div>
-                                
                                 <div style={{ display: 'flex', gap: '10px', marginBottom: '20px', alignItems: 'flex-end' }}>
                                     <div style={{flex: 2}}><label className="b-label">{UI.assetLabel}</label><input className="b-input" placeholder="Item Name" value={investInput.name} onChange={(e) => setInvestInput({...investInput, name: e.target.value})}/></div>
                                     <div style={{flex: 1}}><label className="b-label">Cost</label><input className="b-input" placeholder="₹0" value={investInput.cost} onChange={(e) => setInvestInput({...investInput, cost: e.target.value})}/></div>
-                                    <button onClick={handleCustomInvest} className="b-btn b-btn-primary" style={{height:'50px'}}>ADD</button>
+                                    <button onClick={handleCustomInvest} className="b-btn b-btn-primary" style={{height: '42px', padding: '0 20px'}}>+</button>
                                 </div>
-
-                                <div style={{ maxHeight: '150px', overflowY: 'auto' }}>
-                                    {assets.length === 0 ? <p style={{color:'#9ca3af', fontSize:'0.9rem'}}>No assets recorded in your portfolio.</p> : assets.map(a => (
-                                        <div key={a.id} style={{display:'flex', justifyContent:'space-between', alignItems: 'center', padding:'10px 12px', background:'#f9fafb', borderRadius:'8px', marginBottom:'8px'}}>
-                                            <span style={{fontWeight:'bold', color:'#374151'}}>{a.name}</span>
+                                <div style={{ maxHeight: '200px', overflowY: 'auto' }}>
+                                    {assets.map(a => (
+                                        <div key={a.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems:'center', padding: '12px', background:'var(--card-bg)', borderRadius:'12px', marginBottom:'8px' }}>
+                                            <span style={{fontWeight:'600', fontSize:'0.9rem'}}>{a.name}</span>
                                             <div style={{display:'flex', gap:'15px', alignItems:'center'}}>
-                                                <span style={{color:'var(--accent)', fontWeight:'600'}}>{formatCurrency(a.cost)}</span>
-                                                <button onClick={() => handleRemoveAsset(a.id)} style={{color:'#ef4444', background:'none', border:'none', cursor:'pointer', fontSize: '0.8rem', fontWeight: 'bold'}}>Remove</button>
+                                                <span style={{color:'var(--text-muted)'}}>{formatCurrency(a.cost)}</span>
+                                                <button onClick={() => handleRemoveAsset(a.id)} style={{color:'var(--danger)', background:'none', border:'none', cursor:'pointer', fontSize: '0.8rem', fontWeight: 'bold'}}>Remove</button>
                                             </div>
                                         </div>
                                     ))}
                                 </div>
                             </div>
-
                         </div>
-
                         <div>
-                            <div style={{ marginBottom: '20px' }}>
-                                <AIInsightBox balance={takeHome} transactions={ledger.map(l => ({...l, type: l.type === 'Debit' ? 'expense' : 'income'}))} />
-                            </div>
-
-                            <div className="b-card">
-                                <h3 className="b-title" style={{ fontSize: '1rem', marginBottom: '15px' }}>💡 {UI.role} Analysis</h3>
-                                {smartInsights.map((alert, i) => <div key={i} className={`alert-card alert-${alert.type}`}>{alert.text}</div>)}
-                            </div>
-                            
-                            <div className="b-card" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                <h3 className="b-title" style={{ fontSize: '1rem', marginBottom: '20px' }}>Money Flow</h3>
-                                <SimplePieChart data={profitData} size={160} hollow={true} />
-                            </div>
-
                             {businessType === 'shop' && topSellers.length > 0 && (
                                 <div className="b-card">
                                     <h3 className="b-title" style={{ fontSize: '1rem', marginBottom: '15px' }}>🏆 Top Selling Items</h3>
                                     {topSellers.map((item, i) => (
-                                        <div key={i} style={{display:'flex', justifyContent:'space-between', padding:'8px', background: i === 0 ? '#fef3c7' : '#f9fafb', borderRadius:'8px', marginBottom:'6px'}}>
-                                            <span style={{fontWeight:'bold', color: i===0 ? '#d97706' : '#374151'}}>#{i+1} {item[0]}</span>
-                                            <span style={{color:'#6b7280', fontWeight:'600'}}>{item[1]} sold</span>
+                                        <div key={i} style={{display:'flex', justifyContent:'space-between', padding:'8px', background: i === 0 ? 'rgba(245, 158, 11, 0.1)' : 'var(--card-bg)', borderRadius:'8px', marginBottom:'6px'}}>
+                                            <span style={{fontWeight:'bold', color: i===0 ? '#f59e0b' : 'rgba(0, 0, 0, 0.08)'}}>#{i+1} {item[0]}</span>
+                                            <span style={{color:'var(--text-muted)', fontWeight:'600'}}>{item[1]} sold</span>
                                         </div>
                                     ))}
                                 </div>
                             )}
+                        </div>
+                    </div>
+                    </>)}
 
-                            {/* 👇 REMOVED THE FIXED BILLS TEXT BOX ENTIRELY 👇 */}
-                            
-                            <div className="b-card" style={{ flex: 1 }}>
-                                <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom: '15px'}}>
-                                    <h3 className="b-title" style={{ fontSize: '1rem' }}>📖 Daily Ledger</h3>
-                                    <span style={{fontSize:'0.7rem', background:'#e0f2fe', padding:'3px 6px', borderRadius:'4px', color:'var(--primary)'}}>{filteredLedger.length} entries</span>
-                                </div>
-                                
-                                {/* 🌟 UPDATED DATE SELECTOR TOOL: Now opens native calendar instantly on click */}
-                                <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
-                                    <input 
-                                        type="date" 
-                                        className="b-input" 
-                                        style={{ flex: 1, fontSize: '0.85rem', padding: '8px', cursor: 'pointer' }} 
-                                        value={ledgerDate} 
-                                        onChange={(e) => setLedgerDate(e.target.value)} 
-                                        onClick={(e) => {
-                                            try { e.target.showPicker(); } catch (err) { /* Catch for older browsers */ }
-                                        }}
-                                    />
-                                    {ledgerDate && (
-                                        <button 
-                                            onClick={() => setLedgerDate("")}
-                                            style={{ background: '#fef2f2', border: '1px solid var(--status-danger)', borderRadius: '8px', padding: '0 15px', cursor: 'pointer', fontSize: '0.8rem', color: '#ef4444', fontWeight: 'bold' }}
-                                        >
-                                            Clear
-                                        </button>
-                                    )}
-                                </div>
-
-                                <input className="b-input" placeholder="🔍 Search description or amount..." style={{fontSize:'0.9rem', padding:'8px 12px', marginBottom:'15px', background:'#f9fafb'}} value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
-                                
-                                <div style={{ maxHeight: '350px', overflowY: 'auto' }}>
-                                    {filteredLedger.length === 0 && <div style={{textAlign:'center', color:'#9ca3af', padding:'20px'}}>No transactions found.</div>}
-                                    {filteredLedger.map((entry, i) => (
-                                        <div key={i} style={{ padding:'12px', borderBottom:'1px solid #f3f4f6' }}>
-                                            <div style={{display:'flex', justifyContent:'space-between', marginBottom:'4px'}}>
-                                                <span style={{fontWeight:'600', fontSize:'0.9rem'}}>{entry.desc}</span>
-                                                <div style={{display:'flex', alignItems:'center', gap:'10px'}}><span style={{fontWeight:'700', color: entry.type === 'Credit' ? 'var(--accent)' : '#ef4444'}}>{entry.type === 'Credit' ? '+' : '-'} {formatCurrency(entry.amount)}</span><button onClick={() => setDeleteId(entry.id)} style={{background:'none', border:'none', color:'#9ca3af', cursor:'pointer', fontSize:'1.2rem', lineHeight:1}}>×</button></div>
+                    {activeTab === 'crm' && (<>
+                    <div className="b-main-layout" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px' }}>
+                        <div className="b-card">
+                            <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom: '15px'}}>
+                                <h3 className="b-title" style={{ fontSize: '1.2rem' }}>👑 Lifetime Value (LTV) Leaderboard</h3>
+                                <span style={{fontSize:'0.7rem', background:'var(--accent-blue-light)', padding:'3px 6px', borderRadius:'4px', color:'var(--primary)'}}>Top Customers</span>
+                            </div>
+                            <div style={{ maxHeight: '400px', overflowY: 'auto', paddingRight: '5px' }}>
+                                {customerLTV.length === 0 ? <p style={{color:'var(--text-muted)', fontSize:'0.9rem'}}>No tracked customers yet. Add names during billing.</p> : customerLTV.map((c, i) => (
+                                    <div key={i} style={{display:'flex', justifyContent:'space-between', padding:'15px', background: i === 0 ? 'linear-gradient(to right, rgba(59, 130, 246, 0.1), transparent)' : 'var(--card-bg)', borderRadius:'12px', marginBottom:'10px', border: i === 0 ? '1px solid rgba(59, 130, 246, 0.1)' : '1px solid transparent'}}>
+                                        <div style={{display:'flex', gap:'12px', alignItems:'center'}}>
+                                            <div style={{width:'35px', height:'35px', background: i === 0 ? 'var(--primary)' : 'rgba(0, 0, 0, 0.08)', color: i === 0 ? '#fff' : 'var(--text-main)', borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', fontWeight:'bold'}}>
+                                                {i === 0 ? '🏆' : i + 1}
                                             </div>
-                                            <div style={{fontSize:'0.75rem', color:'#9ca3af'}}>{entry.date} • {entry.source ? entry.source.toUpperCase() : entry.category}</div>
+                                            <div>
+                                                <div style={{fontWeight:'700', fontSize:'1rem', color:'var(--text-main)'}}>{c.name}</div>
+                                                {c.totalDebt > 0 && <div style={{fontSize:'0.75rem', color:'#f59e0b'}}>Owes {formatCurrency(c.totalDebt)}</div>}
+                                            </div>
+                                        </div>
+                                        <div style={{textAlign:'right'}}>
+                                            <div style={{fontSize:'0.7rem', color:'var(--text-muted)'}}>Lifetime Paid</div>
+                                            <div style={{color:'var(--accent-blue)', fontWeight:'bold', fontSize:'1.1rem'}}>{formatCurrency(c.totalPaid)}</div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        {businessType === 'shop' && (
+                            <div className="b-card">
+                                <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom: '15px'}}>
+                                    <h3 className="b-title" style={{ fontSize: '1.2rem' }}>📒 Pending Udhaar (Khata)</h3>
+                                    <span style={{fontSize:'0.7rem', background:'rgba(245, 158, 11, 0.1)', color:'#f59e0b', padding:'4px 8px', borderRadius:'6px', fontWeight:'bold'}}>{khata.length} Unpaid</span>
+                                </div>
+                                <div style={{ maxHeight: '400px', overflowY: 'auto', paddingRight: '5px' }}>
+                                    {khata.length === 0 ? <p style={{color:'var(--text-muted)', fontSize:'0.9rem'}}>No pending payments.</p> : khata.map(k => (
+                                        <div key={k.id} style={{display:'flex', justifyContent:'space-between', padding:'15px', background:'var(--card-bg)', borderRadius:'12px', marginBottom:'10px', borderLeft:'4px solid #f59e0b'}}>
+                                            <div>
+                                                <strong style={{color:'var(--text-main)', fontSize:'1rem'}}>{k.name}</strong><br/>
+                                                <span style={{fontSize:'0.8rem', color:'var(--text-muted)'}}>{k.date} • {k.phone || 'No phone'}</span>
+                                            </div>
+                                            <div style={{textAlign:'right'}}>
+                                                <span style={{color:'var(--danger)', fontWeight:'bold', fontSize:'1.1rem', display:'block', marginBottom:'8px'}}>{formatCurrency(k.amount)}</span>
+                                                <button onClick={() => handleSettleKhata(k)} style={{background:'#f59e0b', color:'var(--text-main)', border:'none', borderRadius:'6px', padding:'6px 12px', fontSize:'0.8rem', cursor:'pointer', fontWeight:'bold', boxShadow:'0 2px 4px rgba(245,158,11,0.2)'}}>SETTLE</button>
+                                            </div>
                                         </div>
                                     ))}
                                 </div>
                             </div>
-                        </div>
+                        )}
                     </div>
-                    
-                    <div className="fab-container"><div className={`toggle ${showTransModal ? 'active' : ''}`} onClick={() => setShowTransModal(!showTransModal)}><span className="label">+</span></div></div>
+                    </>)}
 
+                    {/* Placeholder marker: */}
+                    {activeTab === 'ops' && (<>
                     {/* =======================================================
                         🛠️ DISCRETE BUSINESS DEV TOOLS (HIDDEN AT BOTTOM)
                         ======================================================= */}
@@ -920,16 +982,16 @@ function BusinessView({ onLogout, onUpdateFinance }) {
                         type="month" 
                         value={seedMonth} 
                         onChange={(e) => setSeedMonth(e.target.value)} 
-                        style={{ background: 'rgba(0,0,0,0.05)', border: '1px solid #d1d5db', color: '#6b7280', padding: '4px 8px', borderRadius: '4px', fontSize: '0.75rem' }}
+                        style={{ background: 'rgba(0,0,0,0.05)', border: '1px solid rgba(0, 0, 0, 0.08)', color: 'var(--text-muted)', padding: '4px 8px', borderRadius: '4px', fontSize: '0.75rem' }}
                         />
                         
                         <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                        <span style={{ fontSize: '0.7rem', color: '#6b7280' }}>Qty:</span>
+                        <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Qty:</span>
                         <input 
                             type="number" 
                             value={seedCount} 
                             onChange={(e) => setSeedCount(e.target.value)} 
-                            style={{ width: '50px', background: 'rgba(0,0,0,0.05)', border: '1px solid #d1d5db', color: '#6b7280', padding: '4px', borderRadius: '4px', fontSize: '0.75rem' }}
+                            style={{ width: '50px', background: 'rgba(0,0,0,0.05)', border: '1px solid rgba(0, 0, 0, 0.08)', color: 'var(--text-muted)', padding: '4px', borderRadius: '4px', fontSize: '0.75rem' }}
                             min="1" max="100"
                         />
                         </div>
@@ -943,18 +1005,20 @@ function BusinessView({ onLogout, onUpdateFinance }) {
                         
                         <button 
                         onClick={handleClearBusinessMonth}
-                        style={{ background: 'transparent', border: 'none', color: '#ef4444', fontSize: '0.75rem', cursor: 'pointer', fontWeight: 'bold' }}
+                        style={{ background: 'transparent', border: 'none', color: 'var(--danger)', fontSize: '0.75rem', cursor: 'pointer', fontWeight: 'bold' }}
                         >
                         - Clear Month
                         </button>
 
                         <button 
                         onClick={handleNukeBusinessDatabase}
-                        style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid #ef4444', color: '#ef4444', fontSize: '0.75rem', cursor: 'pointer', padding: '4px 8px', borderRadius: '4px', marginLeft: '10px' }}
+                        style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid #ef4444', color: 'var(--danger)', fontSize: '0.75rem', cursor: 'pointer', padding: '4px 8px', borderRadius: '4px', marginLeft: '10px' }}
                         >
                         ☢️ Nuke Ledger
                         </button>
                     </div>
+                </>)}
+                </div>
                 </>
             )}
 
@@ -962,13 +1026,13 @@ function BusinessView({ onLogout, onUpdateFinance }) {
             {showInventoryModal && (
                 <div className="report-overlay">
                     <div className="report-card" style={{maxWidth:'700px', width: '90%', maxHeight:'90vh', overflowY:'auto'}}>
-                        <div className="report-header" style={{display:'flex', justifyContent:'space-between', alignItems:'center', position:'sticky', top:0, background:'white', zIndex:10}}>
+                        <div className="report-header" style={{display:'flex', justifyContent:'space-between', alignItems:'center', position:'sticky', top:0, background:'var(--text-main)', zIndex:10}}>
                             <h2 className="b-title">📦 Manage Inventory</h2>
-                            <button onClick={() => setShowInventoryModal(false)} style={{background:'none', border:'none', fontSize:'2rem', cursor:'pointer', color: '#ef4444', fontWeight: 'bold'}}>×</button>
+                            <button onClick={() => setShowInventoryModal(false)} style={{background:'none', border:'none', fontSize:'2rem', cursor:'pointer', color: 'var(--danger)', fontWeight: 'bold'}}>×</button>
                         </div>
                         
                         <div className="report-body">
-                            <div style={{display:'flex', gap:'8px', alignItems:'flex-end', marginBottom:'20px', borderBottom:'1px solid #e5e7eb', paddingBottom:'20px'}}>
+                            <div style={{display:'flex', gap:'8px', alignItems:'flex-end', marginBottom:'20px', borderBottom:'1px solid rgba(0, 0, 0, 0.08)', paddingBottom:'20px'}}>
                                 <div style={{flex:2}}>
                                     <label className="b-label" style={{display:'flex', justifyContent:'space-between'}}>
                                         <span>Barcode Scanner</span>
@@ -979,7 +1043,7 @@ function BusinessView({ onLogout, onUpdateFinance }) {
                                         onChange={e => setInvForm({...invForm, barcode: e.target.value})} 
                                         onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); fetchProductData(invForm.barcode); } }}
                                         onBlur={() => fetchProductData(invForm.barcode)}
-                                        style={{background:'#e0f2fe', borderColor:'#7dd3fc'}}
+                                        style={{background:'var(--accent-blue-light)', borderColor:'var(--accent-blue)'}}
                                     />
                                 </div>
 
@@ -990,17 +1054,17 @@ function BusinessView({ onLogout, onUpdateFinance }) {
                                 <button onClick={handleAddInventory} className="b-btn b-btn-primary" style={{height:'46px'}}>ADD</button>
                             </div>
                             <div style={{marginBottom:'10px'}}>
-                                {inventory.length === 0 && <div style={{textAlign:'center', color:'#9ca3af', padding:'20px'}}>No items added. Add your first item above!</div>}
+                                {inventory.length === 0 && <div style={{textAlign:'center', color:'var(--text-muted)', padding:'20px'}}>No items added. Add your first item above!</div>}
                                 {inventory.map(item => (
                                     <div key={item.id} style={{display:'flex', justifyContent:'space-between', padding:'10px', borderBottom:'1px solid #f3f4f6'}}>
                                         <div>
                                             <span style={{fontWeight:'bold'}}>{item.name}</span>
-                                            <span style={{marginLeft:'10px', fontSize:'0.75rem', background: item.stockQty !== '' && item.stockQty < 5 ? '#fee2e2' : '#e0f2fe', color: item.stockQty !== '' && item.stockQty < 5 ? '#ef4444' : '#0369a1', padding:'2px 6px', borderRadius:'10px'}}>Stock: {item.stockQty !== '' ? item.stockQty : '∞'}</span>
-                                            {item.barcode && <span style={{display:'block', fontSize:'0.75rem', color:'#9ca3af', marginTop:'2px'}}>📟 {item.barcode}</span>}
+                                            <span style={{marginLeft:'10px', fontSize:'0.75rem', background: item.stockQty !== '' && item.stockQty < 5 ? 'rgba(239, 68, 68, 0.1)' : 'var(--accent-blue-light)', color: item.stockQty !== '' && item.stockQty < 5 ? 'var(--danger)' : 'var(--accent-blue)', padding:'2px 6px', borderRadius:'10px'}}>Stock: {item.stockQty !== '' ? item.stockQty : '∞'}</span>
+                                            {item.barcode && <span style={{display:'block', fontSize:'0.75rem', color:'var(--text-muted)', marginTop:'2px'}}>📟 {item.barcode}</span>}
                                         </div>
                                         <div style={{display:'flex', gap:'15px', alignItems:'center'}}>
                                             <span style={{fontWeight:'bold'}}>{formatCurrency(item.price)}</span>
-                                            <button onClick={() => handleDeleteInventory(item.id)} style={{color:'#ef4444', background:'none', border:'none', cursor:'pointer'}}>Delete</button>
+                                            <button onClick={() => handleDeleteInventory(item.id)} style={{color:'var(--danger)', background:'none', border:'none', cursor:'pointer'}}>Delete</button>
                                         </div>
                                     </div>
                                 ))}
@@ -1008,7 +1072,7 @@ function BusinessView({ onLogout, onUpdateFinance }) {
                         </div>
 
                         <div style={{marginTop:'20px', borderTop:'1px solid #eee', paddingTop:'20px'}}>
-                             <button onClick={() => setShowInventoryModal(false)} className="b-btn" style={{width:'100%', background:'#e5e7eb', color:'#374151', padding:'12px'}}>← GO BACK</button>
+                             <button onClick={() => setShowInventoryModal(false)} className="b-btn" style={{width:'100%', background:'rgba(0, 0, 0, 0.08)', color:'rgba(0, 0, 0, 0.08)', padding:'12px'}}>← GO BACK</button>
                         </div>
                     </div>
                 </div>
@@ -1020,11 +1084,11 @@ function BusinessView({ onLogout, onUpdateFinance }) {
                     <div className="report-card" style={{maxWidth:'650px', height:'auto'}}>
                         <div className="report-header" style={{display:'flex', justifyContent:'space-between', alignItems:'center'}}>
                             <h2 className="b-title" style={{fontSize:'1.3rem'}}>Generate Bill</h2>
-                            <button onClick={() => setShowBilling(false)} style={{background:'none', border:'none', fontSize:'2rem', cursor:'pointer', color: '#ef4444', fontWeight: 'bold'}}>×</button>
+                            <button onClick={() => setShowBilling(false)} style={{background:'none', border:'none', fontSize:'2rem', cursor:'pointer', color: 'var(--danger)', fontWeight: 'bold'}}>×</button>
                         </div>
                         <div className="report-body">
                             
-                            <div style={{marginBottom:'15px', display:'flex', alignItems:'center', gap:'15px', background:'#f9fafb', padding:'10px', borderRadius:'8px', border:'1px solid #e5e7eb', overflowX: 'auto'}}>
+                            <div style={{marginBottom:'15px', display:'flex', alignItems:'center', gap:'15px', background:'var(--card-bg)', padding:'10px', borderRadius:'8px', border:'1px solid rgba(0, 0, 0, 0.08)', overflowX: 'auto'}}>
                                 <span className="b-label" style={{margin:0, whiteSpace:'nowrap'}}>Bill Theme:</span>
                                 <div style={{display:'flex', gap:'10px'}}>
                                     {Object.entries(INVOICE_THEMES).map(([key, themeData]) => (
@@ -1033,11 +1097,11 @@ function BusinessView({ onLogout, onUpdateFinance }) {
                                 </div>
                             </div>
 
-                            <div style={{marginBottom:'15px', background:'#fffbeb', padding:'10px', borderRadius:'8px', border:'2px dashed #fcd34d'}}>
-                                <label className="b-label" style={{color:'#d97706'}}>📷 Fast Barcode Scan (Click here and scan item)</label>
+                            <div style={{marginBottom:'15px', background:'rgba(245, 158, 11, 0.05)', padding:'10px', borderRadius:'8px', border:'2px dashed #f59e0b'}}>
+                                <label className="b-label" style={{color:'#f59e0b'}}>📷 Fast Barcode Scan (Click here and scan item)</label>
                                 <input 
                                     className="b-input" autoFocus placeholder="Listening for scanner beep..." value={scannedCode}
-                                    onChange={(e) => setScannedCode(e.target.value)} onKeyDown={handleBarcodeSubmit} style={{background:'white', borderColor:'#fde68a'}}
+                                    onChange={(e) => setScannedCode(e.target.value)} onKeyDown={handleBarcodeSubmit} style={{background:'var(--text-main)', borderColor:'rgba(245, 158, 11, 0.2)'}}
                                 />
                             </div>
 
@@ -1046,19 +1110,19 @@ function BusinessView({ onLogout, onUpdateFinance }) {
                                 <div style={{flex:2}}><label className="b-label">Phone</label><input className="b-input" placeholder="Optional" value={billCustomer.phone} onChange={e => setBillCustomer({...billCustomer, phone: e.target.value})} /></div>
                             </div>
 
-                            <div style={{display:'flex', gap:'10px', marginBottom:'20px', background:'#e0f2fe', padding:'10px', borderRadius:'8px', border:'1px solid #bae6fd'}}>
+                            <div style={{display:'flex', gap:'10px', marginBottom:'20px', background:'var(--accent-blue-light)', padding:'10px', borderRadius:'8px', border:'1px solid var(--accent-blue)'}}>
                                 <div style={{flex:1}}>
-                                    <label className="b-label" style={{color:'#0369a1'}}>Payment Status</label>
-                                    <select className="b-input" style={{borderColor:'#7dd3fc'}} value={paymentStatus} onChange={(e) => setPaymentStatus(e.target.value)}>
+                                    <label className="b-label" style={{color:'var(--accent-blue)'}}>Payment Status</label>
+                                    <select className="b-input" style={{borderColor:'var(--accent-blue)'}} value={paymentStatus} onChange={(e) => setPaymentStatus(e.target.value)}>
                                         <option value="Paid">✅ Paid Instantly</option>
                                         <option value="Udhaar">📒 Udhaar (Unpaid Khata)</option>
                                     </select>
                                 </div>
                                 <div style={{flex:1}}>
-                                    <label className="b-label" style={{color:'#0369a1'}}>Tax Options</label>
-                                    <label style={{display:'flex', alignItems:'center', gap:'8px', height:'42px', background:'white', padding:'0 10px', borderRadius:'8px', border:'1px solid #7dd3fc', cursor:'pointer'}}>
+                                    <label className="b-label" style={{color:'var(--accent-blue)'}}>Tax Options</label>
+                                    <label style={{display:'flex', alignItems:'center', gap:'8px', height:'42px', background:'var(--text-main)', padding:'0 10px', borderRadius:'8px', border:'1px solid var(--accent-blue)', cursor:'pointer'}}>
                                         <input type="checkbox" checked={applyGST} onChange={(e) => setApplyGST(e.target.checked)} style={{width:'18px', height:'18px'}} />
-                                        <span style={{fontWeight:'bold', fontSize:'0.9rem', color:'#0369a1'}}>Apply 18% GST</span>
+                                        <span style={{fontWeight:'bold', fontSize:'0.9rem', color:'var(--accent-blue)'}}>Apply 18% GST</span>
                                     </label>
                                 </div>
                             </div>
@@ -1072,14 +1136,14 @@ function BusinessView({ onLogout, onUpdateFinance }) {
                                         />
                                         
                                         {suggestions.visible && suggestions.rowIndex === i && (
-                                            <div style={{position:'absolute', top:'100%', left:0, width:'70%', background:'white', border:'1px solid #e5e7eb', borderRadius:'8px', zIndex:10, boxShadow:'0 10px 15px -3px rgba(0,0,0,0.1)', maxHeight:'150px', overflowY:'auto'}}>
+                                            <div style={{position:'absolute', top:'100%', left:0, width:'70%', background:'var(--text-main)', border:'1px solid rgba(0, 0, 0, 0.08)', borderRadius:'8px', zIndex:10, boxShadow:'0 10px 15px -3px rgba(0, 0, 0, 0.08)', maxHeight:'150px', overflowY:'auto'}}>
                                                 {suggestions.items.map(s => (
                                                     <div 
                                                         key={s.id} onClick={() => selectSuggestion(s, row.id)}
                                                         style={{padding:'10px 12px', borderBottom:'1px solid #f3f4f6', cursor:'pointer', fontSize:'0.9rem', display:'flex', justifyContent:'space-between'}}
-                                                        onMouseOver={e => e.target.style.background = '#f3f4f6'} onMouseOut={e => e.target.style.background = 'white'}
+                                                        onMouseOver={e => e.target.style.background = 'rgba(0, 0, 0, 0.08)'} onMouseOut={e => e.target.style.background = 'var(--text-main)'}
                                                     >
-                                                        <span><strong>{s.name}</strong> <span style={{fontSize:'0.75rem', color: s.stockQty !== '' && s.stockQty < 5 ? '#ef4444' : '#6b7280'}}>(Stock: {s.stockQty !== '' ? s.stockQty : '∞'})</span></span>
+                                                        <span><strong>{s.name}</strong> <span style={{fontSize:'0.75rem', color: s.stockQty !== '' && s.stockQty < 5 ? 'var(--danger)' : 'var(--text-muted)'}}>(Stock: {s.stockQty !== '' ? s.stockQty : '∞'})</span></span>
                                                         <span>{formatCurrency(s.price)}</span>
                                                     </div>
                                                 ))}
@@ -1091,22 +1155,22 @@ function BusinessView({ onLogout, onUpdateFinance }) {
                                             className="b-input" type="number" placeholder="Price" value={row.price} 
                                             onChange={e => updateBillItem(row.id, 'price', e.target.value)} onKeyDown={(e) => handleBillKeyDown(e, i)} style={{width:'80px'}} 
                                         />
-                                        <button onClick={() => removeBillItem(row.id)} style={{background:'transparent', border:'none', color:'#ef4444', fontSize:'1.2rem'}}>×</button>
+                                        <button onClick={() => removeBillItem(row.id)} style={{background:'transparent', border:'none', color:'var(--danger)', fontSize:'1.2rem'}}>×</button>
                                     </div>
                                 ))}
-                                <button onClick={addBillItem} style={{fontSize:'0.8rem', color:'#0369a1', background:'transparent', border:'none', cursor:'pointer', fontWeight:'bold'}}>+ Add Another Item</button>
+                                <button onClick={addBillItem} style={{fontSize:'0.8rem', color:'var(--accent-blue)', background:'transparent', border:'none', cursor:'pointer', fontWeight:'bold'}}>+ Add Another Item</button>
                             </div>
                             
-                            <div style={{borderTop:'1px solid #e5e7eb', paddingTop:'15px', display:'flex', justifyContent:'space-between', alignItems:'center'}}>
+                            <div style={{borderTop:'1px solid rgba(0, 0, 0, 0.08)', paddingTop:'15px', display:'flex', justifyContent:'space-between', alignItems:'center'}}>
                                 <div>
-                                    <div style={{fontSize:'0.9rem', color:'#6b7280'}}>Subtotal: {formatCurrency(getBillTotal())}</div>
-                                    <div style={{fontSize:'1.3rem', fontWeight:'800', color:'#111827'}}>Total: {formatCurrency(applyGST ? getBillTotal() * 1.18 : getBillTotal())}</div>
+                                    <div style={{fontSize:'0.9rem', color:'var(--text-muted)'}}>Subtotal: {formatCurrency(getBillTotal())}</div>
+                                    <div style={{fontSize:'1.3rem', fontWeight:'800', color:'var(--text-main)'}}>Total: {formatCurrency(applyGST ? getBillTotal() * 1.18 : getBillTotal())}</div>
                                 </div>
                                 <div style={{display:'flex', gap:'10px'}}>
-                                    <button onClick={() => handleGenerateBill(false)} className="b-btn b-btn-primary" style={{padding:'10px 15px', background:'#374151'}}>
+                                    <button onClick={() => handleGenerateBill(false)} className="b-btn b-btn-primary" style={{padding:'10px 15px', background:'rgba(0, 0, 0, 0.08)'}}>
                                         🖨️ SAVE PDF
                                     </button>
-                                    <button onClick={() => handleGenerateBill(true)} className="b-btn b-btn-primary" style={{padding:'10px 15px', background:'#22c55e', color:'white', boxShadow:'0 4px 6px -1px rgba(34, 197, 94, 0.4)'}}>
+                                    <button onClick={() => handleGenerateBill(true)} className="b-btn b-btn-primary" style={{padding:'10px 15px', background:'var(--primary)', color:'var(--text-main)', boxShadow:'0 4px 6px -1px rgba(34, 197, 94, 0.1)'}}>
                                         💬 SAVE & WHATSAPP
                                     </button>
                                 </div>
@@ -1125,17 +1189,17 @@ function BusinessView({ onLogout, onUpdateFinance }) {
                             <div style={{marginBottom:'20px'}}><label className="b-label">Business Name</label><input className="b-input" value={companyName} onChange={(e) => setCompanyName(e.target.value)} placeholder="Enter Name..." /></div>
                             <div style={{marginBottom:'20px'}}><label className="b-label">Opening Cash Balance (Galla)</label><input className="b-input" type="number" value={openingBalance} onChange={(e) => setOpeningBalance(e.target.value)} placeholder="₹0" /></div>
                             
-                            <div style={{marginBottom:'20px', background:'#fffbeb', padding:'10px', borderRadius:'8px', border:'1px solid #fde68a'}}>
+                            <div style={{marginBottom:'20px', background:'rgba(245, 158, 11, 0.05)', padding:'10px', borderRadius:'8px', border:'1px solid #f59e0b'}}>
                                 <label style={{display:'flex', alignItems:'center', gap:'10px', cursor:'pointer'}}>
                                     <input type="checkbox" checked={isCashierMode} onChange={(e) => {
                                         if(e.target.checked) setIsCashierMode(true);
                                     }} style={{width:'18px', height:'18px'}} />
-                                    <span style={{fontWeight:'bold', color:'#d97706'}}>Lock in Cashier Mode</span>
+                                    <span style={{fontWeight:'bold', color:'#f59e0b'}}>Lock in Cashier Mode</span>
                                 </label>
-                                <p style={{fontSize:'0.75rem', color:'#d97706', marginTop:'5px'}}>Hides financial data. Pin `1234` required to exit.</p>
+                                <p style={{fontSize:'0.75rem', color:'#f59e0b', marginTop:'5px'}}>Hides financial data. Pin `1234` required to exit.</p>
                             </div>
 
-                            <div style={{marginBottom:'25px'}}><label className="b-label">Identity</label><div style={{display:'flex', gap:'10px'}}><button onClick={() => setBusinessType('shop')} className="b-btn" style={{flex:1, background: businessType === 'shop' ? '#111827' : '#f3f4f6', color: businessType === 'shop' ? 'white' : '#6b7280'}}>🏪 Shop</button><button onClick={() => setBusinessType('startup')} className="b-btn" style={{flex:1, background: businessType === 'startup' ? '#111827' : '#f3f4f6', color: businessType === 'startup' ? 'white' : '#6b7280'}}>🚀 Startup</button></div></div>
+                            <div style={{marginBottom:'25px'}}><label className="b-label">Identity</label><div style={{display:'flex', gap:'10px'}}><button onClick={() => setBusinessType('shop')} className="b-btn" style={{flex:1, background: businessType === 'shop' ? 'var(--text-main)' : 'rgba(0, 0, 0, 0.08)', color: businessType === 'shop' ? 'var(--text-main)' : 'var(--text-muted)'}}>🏪 Shop</button><button onClick={() => setBusinessType('startup')} className="b-btn" style={{flex:1, background: businessType === 'startup' ? 'var(--text-main)' : 'rgba(0, 0, 0, 0.08)', color: businessType === 'startup' ? 'var(--text-main)' : 'var(--text-muted)'}}>🚀 Startup</button></div></div>
                             <button onClick={handleSaveSettings} className="b-btn b-btn-primary" style={{width:'100%'}}>SAVE CHANGES</button>
                         </div>
                     </div>
@@ -1144,9 +1208,9 @@ function BusinessView({ onLogout, onUpdateFinance }) {
 
             {showTransModal && (
                 <div className="trans-modal">
-                    <h3 className="b-title" style={{fontSize:'1.2rem', marginBottom:'20px', color: '#111827'}}>New Entry</h3>
+                    <h3 className="b-title" style={{fontSize:'1.2rem', marginBottom:'20px', color: 'var(--text-main)'}}>New Entry</h3>
                     <div style={{display:'flex', flexDirection:'column', gap:'15px'}}>
-                        <div style={{display:'flex', gap:'8px', flexWrap:'wrap', marginBottom:'5px'}}>{UI.quickTags[transForm.type === 'Credit' ? 'income' : 'expense'].map((tag, i) => (<button key={i} onClick={() => handleQuickTag(tag)} style={{background: '#f3f4f6', border: '1px solid #e5e7eb', borderRadius:'20px', padding:'6px 12px', fontSize:'0.75rem', cursor:'pointer', color:'#4b5563', transition: 'all 0.2s ease'}} onMouseOver={(e) => {e.target.style.background = '#e5e7eb'; e.target.style.color = '#111827'}} onMouseOut={(e) => {e.target.style.background = '#f3f4f6'; e.target.style.color = '#4b5563'}}>+ {tag}</button>))}</div>
+                        <div style={{display:'flex', gap:'8px', flexWrap:'wrap', marginBottom:'5px'}}>{UI.quickTags[transForm.type === 'Credit' ? 'income' : 'expense'].map((tag, i) => (<button key={i} onClick={() => handleQuickTag(tag)} style={{background: 'rgba(0, 0, 0, 0.08)', border: '1px solid rgba(0, 0, 0, 0.08)', borderRadius:'20px', padding:'6px 12px', fontSize:'0.75rem', cursor:'pointer', color:'#4b5563', transition: 'all 0.2s ease'}} onMouseOver={(e) => {e.target.style.background = 'rgba(0, 0, 0, 0.08)'; e.target.style.color = 'var(--text-main)'}} onMouseOut={(e) => {e.target.style.background = 'rgba(0, 0, 0, 0.08)'; e.target.style.color = '#4b5563'}}>+ {tag}</button>))}</div>
                         
                         <AIReceiptScanner 
                             onScanSuccess={(aiData) => {
@@ -1156,7 +1220,7 @@ function BusinessView({ onLogout, onUpdateFinance }) {
                                     amount: aiData.total || "",
                                     type: 'Debit'
                                 }));
-                                alert("Receipt scanned successfully!");
+                                toastMessage("Receipt scanned successfully!", "error");
                             }} 
                         />
 
@@ -1164,7 +1228,7 @@ function BusinessView({ onLogout, onUpdateFinance }) {
                         <div><label className="b-label">Amount</label><input className="b-input" type="number" placeholder="₹0" value={transForm.amount} onChange={e => setTransForm({...transForm, amount: e.target.value})} /></div>
                         <div>
                             <label className="b-label">Transaction Type</label>
-                            <div style={{display:'flex', gap:'10px', marginBottom:'10px'}}><button onClick={() => setTransForm({...transForm, type: 'Credit'})} className="b-btn" style={{flex:1, background: transForm.type === 'Credit' ? 'var(--accent)' : '#f3f4f6', color: transForm.type === 'Credit' ? 'white' : 'black'}}>INCOME (+)</button><button onClick={() => setTransForm({...transForm, type: 'Debit'})} className="b-btn" style={{flex:1, background: transForm.type === 'Debit' ? '#ef4444' : '#f3f4f6', color: transForm.type === 'Debit' ? 'white' : 'black'}}>EXPENSE (-)</button></div>
+                            <div style={{display:'flex', gap:'10px', marginBottom:'10px'}}><button onClick={() => setTransForm({...transForm, type: 'Credit'})} className="b-btn" style={{flex:1, background: transForm.type === 'Credit' ? 'var(--accent)' : 'rgba(0, 0, 0, 0.08)', color: transForm.type === 'Credit' ? 'var(--text-main)' : 'var(--app-bg)'}}>INCOME (+)</button><button onClick={() => setTransForm({...transForm, type: 'Debit'})} className="b-btn" style={{flex:1, background: transForm.type === 'Debit' ? 'var(--danger)' : 'rgba(0, 0, 0, 0.08)', color: transForm.type === 'Debit' ? 'var(--text-main)' : 'var(--app-bg)'}}>EXPENSE (-)</button></div>
                             {transForm.type === 'Credit' && (<div><label className="b-label">Select Source</label><select className="b-input" value={transForm.source} onChange={(e) => setTransForm({...transForm, source: e.target.value})}><option value="direct">{UI.rev1}</option><option value="services">{UI.rev2}</option><option value="investments">{UI.rev3}</option></select></div>)}
                         </div>
                         <button onClick={handleManualTransaction} className="b-btn b-btn-primary" style={{marginTop:'10px'}}>SAVE</button>
@@ -1172,11 +1236,93 @@ function BusinessView({ onLogout, onUpdateFinance }) {
                 </div>
             )}
 
-            {deleteId && <div className="report-overlay" onClick={() => setDeleteId(null)}><div className="report-card" style={{maxWidth:'400px'}} onClick={e => e.stopPropagation()}><div className="report-header"><h3 className="b-title">Confirm Delete</h3></div><div style={{padding:'20px'}}><p style={{marginBottom:'20px', color:'#666'}}>Delete this entry?</p><div style={{display:'flex', gap:'10px'}}><button onClick={() => setDeleteId(null)} className="b-btn">CANCEL</button><button onClick={confirmDeleteTransaction} className="b-btn b-btn-danger">DELETE</button></div></div></div></div>}
+            {deleteId && <div className="report-overlay" onClick={() => setDeleteId(null)}><div className="report-card" style={{maxWidth:'400px'}} onClick={e => e.stopPropagation()}><div className="report-header"><h3 className="b-title">Confirm Delete</h3></div><div style={{padding:'20px'}}><p style={{marginBottom:'20px', color:'var(--text-muted)'}}>Delete this entry?</p><div style={{display:'flex', gap:'10px'}}><button onClick={() => setDeleteId(null)} className="b-btn">CANCEL</button><button onClick={confirmDeleteTransaction} className="b-btn b-btn-danger">DELETE</button></div></div></div></div>}
             
-            {showFinancials && <div className="report-overlay" onClick={() => setShowFinancials(false)}><div className="report-card" onClick={e => e.stopPropagation()}><div className="report-header"><h2 className="b-title">Report</h2><button onClick={() => setShowFinancials(false)} style={{background:'none', border:'none', fontSize:'1.5rem', cursor:'pointer'}}>×</button></div><div className="report-body"><div className="report-section"><div className="report-row"><span>Opening Balance</span><span>{formatCurrency(openingBalance)}</span></div><div className="report-row"><span>+ Total Revenue</span><span>{formatCurrency(totalRevenue)}</span></div><div className="report-row"><span>- Total Expenses</span><span>{formatCurrency(totalExpenses)}</span></div><div className="report-row total"><span>= Net Cash</span><span>{formatCurrency(takeHome)}</span></div></div><div style={{marginTop:'20px', display:'flex', justifyContent:'flex-end'}}><button onClick={handleExportCSV} className="b-btn b-btn-primary">Download CSV</button></div></div></div></div>}
+            <FinancialModal showFinancials={showFinancials} setShowFinancials={setShowFinancials} openingBalance={openingBalance} totalRevenue={totalRevenue} totalExpenses={totalExpenses} takeHome={takeHome} handleExportCSV={handleExportCSV} />
 
+
+            {/* 🔒 CUSTOM PIN PROMPT MODAL */}
+            {pinPrompt && (
+                <div className="b-overlay" onClick={() => setPinPrompt(false)}>
+                    <div className="b-modal" onClick={e => e.stopPropagation()} style={{textAlign: 'center'}}>
+                        <h3 className="b-title" style={{marginBottom: '10px'}}>Exit Cashier Mode</h3>
+                        <p style={{color: 'var(--text-muted)', marginBottom: '20px'}}>Enter the owner PIN to unlock financial data.</p>
+                        <input 
+                            type="password" 
+                            autoFocus
+                            className="b-input" 
+                            style={{textAlign: 'center', fontSize: '2rem', letterSpacing: '0.5em', marginBottom: '20px'}}
+                            value={pinInput} 
+                            onChange={(e) => setPinInput(e.target.value)} 
+                            onKeyDown={(e) => {
+                                if(e.key === 'Enter') {
+                                    if(pinInput === "1234") { setIsCashierMode(false); setPinPrompt(false); setPinInput(''); }
+                                    else { toastMessage("Incorrect PIN!", "error"); setPinInput(''); }
+                                }
+                            }}
+                        />
+                        <div style={{display: 'flex', gap: '10px', justifyContent: 'center'}}>
+                            <button onClick={() => setPinPrompt(false)} className="b-btn">CANCEL</button>
+                            <button onClick={() => {
+                                if(pinInput === "1234") { setIsCashierMode(false); setPinPrompt(false); setPinInput(''); }
+                                else { toastMessage("Incorrect PIN!", "error"); setPinInput(''); }
+                            }} className="b-btn b-btn-primary">UNLOCK</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* 🗑️ CUSTOM CONFIRMATION MODAL */}
+            {confirmDelete && (
+                <div className="b-overlay" onClick={() => setConfirmDelete(null)}>
+                    <div className="b-modal" onClick={e => e.stopPropagation()}>
+                        <h3 className="b-title" style={{marginBottom: '10px', color: 'var(--danger)'}}>Confirm Deletion</h3>
+                        <p style={{color: 'var(--text-muted)', marginBottom: '25px'}}>Are you sure you want to delete this {confirmDelete.type}? This action cannot be undone.</p>
+                        <div style={{display: 'flex', gap: '10px', justifyContent: 'flex-end'}}>
+                            <button onClick={() => setConfirmDelete(null)} className="b-btn">CANCEL</button>
+                            <button onClick={() => {
+                                if(confirmDelete.type === 'employee') {
+                                    const updated = employees.filter(e => e.id !== confirmDelete.id);
+                                    setEmployees(updated);
+                                    saveData({employees: updated});
+                                } else if(confirmDelete.type === 'inventory') {
+                                    const updated = inventory.filter(i => i.id !== confirmDelete.id);
+                                    setInventory(updated);
+                                    saveData({inventory: updated});
+                                }
+                                setConfirmDelete(null);
+                            }} className="b-btn b-btn-danger">DELETE</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+        
+{toast && (
+    <div style={{
+        position: 'fixed', bottom: '20px', left: '50%', transform: 'translateX(-50%)',
+        background: toast.type === 'error' ? 'var(--danger)' : 'var(--primary)',
+        color: '#fff', padding: '12px 24px', borderRadius: '8px', zIndex: 9999,
+        boxShadow: '0 4px 12px rgba(0,0,0,0.2)', display: 'flex', alignItems: 'center', gap: '10px'
+    }}>
+        {toast.msg}
+    </div>
+)}
+
+{confirmAction && (
+    <div className="modal-overlay">
+        <div className="modal-content" style={{textAlign:'center'}}>
+            <h3 style={{color:'var(--text-main)', marginBottom:'15px'}}>Confirm Action</h3>
+            <p style={{color:'var(--text-muted)', marginBottom:'25px'}}>{confirmAction.message}</p>
+            <div style={{display:'flex', gap:'10px', justifyContent:'center'}}>
+                <button className="b-btn" onClick={() => setConfirmAction(null)} style={{background:'rgba(0, 0, 0, 0.08)', color:'var(--text-main)'}}>Cancel</button>
+                <button className="b-btn b-btn-danger" onClick={confirmAction.onConfirm}>Confirm</button>
+            </div>
         </div>
+    </div>
+)}
+
+</div>
     );
 }
 

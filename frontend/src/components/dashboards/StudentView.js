@@ -68,6 +68,7 @@ function StudentView({ onUpdateFinance, onOpenAddTransaction }) {
           gsap.from(card, {
             scrollTrigger: {
               trigger: card,
+              scroller: mainRef.current,
               start: 'top bottom-=80',
               toggleActions: 'play none none reverse',
             },
@@ -316,7 +317,7 @@ function StudentView({ onUpdateFinance, onOpenAddTransaction }) {
             {/* TILE 1 — Available Balance (col-span-2 row-span-1) */}
             <div className="sv-bento-card sv-stat-tile sv-tile-balance sv-span-col-2 sv-span-row-1">
             <div className="sv-tile-tag">Available Balance</div>
-            <div className="sv-tile-value" style={{ color: '#06b6d4' }}>
+            <div className="sv-tile-value" style={{ color: '#8b5cf6' }}>
               <span className="privacy-blur">Rs.{availableBalance.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
             </div>
             <p className="sv-tile-sub">After <span className="privacy-blur">Rs.{totalAllocatedToGoals.toLocaleString('en-IN')}</span> saved</p>
@@ -326,7 +327,7 @@ function StudentView({ onUpdateFinance, onOpenAddTransaction }) {
           <div className="sv-bento-card sv-stat-tile sv-tile-spending sv-span-col-2 sv-span-row-2">
             <div className="sv-tile-tag" aria-live="polite">{isOverLimit ? 'Over Limit' : 'On Track'}</div>
             <h2 className="sv-tile-heading">Today</h2>
-            <div className="sv-tile-value" style={{ color: isOverLimit ? '#f43f5e' : '#06b6d4' }}>
+            <div className="sv-tile-value" style={{ color: isOverLimit ? '#f43f5e' : '#8b5cf6' }}>
               <span className="privacy-blur">Rs.{spentToday.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
             </div>
             <p className="sv-tile-sub">
@@ -340,7 +341,7 @@ function StudentView({ onUpdateFinance, onOpenAddTransaction }) {
               aria-valuemax="100" 
               aria-label="Daily spending limit"
             >
-              <div className="sv-progress-fill" style={{ width: `${spendPercent}%`, background: isOverLimit ? '#f43f5e' : 'linear-gradient(90deg, #06b6d4, #8b5cf6)' }} />
+              <div className="sv-progress-fill" style={{ width: `${spendPercent}%`, background: isOverLimit ? '#f43f5e' : 'linear-gradient(90deg, #6366f1, #10b981)' }} />
             </div>
             <p className="sv-tile-footnote">{daysLeft} days remaining this month</p>
           </div>

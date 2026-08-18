@@ -1,0 +1,68 @@
+{
+  "version": 1,
+  "savedAt": "2026-08-18T04:45:45.548Z",
+  "agents": [
+    {
+      "id": "god",
+      "name": "Michael",
+      "character": "michael",
+      "accent": "lemon",
+      "description": "on standby",
+      "project": "hive",
+      "tmuxTarget": "",
+      "cwd": "C:\\Users\\visha\\Desktop\\Documents\\PCA",
+      "status": "idle",
+      "action": "awaiting",
+      "progress": 0,
+      "currentStation": "desk",
+      "ptyId": "pty-god",
+      "command": "agy --model \"Gemini 3.1 Pro (High)\" --dangerously-skip-permissions",
+      "provider": "antigravity",
+      "model": "Gemini 3.1 Pro (High)",
+      "isGod": true
+    },
+    {
+      "id": "jim-msy659bv",
+      "name": "Jim",
+      "character": "jim",
+      "accent": "sky",
+      "description": "read",
+      "project": "C:\\Users\\visha\\Desktop\\Documents\\PCA",
+      "tmuxTarget": "",
+      "cwd": "C:\\Users\\visha\\Desktop\\Documents\\PCA",
+      "status": "working",
+      "action": "read",
+      "progress": 0,
+      "currentStation": "shelf",
+      "ptyId": "pty-jim-msy659bv",
+      "command": "agy --model \"Gemini 3.1 Pro (High)\" --dangerously-skip-permissions",
+      "provider": "antigravity",
+      "model": "Gemini 3.1 Pro (High)",
+      "lastPrompt": "i want you to test my project , search for errors bugs and everthing that can cause app failure",
+      "carrying": "Read"
+    }
+  ],
+  "archived": [
+    {
+      "id": "jim-msy5gm2l",
+      "name": "Jim",
+      "character": "jim",
+      "accent": "sky",
+      "description": "on standby",
+      "project": "C:\\Users\\visha\\Desktop\\Documents\\PCA",
+      "tmuxTarget": "",
+      "cwd": "C:\\Users\\visha\\Desktop\\Documents\\PCA",
+      "goal": "Research the questions you are given across multiple sources, verify the key claims, and return a concise, cited summary.",
+      "status": "idle",
+      "action": "archived",
+      "progress": 0,
+      "command": "agy --model \"Gemini 3.1 Pro (High)\" --dangerously-skip-permissions",
+      "provider": "antigravity",
+      "model": "Gemini 3.1 Pro (High)",
+      "archived": true
+    }
+  ],
+  "restorable": [],
+  "queues": {},
+  "selectedId": "jim-msy659bv"
+}
