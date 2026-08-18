@@ -181,6 +181,7 @@ function IndividualView({ userData }) {
 
   return (
     <div className="theme-pro-mono">
+      <div className="ambient-glow"></div>
       {/* HEADER */}
       <div className="pro-header">
         <div className="pro-title">
@@ -198,8 +199,9 @@ function IndividualView({ userData }) {
         </div>
       </div>
 
-      {/* METRICS */}
-      <div className="pro-metrics-grid">
+      <div className="epic-bento-dashboard">
+        {/* METRICS */}
+      <div className="bento-metrics-row">
         <div className="metric-box gsap-stagger">
           <span className="metric-label">Total Wealth
   <span className="tooltip-container"><Info size={14} className="icon-node" /><span className="tooltip-text">The complete sum of your liquid cash balance plus the current market value of all open positions.</span></span>
@@ -231,7 +233,7 @@ function IndividualView({ userData }) {
       </div>
 
       {/* LIVE MARKET TICKER */}
-      <div style={{ marginBottom: "25px", borderRadius: "12px", overflow: "hidden", border: "1px solid rgba(255,255,255,0.05)" }}>
+      <div className="mb-25">
         <MarketTicker />
       </div>
 
@@ -252,7 +254,7 @@ function IndividualView({ userData }) {
       </div>
 
       {/* MAIN LAYOUT */}
-      <div className="pro-main-layout">
+      <div className="bento-main-row">
         {/* LEFT: ASSETS */}
         <div className="pro-panel gsap-stagger">
           <div className="panel-header">
@@ -293,10 +295,10 @@ function IndividualView({ userData }) {
               <table className="pro-table">
                 <thead>
                   <tr>
-                    <th tabIndex={0} role="columnheader" aria-sort={sortConfig.key==='name' ? (sortConfig.direction==='asc' ? 'ascending' : 'descending') : 'none'} style={{cursor:'pointer'}} onClick={() => requestSort('name')} onKeyDown={(e) => { if(e.key==='Enter'||e.key===' ') requestSort('name'); }}>ASSET {sortConfig.key === 'name' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : ''}</th>
-                    <th tabIndex={0} role="columnheader" aria-sort={sortConfig.key==='invested' ? (sortConfig.direction==='asc' ? 'ascending' : 'descending') : 'none'} style={{textAlign:'right', cursor:'pointer'}} onClick={() => requestSort('invested')} onKeyDown={(e) => { if(e.key==='Enter'||e.key===' ') requestSort('invested'); }}>INVESTED {sortConfig.key === 'invested' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : ''}</th>
-                    <th tabIndex={0} role="columnheader" aria-sort={sortConfig.key==='value' ? (sortConfig.direction==='asc' ? 'ascending' : 'descending') : 'none'} style={{textAlign:'right', cursor:'pointer'}} onClick={() => requestSort('value')} onKeyDown={(e) => { if(e.key==='Enter'||e.key===' ') requestSort('value'); }}>CURRENT {sortConfig.key === 'value' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : ''}</th>
-                    <th tabIndex={0} role="columnheader" aria-sort={sortConfig.key==='percent' ? (sortConfig.direction==='asc' ? 'ascending' : 'descending') : 'none'} style={{textAlign:'right', cursor:'pointer'}} onClick={() => requestSort('percent')} onKeyDown={(e) => { if(e.key==='Enter'||e.key===' ') requestSort('percent'); }}>P&L {sortConfig.key === 'percent' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : ''}</th><th style={{width:"40px"}}></th>
+                    <th tabIndex={0} role="columnheader" aria-sort={sortConfig.key==='name' ? (sortConfig.direction==='asc' ? 'ascending' : 'descending') : 'none'} className="pointer" onClick={() => requestSort('name')} onKeyDown={(e) => { if(e.key==='Enter'||e.key===' ') requestSort('name'); }}>ASSET {sortConfig.key === 'name' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : ''}</th>
+                    <th tabIndex={0} role="columnheader" aria-sort={sortConfig.key==='invested' ? (sortConfig.direction==='asc' ? 'ascending' : 'descending') : 'none'} className="text-right pointer" onClick={() => requestSort('invested')} onKeyDown={(e) => { if(e.key==='Enter'||e.key===' ') requestSort('invested'); }}>INVESTED {sortConfig.key === 'invested' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : ''}</th>
+                    <th tabIndex={0} role="columnheader" aria-sort={sortConfig.key==='value' ? (sortConfig.direction==='asc' ? 'ascending' : 'descending') : 'none'} className="text-right pointer" onClick={() => requestSort('value')} onKeyDown={(e) => { if(e.key==='Enter'||e.key===' ') requestSort('value'); }}>CURRENT {sortConfig.key === 'value' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : ''}</th>
+                    <th tabIndex={0} role="columnheader" aria-sort={sortConfig.key==='percent' ? (sortConfig.direction==='asc' ? 'ascending' : 'descending') : 'none'} className="text-right pointer" onClick={() => requestSort('percent')} onKeyDown={(e) => { if(e.key==='Enter'||e.key===' ') requestSort('percent'); }}>P&L {sortConfig.key === 'percent' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : ''}</th><th className="w-40"></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -311,9 +313,9 @@ function IndividualView({ userData }) {
   return (
                       <tr key={asset.id} className="gsap-stagger pro-table-row">
                         <td><div className="asset-name">{asset.name}</div><div className="asset-type">{asset.type}</div></td>
-                        <td className="mono-num" style={{textAlign:'right'}}>{formatINR(invested)}</td>
-                        <td className="mono-num" style={{textAlign:'right'}}>{formatINR(current)}</td>
-                        <td className={`mono-num ${profit >= 0 ? 'text-green' : 'text-red'}`} style={{textAlign:'right'}}>{profit >= 0 ? '+' : ''}{percent}%</td>
+                        <td className="mono-num text-right">{formatINR(invested)}</td>
+                        <td className="mono-num text-right">{formatINR(current)}</td>
+                        <td className={`mono-num text-right ${profit >= 0 ? 'text-green' : 'text-red'}`}>{profit >= 0 ? '+' : ''}{percent}%</td>
                         <td>
                           <div className="row-actions">
                             <button className="row-action-btn" title="View Details" onClick={() => setSelectedAsset(asset)}><DotsThree size={18} weight="bold" /></button>
@@ -329,7 +331,7 @@ function IndividualView({ userData }) {
         </div>
 
         {/* RIGHT: TRANSACTION LOG */}
-        <div className="pro-panel gsap-stagger" style={{ background: 'transparent', border: 'none', boxShadow: 'none' }}>
+        <div className="pro-panel gsap-stagger pro-panel-transparent">
           {/* COMMAND CENTER */}
           <div className="command-center-grid">
             <button className="pro-action-card" onClick={() => setIsTransactionModalOpen(true)}>
@@ -350,25 +352,27 @@ function IndividualView({ userData }) {
 
       
       {/* SECONDARY LAYOUT: PRO MAX WIDGETS */}
-      <div className="pro-secondary-layout gsap-stagger">
+      <div className="bento-secondary-row gsap-stagger">
         <div className="pro-opportunity-card">
-          <div className="opp-title" style={{color: 'var(--accent-pink)'}}>Tax-Loss Opportunities</div>
+          <div className="opp-title pink">Tax-Loss Opportunities</div>
           <div className="opp-val">{formatINR(taxLossOpportunities)}</div>
           <div className="opp-desc">Unrealized losses available to harvest. Liquidating these positions can offset capital gains tax this fiscal year.</div>
         </div>
         <div className="pro-opportunity-card">
-          <div className="opp-title" style={{color: 'var(--accent-blue)'}}>Macro Exposure Alert</div>
+          <div className="opp-title blue">Macro Exposure Alert</div>
           <div className="opp-val">High Correlation</div>
           <div className="opp-desc">{exposureWarning}</div>
         </div>
         <div className="pro-opportunity-card">
-          <div className="opp-title" style={{color: 'var(--status-success)'}}>Estimated Passive Yield</div>
+          <div className="opp-title green">Estimated Passive Yield</div>
           <div className="opp-val">{formatINR(estimatedAnnualYield)} / yr</div>
           <div className="opp-desc">Based on your portfolio composition, you are generating approximately {formatINR(estimatedAnnualYield/12)} per month in passive income.</div>
         </div>
       </div>
 
-      {/* FIRE HORIZON CHART */}
+      </div>
+
+        {/* FIRE HORIZON CHART */}
       <FIREChart currentWealth={netWorth} monthlyBurn={expenses > 0 ? expenses : 100000} />
 
       {/* MODALS */}
