@@ -3,20 +3,20 @@
 
 .b-view { max-width: 100vw; overflow-x: hidden;
     /* The "Soft" Palette */
-    --bg-color: #f3f4f6;       /* Cloud Grey (Easy on eyes) */
-    --card-bg: #ffffff;        /* Pure White */
-    --text-main: #111827;      /* Deep Charcoal (Not Pitch Black) */
-    --text-muted: #9ca3af;     /* Soft Grey Text */
+    --bg-color: transparent;       /* Cloud Grey (Easy on eyes) */
+    --card-bg: rgba(255, 255, 255, 0.02);        /* Pure White */
+    --text-main: #ffffff;      /* Deep Charcoal (Not Pitch Black) */
+    --text-muted: rgba(255, 255, 255, 0.6);     /* Soft Grey Text */
     
     /* Action Colors */
-    --primary: #111827;        /* Black/Dark Grey */
+    --primary: #ffffff;        /* Black/Dark Grey */
     --accent-blue: #3b82f6;    /* Soft Twitter Blue */
     --accent-green: var(--accent);   /* Mint Green */
     --danger: #ef4444;         /* Soft Red */
     
     /* Shadows - The Secret Sauce */
-    --shadow-soft: 0 10px 40px -10px rgba(0,0,0,0.05);
-    --shadow-hover: 0 20px 40px -10px rgba(0,0,0,0.1);
+    --shadow-soft: inset 0 1px 1px rgba(255,255,255,0.05), 0 4px 24px -8px rgba(0, 0, 0, 0.5);
+    --shadow-hover: inset 0 1px 1px rgba(255,255,255,0.1), 0 12px 48px -12px rgba(0, 0, 0, 0.7);
 }
 
 /* SCOPED VIEW CONTAINER */
@@ -54,10 +54,12 @@
 /* CARDS */
 .b-view .b-card {
     background: var(--card-bg);
-    border-radius: 30px;
+    border-radius: 28px;
     padding: 30px;
     box-shadow: var(--shadow-soft);
-    border: 1px solid white;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(80px);
+    -webkit-backdrop-filter: blur(80px);
     margin-bottom: 24px;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
@@ -79,7 +81,7 @@
 }
 
 .b-view .b-input {
-    background: #f9fafb;
+    background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255,255,255,0.05);
     border: none;
     color: var(--text-main);
     padding: 16px 20px;
@@ -94,7 +96,7 @@
 }
 
 .b-view .b-input:focus {
-    background: #ffffff;
+    background: rgba(0, 0, 0, 0.5);
     box-shadow: 0 0 0 3px var(--primary-transparent);
 }
 
@@ -185,7 +187,7 @@
 }
 
 .b-view .toggle.active {
-    background: #ffffff;
+    background: rgba(0, 0, 0, 0.5);
     box-shadow: inset 5px 5px 10px rgba(170, 170, 204, 0.15), inset -5px -5px 10px #ffffff;
 }
 
@@ -244,7 +246,7 @@
     width: 90%;
     max-width: 800px;
     max-height: 90vh;
-    background: #ffffff;
+    background: rgba(0, 0, 0, 0.5);
     border-radius: 30px;
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
     border: 1px solid #ffffff;
@@ -259,7 +261,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: #f9fafb;
+    background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255,255,255,0.05);
 }
 
 .b-view .report-body {
@@ -444,3 +446,73 @@
     visibility: visible;
     bottom: 125%;
 }
+
+/* ========================================= */
+/* --- TASTE: HIGH-END CRM & OPS STYLING --- */
+/* ========================================= */
+
+.crm-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+.ops-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 30px; }
+.crm-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+
+/* Badges */
+.crm-badge-blue { font-size: 0.7rem; background: rgba(59, 130, 246, 0.1); padding: 6px 12px; border-radius: 8px; color: var(--accent-blue); font-weight: 700; }
+.crm-badge-orange { font-size: 0.7rem; background: rgba(245, 158, 11, 0.1); color: #d97706; padding: 6px 12px; border-radius: 8px; font-weight: bold; }
+
+/* Lists */
+.crm-list, .ops-list { max-height: 400px; overflow-y: auto; padding-right: 5px; }
+.ops-list.no-scroll { max-height: none; overflow: visible; padding-right: 0; }
+.crm-empty { color: var(--text-muted); font-size: 0.9rem; padding: 20px 0; }
+
+/* Items */
+.crm-item { display: flex; justify-content: space-between; padding: 15px; background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; margin-bottom: 10px; border: 1px solid rgba(255,255,255,0.02); transition: transform 0.2s; }
+.crm-item:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.4); }
+.crm-item.top-rank { background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(59, 130, 246, 0.02) 100%); border: 1px solid rgba(59, 130, 246, 0.1); }
+
+.crm-item-left { display: flex; gap: 12px; align-items: center; }
+.crm-item-right { text-align: right; }
+.crm-avatar { width: 35px; height: 35px; background: rgba(255, 255, 255, 0.05); color: var(--text-main); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+.crm-avatar.top-rank { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: #fff; }
+.crm-name { font-weight: 700; font-size: 1rem; color: var(--text-main); }
+.crm-debt { font-size: 0.75rem; color: #f59e0b; }
+.crm-label { font-size: 0.7rem; color: var(--text-muted); }
+.crm-val { color: var(--accent-blue); font-weight: bold; font-size: 1.1rem; }
+
+/* Khata (Udhaar) */
+.khata-item { display: flex; justify-content: space-between; padding: 20px; background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.04); border-radius: 12px; margin-bottom: 10px; border-left: 4px solid #f59e0b; box-shadow: 0 8px 24px rgba(0,0,0,0.3); transition: transform 0.2s; }
+.khata-item:hover { transform: translateY(-2px); }
+.khata-name { color: var(--text-main); font-size: 1rem; display: block; }
+.khata-meta { font-size: 0.8rem; color: var(--text-muted); display: block; margin-top: 4px; }
+.khata-right { text-align: right; }
+.khata-amount { color: var(--danger); font-weight: bold; font-size: 1.1rem; display: block; margin-bottom: 8px; }
+.khata-btn { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: #fff; border: none; border-radius: 8px; padding: 8px 16px; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3); font-size: 0.8rem; cursor: pointer; font-weight: bold; transition: opacity 0.2s; }
+.khata-btn:hover { opacity: 0.9; }
+
+/* Ops */
+.ops-input-group { border-bottom: 2px dashed rgba(255, 255, 255, 0.1); padding-bottom: 20px; margin-bottom: 20px; }
+.ops-input-row { display: flex; gap: 10px; }
+.ops-input-row.align-end { align-items: flex-end; margin-bottom: 20px; }
+.flex-1 { flex: 1; }
+.flex-2 { flex: 2; }
+.w-full { width: 100%; box-sizing: border-box; }
+.h-42 { height: 42px; padding: 0 20px; }
+
+.ops-item { display: flex; justify-content: space-between; align-items: center; padding: 16px; background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.04); border-radius: 12px; margin-bottom: 8px; transition: transform 0.2s; }
+.ops-item:hover { transform: translateX(4px); }
+.ops-item-left { display: flex; gap: 10px; align-items: center; }
+.ops-item-right { display: flex; gap: 15px; align-items: center; }
+.ops-avatar { width: 30px; height: 30px; background: rgba(59, 130, 246, 0.1); border-radius: 50%; color: var(--accent-blue); display: flex; align-items: center; justify-content: center; font-weight: bold; }
+.ops-name { font-size: 0.9rem; font-weight: 700; color: var(--text-main); }
+.ops-role { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; }
+.ops-salary { font-size: 0.9rem; font-weight: 600; }
+.ops-meta { color: var(--text-muted); }
+.ops-remove-btn { background: transparent; border: none; color: var(--danger); font-weight: bold; cursor: pointer; font-size: 0.8rem; transition: opacity 0.2s; padding: 0; }
+.ops-remove-btn:hover { opacity: 0.7; text-decoration: underline; }
+
+/* Seller Items */
+.seller-item { display: flex; justify-content: space-between; padding: 12px 16px; background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.03); border-radius: 8px; margin-bottom: 8px; }
+.seller-item.top-rank { background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border: 1px solid #fcd34d; }
+.seller-name { font-weight: bold; color: var(--text-muted); }
+.seller-item.top-rank .seller-name { color: var(--text-main); }
+.seller-sold { font-weight: 600; color: var(--text-muted); }
+.seller-item.top-rank .seller-sold { color: var(--text-main); }

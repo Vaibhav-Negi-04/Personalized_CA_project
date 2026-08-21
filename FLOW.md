@@ -139,3 +139,10 @@ etWorth).
 ## IndividualView Epic Bento Redesign
 - Refactored the DOM structure in IndividualView.js to group the metrics, main table, and secondary widgets into a unified \.epic-bento-dashboard\ flex/grid stack.
 - Injected an \.ambient-glow\ sphere behind the bento grid in Dashboard2.css to create volumetric lighting.
+
+## BusinessView Soft Fintech Enhancements
+- Refactored CRMTab.js and OpsTab.js: Extracted inline styles to Dashboard3.css, added Phosphor icons, and implemented premium data tables for Top Sellers, Employees, Assets, and Khata (Ledger).
+
+## BusinessView Global Aesthetic Unification
+- Rewrote the CSS variables in Dashboard3.css to override the light theme with a transparent body and dark glassmorphic cards.
+- Refactored BusinessCharts.js CartesianGrids and Tooltips to use light strokes to ensure visibility against the new dark transparent background.

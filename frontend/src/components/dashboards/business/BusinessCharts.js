@@ -5,7 +5,7 @@ export const SimplePieChart = ({ data, size = 200, hollow = false }) => {
     const [hoveredIndex, setHoveredIndex] = useState(null);
     const total = data.reduce((acc, item) => acc + item.value, 0);
 
-    if (total === 0) return <div style={{width: size, height: size, borderRadius: '50%', border: '4px solid rgba(0, 0, 0, 0.08)', display:'flex', alignItems:'center', justifyContent:'center', fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight:'bold'}}>NO DATA</div>;
+    if (total === 0) return <div style={{width: size, height: size, borderRadius: '50%', border: '4px solid rgba(255, 255, 255, 0.1)', display:'flex', alignItems:'center', justifyContent:'center', fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight:'bold'}}>NO DATA</div>;
     
     const centerLabel = hoveredIndex !== null ? data[hoveredIndex].label : "TOTAL";
     const centerValue = hoveredIndex !== null ? data[hoveredIndex].value : total;
@@ -68,7 +68,7 @@ export const SimpleBarChart = ({ ledger }) => {
     const maxVal = Math.max(...chartData.map(d => d.amount), 1);
 
     return (
-        <div style={{ display: 'flex', alignItems: 'flex-end', gap: '8px', height: '140px', width: '100%', padding: '10px 0', borderBottom: '1px solid rgba(0, 0, 0, 0.08)' }}>
+        <div style={{ display: 'flex', alignItems: 'flex-end', gap: '8px', height: '140px', width: '100%', padding: '10px 0', borderBottom: '1px solid rgba(255, 255, 255, 0.1)' }}>
             {chartData.map((d, i) => (
                 <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end', height: '100%', group: 'hover' }}>
                     <span style={{fontSize:'0.6rem', color:'var(--accent-blue)', fontWeight:'bold', marginBottom:'4px', opacity: d.amount > 0 ? 1 : 0}}>{(d.amount/1000).toFixed(1)}k</span>
@@ -122,8 +122,8 @@ export const AICashFlowForecastingChart = ({ ledger }) => {
                     </defs>
                     <XAxis dataKey="name" stroke="var(--text-muted)" fontSize={12} tickLine={false} axisLine={false} />
                     <YAxis stroke="var(--text-muted)" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(val) => `₹${val/1000}k`} />
-                    <Tooltip contentStyle={{ backgroundColor: 'var(--card-bg)', border: '1px solid rgba(0, 0, 0, 0.08)', borderRadius: '8px' }} />
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(0, 0, 0, 0.08)" vertical={false} />
+                    <Tooltip contentStyle={{ backgroundColor: 'var(--card-bg)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '8px' }} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.1)" vertical={false} />
                     <ReferenceLine x="May (Now)" stroke="var(--text-muted)" strokeDasharray="3 3" label={{ position: 'top', value: 'Today', fill: 'var(--text-muted)', fontSize: 10 }} />
                     <Area type="monotone" dataKey="balance" stroke="#3b82f6" fillOpacity={1} fill="url(#colorBalance)" />
                     <Area type="monotone" dataKey="forecasted" stroke="#10b981" strokeDasharray="5 5" fillOpacity={1} fill="url(#colorForecast)" />
