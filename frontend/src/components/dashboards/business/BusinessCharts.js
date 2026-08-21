@@ -106,7 +106,7 @@ export const AICashFlowForecastingChart = ({ ledger }) => {
         <div style={{ width: '100%', height: '250px', marginTop: '20px' }}>
             <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px', gap: '8px' }}>
                 <span style={{ fontSize: '1rem', fontWeight: 'bold' }}>AI Cash Flow Forecast</span>
-                <span style={{ fontSize: '0.7rem', background: 'rgba(34, 197, 94, 0.1)', color: '#10B981', padding: '2px 6px', borderRadius: '4px' }}>✨ Gemma AI Powered</span>
+                <span style={{ fontSize: '0.7rem', background: 'rgba(34, 197, 94, 0.1)', color: '#10B981', padding: '2px 6px', borderRadius: '4px' }}>Gemma AI Powered</span>
             </div>
             <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>

@@ -181,7 +181,7 @@ function IndividualView({ userData }) {
 
   return (
     <div className="theme-pro-mono">
-      <div className="ambient-glow"></div>
+
       {/* HEADER */}
       <div className="pro-header">
         <div className="pro-title">

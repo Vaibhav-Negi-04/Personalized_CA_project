@@ -5,6 +5,9 @@ import Register from './components/Register';
 import Login from './components/Login';
 import Dashboard from './components/Dashboard';
 import LandingPage from './components/LandingPage'; // <--- Import Here
+import NotFound from './components/NotFound';
+import TOS from './components/TOS';
+import Privacy from './components/Privacy';
 import { useAuth } from './context/AuthContext';
 
 function App() {
@@ -17,6 +20,9 @@ function App() {
         <Routes>
           {/* The Home Route is now the Landing Page */}
           <Route path="/" element={<LandingPage />} />
+          
+          <Route path="/terms" element={<TOS />} />
+          <Route path="/privacy" element={<Privacy />} />
 
           {/* Public Routes */}
           <Route 
@@ -33,6 +39,8 @@ function App() {
             path="/dashboard" 
             element={currentUser ? <Dashboard /> : <Navigate to="/login" />} 
           />
+
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </div>
     </Router>

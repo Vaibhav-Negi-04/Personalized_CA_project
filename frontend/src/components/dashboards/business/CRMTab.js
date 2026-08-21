@@ -14,7 +14,7 @@ const CRMTab = ({ customerLTV, businessType, khata, formatCurrency, handleSettle
                         <div key={i} className={`crm-item ${i === 0 ? 'top-rank' : ''}`}>
                             <div className="crm-item-left">
                                 <div className={`crm-avatar ${i === 0 ? 'top-rank' : ''}`}>
-                                    {i === 0 ? '🏆' : i + 1}
+                                    {i + 1}
                                 </div>
                                 <div>
                                     <div className="crm-name">{c.name}</div>

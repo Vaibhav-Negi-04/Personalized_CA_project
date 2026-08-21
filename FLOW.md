@@ -146,3 +146,7 @@ etWorth).
 ## BusinessView Global Aesthetic Unification
 - Rewrote the CSS variables in Dashboard3.css to override the light theme with a transparent body and dark glassmorphic cards.
 - Refactored BusinessCharts.js CartesianGrids and Tooltips to use light strokes to ensure visibility against the new dark transparent background.
+
+## Global Anti-Trend Routing & Architecture Updates
+- **Routing Updates:** App.js now handles standard corporate compliance routes (/terms, /privacy) and includes a fallback 404 wildcard route (* -> <NotFound />).
+- **Component Flattening:** All views (Landing, Student, Individual, Business) have been structurally flattened. The Epic Bento Grid and GSAP animations in LandingPage have been removed entirely in favor of a standard block-level hierarchical stacking context.
